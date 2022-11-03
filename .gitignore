@@ -1,0 +1,15 @@
+node_modules
+.build
+.output
+.turbo
+/dist
+/lib
+/lib-types
+/server
+.cache
+.mf
+.vscode
+.rollup.cache
+tsconfig.tsbuildinfo
+logs
+pnpm-debug.log*

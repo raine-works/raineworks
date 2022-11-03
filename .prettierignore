@@ -1,0 +1,7 @@
+*.yaml
+*.yml
+node_modules
+~
+.build
+.output
+.turbo
