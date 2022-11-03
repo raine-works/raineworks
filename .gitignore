@@ -13,3 +13,4 @@ node_modules
 tsconfig.tsbuildinfo
 logs
 pnpm-debug.log*
+~
