@@ -2,10 +2,10 @@ node_modules
 .build
 .output
 .turbo
-/dist
-/lib
-/lib-types
-/server
+dist
+lib
+lib-types
+server
 .cache
 .mf
 .vscode

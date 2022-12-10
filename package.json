@@ -7,7 +7,11 @@
 	"scripts": {
 		"format": "pnpx prettier --write .",
 		"build": "turbo build",
-		"dev": "turbo dev"
+		"build.server": "turbo build.server",
+		"dev": "turbo dev",
+		"serve": "turbo serve",
+		"docker.start": "NODE_ENV=prod docker compose up -d",
+		"postinstall": "bash scripts/secrets.sh"
 	},
 	"volta": {
 		"node": "18.12.0"

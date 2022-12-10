@@ -6,10 +6,19 @@
 			"dependsOn": ["^build"],
 			"cache": true
 		},
+		"build.server": {
+			"outputs": [".build/**", "server/**"],
+			"dependsOn": ["build"],
+			"cache": true
+		},
 		"dev": {
 			"outputs": [".build/**"],
-			"dependsOn": ["^build"],
+			"dependsOn": ["build"],
 			"cache": true
+		},
+		"serve": {
+			"outputs": [".build/**"],
+			"dependsOn": ["build"]
 		}
 	}
 }
