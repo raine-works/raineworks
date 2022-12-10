@@ -1,0 +1,13 @@
+{
+	"extends": "ts-config/base.json",
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"~/*": ["src/*"],
+			"~/routes/*": ["src/routes/*"],
+			"~/middleware/*": ["src/middleware/*"]
+		},
+		"noEmit": false
+	},
+	"include": ["src/**/*.ts"]
+}

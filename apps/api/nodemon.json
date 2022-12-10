@@ -1,0 +1,6 @@
+{
+	"watch": ["src", "../../packages"],
+	"ignore": ["**/*.test.ts"],
+	"exec": "pnpm --prefix ../../ build && node ./.build/index.js",
+	"ext": "ts, tsx"
+}

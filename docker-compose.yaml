@@ -1,0 +1,41 @@
+version: '3.9'
+
+services:
+
+  api: 
+    container_name: api
+    build:
+      context: .
+      dockerfile: apps/api/.docker/Dockerfile
+    ports:
+      - '4000:4000'
+    expose:
+      - '4000'
+    environment:
+      - NODE_ENV=prod
+    restart: always
+
+  web: 
+    container_name: web
+    build:
+      context: .
+      dockerfile: apps/web/.docker/Dockerfile
+    ports:
+      - '3000:3000'
+    expose:
+      - '3000'
+    environment:
+      - VITE_NODE_ENV=prod
+      - VITE_API_URL=http://localhost/api
+    restart: always
+
+  nginx: 
+    container_name: nginx
+    build: 
+      context: utils/nginx
+      dockerfile: .docker/Dockerfile
+    ports:
+      - '80:80'
+    expose:
+      - '80'
+    restart: always
