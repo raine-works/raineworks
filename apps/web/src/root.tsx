@@ -9,6 +9,7 @@ export default component$(() => {
 	return (
 		<QwikCity>
 			<head>
+				<time>raineworks</time>
 				<meta
 					charSet="utf-8"
 					name="viewport"
