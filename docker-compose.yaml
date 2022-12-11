@@ -26,7 +26,7 @@ services:
       - '3000'
     environment:
       - VITE_NODE_ENV=prod
-      - VITE_API_URL=http://localhost/api
+      - VITE_API_URL=http://raineworks.com/api
     restart: always
 
   nginx: 
