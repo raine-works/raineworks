@@ -1,10 +1,9 @@
 FROM node:18.12.0 AS builder
 WORKDIR /usr/raineworks
 COPY . .
-RUN npm i -g pnpm
+RUN curl -fsSL "https://github.com/pnpm/pnpm/releases/latest/download/pnpm-linuxstatic-x64" -o /bin/pnpm; chmod +x /bin/pnpm;
 RUN pnpm i
 RUN pnpm build
-RUN pnpm i
 
 FROM node:18.12.0
 WORKDIR /usr/api

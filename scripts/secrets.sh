@@ -1,5 +1,5 @@
 echo "Getting secret variables"
 
-# echo "Removing env files"
+find -type f -name '*.env*' -delete
 
-# find -type f -name '*.env*' -delete
+echo "VITE_API_URL=http://raineworks.com/api" >> apps/web/.env

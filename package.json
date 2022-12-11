@@ -10,7 +10,8 @@
 		"build.server": "turbo build.server",
 		"dev": "turbo dev",
 		"serve": "turbo serve",
-		"docker.start": "NODE_ENV=prod docker compose up -d",
+		"docker.start": "docker compose up -d --build",
+		"docker.kill": "docker compose down && docker image prune -a --force",
 		"postinstall": "bash scripts/secrets.sh"
 	},
 	"volta": {
