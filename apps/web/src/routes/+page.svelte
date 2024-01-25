@@ -1,3 +1,10 @@
-<script lang="ts"></script>
+<script lang="ts">
+    import { client } from "$lib/api.client";
 
-<div>Hello World</div>
+</script>
+
+<div>
+    <button on:click={async () => {
+        await client.api.user.test.post({ name: 'Raine'})
+    }} >Click Me</button>
+</div>

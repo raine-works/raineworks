@@ -6,11 +6,12 @@
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
-		"serve": "bun --cwd=./.build/ start",
+		"start": "bun --cwd=./.build/ start",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"vite": "vite"
 	},
 	"devDependencies": {
+		"@elysiajs/eden": "^0.8.1",
 		"@sveltejs/kit": "^2.4.3",
 		"bun-types": "latest",
 		"elysia": "^0.8.10",

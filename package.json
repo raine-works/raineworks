@@ -12,6 +12,7 @@
 	"scripts": {
 		"build": "turbo build",
 		"dev": "turbo dev",
+		"start": "turbo start",
 		"format": "prettier --write ."
 	}
 }
