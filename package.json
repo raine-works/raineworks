@@ -1,0 +1,17 @@
+{
+	"name": "raineworks",
+	"private": true,
+	"workspaces": [
+		"packages/*",
+		"apps/*"
+	],
+	"devDependencies": {
+		"prettier": "^3.2.4",
+		"turbo": "1.11.3"
+	},
+	"scripts": {
+		"build": "turbo build",
+		"dev": "turbo dev",
+		"format": "prettier --write ."
+	}
+}

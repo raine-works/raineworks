@@ -1,0 +1,26 @@
+{
+	"name": "Buns",
+	"image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+	"postAttachCommand": "git config --global diff.tool ...",
+	"postStartCommand": "bash .devcontainer/scripts/post-start.sh",
+	"forwardPorts": [3000],
+	"otherPortsAttributes": {
+		"onAutoForward": "ignore"
+	},
+	"mounts": [
+		"source=${env:HOME}${env:USERPROFILE}/.config/gh,target=/home/vscode/.config/gh,type=bind"
+	],
+	"features": {
+		"ghcr.io/devcontainers/features/github-cli:1": {}
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"esbenp.prettier-vscode",
+				"oven.bun-vscode",
+				"svelte.svelte-vscode"
+			]
+		}
+	},
+	"runArgs": ["--network=host"]
+}
