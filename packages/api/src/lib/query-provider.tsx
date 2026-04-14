@@ -1,8 +1,8 @@
 /**
- * Shared TanStack Query provider for all micro-frontend zones.
+ * Shared TanStack Query provider for frontend applications.
  *
  * Wraps the application in a {@link QueryClientProvider} with a stable
- * {@link QueryClient} instance. Each zone mounts its own instance, but the
+ * {@link QueryClient} instance. Each app mounts its own instance, but the
  * configuration and defaults are shared here.
  *
  * @module lib/query-provider
@@ -51,9 +51,9 @@ interface QueryProviderProps {
 }
 
 /**
- * Mounts a {@link QueryClientProvider} with a stable, zone-scoped
+ * Mounts a {@link QueryClientProvider} with a stable, app-scoped
  * {@link QueryClient}. Place this inside the provider stack of each
- * micro-frontend entry point.
+ * frontend entry point.
  *
  * Uses `useState` initialiser to guarantee a single `QueryClient` instance
  * per React tree — safe under `<StrictMode>` and concurrent features.

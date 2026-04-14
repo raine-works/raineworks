@@ -1,5 +1,5 @@
 {
-	"name": "@rainestack/web",
+	"name": "@raineworks/web",
 	"private": true,
 	"type": "module",
 	"scripts": {
@@ -10,9 +10,9 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
-		"@rainestack/api": "workspace:*",
-		"@rainestack/ui": "workspace:*",
-		"@rainestack/tools": "workspace:*",
+		"@raineworks/api": "workspace:*",
+		"@raineworks/ui": "workspace:*",
+		"@raineworks/tools": "workspace:*",
 		"@tanstack/react-query": "catalog:",
 		"react": "catalog:",
 		"lucide-react": "catalog:",
@@ -20,7 +20,7 @@
 		"react-router": "catalog:"
 	},
 	"devDependencies": {
-		"@rainestack/tsconfig": "workspace:*",
+		"@raineworks/tsconfig": "workspace:*",
 		"@tailwindcss/vite": "catalog:",
 		"@types/react": "catalog:",
 		"@types/react-dom": "catalog:",

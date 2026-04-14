@@ -1,5 +1,5 @@
 {
-	"name": "@rainestack/api",
+	"name": "@raineworks/api",
 	"private": true,
 	"type": "module",
 	"exports": {
@@ -14,7 +14,7 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@rainestack/tools": "workspace:*",
+		"@raineworks/tools": "workspace:*",
 		"@orpc/client": "catalog:",
 		"@orpc/contract": "catalog:",
 		"@orpc/openapi-client": "catalog:",
@@ -22,8 +22,8 @@
 		"@tanstack/react-query": "catalog:"
 	},
 	"devDependencies": {
-		"@rainestack/server": "workspace:*",
-		"@rainestack/tsconfig": "workspace:*",
+		"@raineworks/server": "workspace:*",
+		"@raineworks/tsconfig": "workspace:*",
 		"@types/react": "catalog:",
 		"typescript": "catalog:"
 	},

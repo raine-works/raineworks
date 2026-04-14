@@ -14,8 +14,8 @@
  */
 
 import { ORPCError } from '@orpc/server';
-import type { PrismaClient } from '@rainestack/database';
-import { toDate, toInstant } from '@rainestack/tools/temporal';
+import type { PrismaClient } from '@raineworks/database';
+import { toDate, toInstant } from '@raineworks/tools/temporal';
 import * as otpData from '@server/data/otp';
 
 // ---------------------------------------------------------------------------

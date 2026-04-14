@@ -5,26 +5,12 @@
 	},
 	"applications": {
 		"web": {
-			"packageName": "@rainestack/web",
+			"packageName": "@raineworks/web",
 			"development": {
 				"local": {
 					"port": 3100
 				}
 			}
-		},
-		"docs": {
-			"packageName": "@rainestack/docs",
-			"development": {
-				"local": {
-					"port": 3101
-				}
-			},
-			"routing": [
-				{
-					"group": "docs",
-					"paths": ["/docs", "/docs/:path*"]
-				}
-			]
 		}
 	}
 }

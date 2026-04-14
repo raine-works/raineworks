@@ -1,6 +1,5 @@
 /**
- * Shared API client and TanStack Query utilities for the web (shell/host)
- * micro-frontend.
+ * Shared API client and TanStack Query utilities for the website frontend.
  *
  * Initialises a single, fully-typed oRPC client using the server's contract
  * router and creates TanStack Query utilities for type-safe query/mutation
@@ -10,9 +9,9 @@
  * @module lib/api
  */
 
-import { createApiClient } from '@rainestack/api';
-import type { Router } from '@rainestack/api/router';
-import { createTanstackQueryUtils } from '@rainestack/api/tanstack-query';
+import { createApiClient } from '@raineworks/api';
+import type { Router } from '@raineworks/api/router';
+import { createTanstackQueryUtils } from '@raineworks/api/tanstack-query';
 
 // ---------------------------------------------------------------------------
 // Client singleton

@@ -1,5 +1,5 @@
 {
-	"name": "@rainestack/tsconfig",
+	"name": "@raineworks/tsconfig",
 	"private": true,
 	"files": [
 		"base.json",

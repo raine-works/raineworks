@@ -69,7 +69,7 @@ interface LogoSet {
 	 */
 	full?: LogoVariant;
 	/**
-	 * Wordmark only — the "RaineStack" text without the icon.
+	 * Wordmark only — the "RaineWorks" text without the icon.
 	 * Used where the icon is rendered separately or omitted entirely.
 	 */
 	wordmark?: LogoVariant;

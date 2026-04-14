@@ -1,9 +1,9 @@
-# RaineStack
+# RaineWorks
 
-A modern, production-ready **full-stack TypeScript monorepo starter** built with Bun, Turborepo, Prisma, and React.
+A personal website codebase built with Bun, Turborepo, Prisma, and React.
 
-[![Bun](https://img.shields.io/badge/Bun-1.3.9-black?logo=bun)](https://bun.sh)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![Bun](https://img.shields.io/badge/Bun-1.3.12-black?logo=bun)](https://bun.sh)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.0.2-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![Prisma](https://img.shields.io/badge/Prisma-7.3-2D3748?logo=prisma)](https://www.prisma.io/)
 [![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react)](https://react.dev/)
 
@@ -29,10 +29,10 @@ Visit **http://localhost:3024** to see your app!
 
 ## 🚀 What's Included
 
-This starter provides a complete, opinionated stack with everything you need to build modern web applications:
+This repo keeps a focused stack for a personal site with a custom backend, shared UI, and modern auth:
 
 ### Backend
-- **⚡️ Bun 1.3.9** — Fast runtime, package manager, and HTTP server
+- **⚡️ Bun 1.3.12** — Fast runtime, package manager, and HTTP server
 - **🗄️ PostgreSQL 18.1 + Prisma 7.3** — Type-safe database with migrations
 - **🔌 oRPC** — Contract-first APIs with auto-generated OpenAPI spec
 - **📝 Audit Trail** — Automatic change tracking with actor attribution
@@ -44,13 +44,12 @@ This starter provides a complete, opinionated stack with everything you need to 
 - **🎨 shadcn/ui** — 50+ beautiful, accessible components
 - **🎯 React Router 7** — Type-safe routing with loaders
 - **📊 TanStack Query 5** — Powerful data fetching and caching
-- **📖 Fumadocs** — Beautiful MDX documentation rendering
 - **🌙 Dark Mode** — Built-in theme system
 - **📱 Responsive** — Mobile-first design
 
 ### Developer Experience
 - **📦 Turborepo** — Cached builds and parallel execution
-- **🔒 TypeScript 5.9.3** — Strict mode, full type safety
+- **🔒 TypeScript 6.0.2** — Strict mode, full type safety
 - **✨ Biome** — Fast formatting and linting
 - **🧪 Bun Test** — Built-in test runner
 - **🔧 Path Aliases** — Clean imports across packages
@@ -58,7 +57,7 @@ This starter provides a complete, opinionated stack with everything you need to 
 ### Authentication
 - **🔐 JWT Tokens** — Access (15m) + refresh (30d) with rotation
 - **📧 OTP** — Email-based passwordless authentication
-- **🔑 OIDC** — Google and GitHub social login
+- **🔑 OIDC** — GitHub social login
 - **🔒 WebAuthn** — Hardware-backed passkeys
 - **👤 Actor Tracking** — Know who made every change
 
@@ -74,10 +73,7 @@ packages/
 ├── server/       # Bun HTTP server with oRPC API
 ├── api/          # Type-safe API client for frontend
 ├── ui/           # shadcn/ui component library
-├── web/          # Main application (micro-frontend)
-└── docs/         # Documentation site (Fumadocs + MDX)
-    └── public/
-        └── content/  # MDX documentation files go here
+└── web/          # Main website frontend
 ```
 
 ---
@@ -108,14 +104,14 @@ bun run db:deploy   # Run migrations + apply triggers (production)
 
 | Layer          | Technology                                                    |
 | -------------- | ------------------------------------------------------------- |
-| **Runtime**    | Bun 1.3.9                                                     |
+| **Runtime**    | Bun 1.3.12                                                     |
 | **Monorepo**   | Turborepo with Bun workspaces                                 |
-| **Language**   | TypeScript 5.9.3 (strict mode)                                |
+| **Language**   | TypeScript 6.0.2 (strict mode)                                |
 | **Backend**    | Bun HTTP server, oRPC, Pino logging                           |
 | **Database**   | PostgreSQL 18.1, Prisma 7.3 (`@prisma/adapter-pg`)           |
 | **Frontend**   | React 19.2, Vite 7.3, React Router 7, TanStack Query 5       |
 | **UI**         | shadcn/ui (base-vega), Tailwind CSS 4.1, Lucide icons         |
-| **Auth**       | JWT (jose), OTP, OIDC (Google/GitHub), WebAuthn passkeys      |
+| **Auth**       | JWT (jose), OTP, OIDC (GitHub), WebAuthn passkeys             |
 | **Linting**    | Biome 2.3 (formatting + linting)                              |
 | **Validation** | Zod 4.1                                                       |
 | **Date/Time**  | Temporal API via `temporal-polyfill`                          |
@@ -154,7 +150,7 @@ await withActor(db, userId, async (tx) => {
 ### Real-Time Database Subscriptions
 
 ```typescript
-import { listener } from '@rainestack/database';
+import { listener } from '@raineworks/database';
 
 listener.on('post', (event) => {
   console.log(`Post ${event.operation}:`, event.id);
@@ -165,9 +161,9 @@ listener.on('post', (event) => {
 ### Beautiful UI Components
 
 ```typescript
-import { Button } from '@rainestack/ui/components/ui/button';
-import { Card } from '@rainestack/ui/components/ui/card';
-import { useTheme } from '@rainestack/ui/providers/theme';
+import { Button } from '@raineworks/ui/components/ui/button';
+import { Card } from '@raineworks/ui/components/ui/card';
+import { useTheme } from '@raineworks/ui/providers/theme';
 
 <Button variant="default">Click me</Button>
 ```
@@ -175,7 +171,7 @@ import { useTheme } from '@rainestack/ui/providers/theme';
 ### Error Handling with tryCatch
 
 ```typescript
-import { tryCatch } from '@rainestack/tools/try-catch';
+import { tryCatch } from '@raineworks/tools/try-catch';
 
 const { data, error } = await tryCatch(fetchUser(id));
 if (error) return handleError(error);
@@ -194,15 +190,13 @@ Create a `.env` file in the root:
 DATABASE_URL=postgresql://dev_user:dev_password@localhost:5432/dev_db
 JWT_SECRET=your-super-secret-key-at-least-32-characters-long
 
-# Optional - OIDC Providers
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
+# Optional - GitHub Sign-In
 GITHUB_CLIENT_ID=your-github-client-id
 GITHUB_CLIENT_SECRET=your-github-client-secret
 
 # Optional - WebAuthn
 RP_ID=localhost
-RP_NAME=RaineStack
+RP_NAME=RaineWorks
 RP_ORIGIN=http://localhost:3000
 ```
 
@@ -220,7 +214,7 @@ bun -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 
 ## 🎨 Customization
 
-This is a **starter template** — make it your own:
+This repo is already trimmed for a personal site, but the core extension points stay the same:
 
 ### 1. Replace Example Models
 
@@ -264,11 +258,7 @@ Edit Tailwind CSS variables in `packages/ui/src/styles/theme.css`:
 
 ### 4. Configure Authentication
 
-Choose which auth methods you need by setting environment variables. Remove unused providers from `packages/server/src/routes/auth.ts`.
-
-### 5. Update Documentation
-
-Replace the docs content in `packages/docs/src/app.tsx` with your own documentation.
+Set GitHub OAuth credentials only if you want social sign-in. Email OTP and passkeys remain available for passwordless auth.
 
 ---
 
@@ -288,32 +278,17 @@ cd packages/server
 bun run dist/index.js
 ```
 
-Set `STATIC_DIR` environment variable to the directory containing built frontend assets.
+Set `STATIC_DIR` to the directory containing the built `web` frontend assets.
 
 ---
 
-## 📖 Documentation
+## 📖 Endpoints
 
-When you run `bun run dev`, documentation is available at:
+When you run `bun run dev`, these endpoints are available:
 
-- **Docs**: http://localhost:3024/docs
+- **Site**: http://localhost:3024
 - **API Spec**: http://localhost:3000/api/openapi.json
 - **Health Check**: http://localhost:3000/healthz
-
-### Adding Documentation Pages
-
-Create MDX files in `packages/docs/public/content/`:
-
-```mdx
----
-title: Your Page Title
-description: Page description
----
-
-# Your Page Title
-
-Your content here with full MDX support!
-```
 
 For detailed project rules and architecture, see **[AGENTS.md](./AGENTS.md)**.
 
@@ -359,14 +334,14 @@ await db.post.create({ data });  // No audit trail!
 
 ### UI Components
 
-Always check `@rainestack/ui` before creating new components:
+Always check `@raineworks/ui` before creating new components:
 
 ```typescript
 // ✅ Use existing components
-import { Button } from '@rainestack/ui/components/ui/button';
+import { Button } from '@raineworks/ui/components/ui/button';
 
 // Import from subpaths for tree-shaking
-import { Card } from '@rainestack/ui/components/ui/card';
+import { Card } from '@raineworks/ui/components/ui/card';
 ```
 
 ### Error Handling
@@ -408,8 +383,8 @@ MIT License - see [LICENSE](./LICENSE) for details.
 <div align="center">
   <p>⭐️ Star this repo if you find it useful!</p>
   <p>
-    <a href="https://github.com/yourusername/rainestack">GitHub</a> •
-    <a href="https://github.com/yourusername/rainestack/issues">Issues</a> •
+    <a href="https://github.com/yourusername/raineworks">GitHub</a> •
+    <a href="https://github.com/yourusername/raineworks/issues">Issues</a> •
     <a href="./AGENTS.md">Documentation</a>
   </p>
 </div>

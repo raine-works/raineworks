@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// RaineStack — Prisma schema
+// RaineWorks — Prisma schema
 //
 // This is the single source of truth for the database structure.
 // Run `bun run db:dev` from the database package (or `turbo db:dev`

@@ -1,8 +1,7 @@
 /**
- * Vite configuration for the web (shell/host) micro-frontend.
+ * Vite configuration for the web application.
  *
- * This is the default application in the microfrontends proxy — it catches
- * all routes not matched by other zones (docs).
+ * This is the only frontend application in the workspace.
  *
  * @module vite.config
  */
@@ -35,8 +34,8 @@ export default defineConfig({
 	base: '/',
 
 	server: {
-		// Turborepo injects TURBO_MFE_PORT when running via the microfrontends
-		// proxy (`turbo dev`). Fall back to 3100 for standalone dev.
+		// Turborepo injects TURBO_MFE_PORT when running via `turbo dev`.
+		// Fall back to 3100 for standalone dev.
 		port: Number(process.env.TURBO_MFE_PORT) || 3100,
 		strictPort: true,
 
@@ -53,7 +52,7 @@ export default defineConfig({
 		alias: {
 			'@web': new URL('./src', import.meta.url).pathname,
 			'@api': new URL('../api/src', import.meta.url).pathname,
-			'@rainestack/ui': new URL('../ui/src', import.meta.url).pathname,
+			'@raineworks/ui': new URL('../ui/src', import.meta.url).pathname,
 			'@ui': new URL('../ui/src', import.meta.url).pathname
 		}
 	},

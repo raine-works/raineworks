@@ -51,8 +51,7 @@ export const envSchema = z
 		 * Expected layout:
 		 * ```
 		 * <STATIC_DIR>/
-		 *   ├── web/    — shell zone (base "/")
-		 *   └── docs/   — docs zone (base "/docs")
+		 *   └── web/    — shell zone (base "/")
 		 * ```
 		 *
 		 * In production this points to a mounted volume on the pod
@@ -64,23 +63,8 @@ export const envSchema = z
 		STATIC_DIR: z.string().optional(),
 
 		// -------------------------------------------------------------------
-		// OIDC provider credentials (optional — omit to disable a provider)
+		// OIDC provider credentials (optional — omit to disable the provider)
 		// -------------------------------------------------------------------
-
-		/**
-		 * Google OAuth 2.0 / OIDC client ID.
-		 *
-		 * Obtain from the Google Cloud Console → APIs & Services → Credentials.
-		 * When omitted, Google sign-in is disabled.
-		 */
-		GOOGLE_CLIENT_ID: z.string().optional(),
-
-		/**
-		 * Google OAuth 2.0 / OIDC client secret.
-		 *
-		 * Must be provided alongside `GOOGLE_CLIENT_ID`.
-		 */
-		GOOGLE_CLIENT_SECRET: z.string().optional(),
 
 		/**
 		 * GitHub OAuth 2.0 client ID.
@@ -118,9 +102,9 @@ export const envSchema = z
 		 * Human-readable name of the Relying Party.
 		 *
 		 * Shown to the user by the authenticator or browser during
-		 * passkey registration (e.g. "RaineStack").
+		 * passkey registration (e.g. "RaineWorks").
 		 */
-		RP_NAME: z.string().default('RaineStack'),
+		RP_NAME: z.string().default('RaineWorks'),
 
 		/**
 		 * Full origin URL of the Relying Party.

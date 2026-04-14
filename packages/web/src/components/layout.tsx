@@ -1,5 +1,5 @@
 /**
- * Root layout shell for the web micro-frontend.
+ * Root layout shell for the website frontend.
  *
  * Provides a consistent page structure with a main content area.
  * Uses react-router's `Outlet` to render nested route content.
@@ -7,8 +7,8 @@
  * @module components/layout
  */
 
-import { ThemePicker } from '@rainestack/ui/components/blocks/theme-picker';
-import { cn } from '@rainestack/ui/lib/utils';
+import { ThemePicker } from '@raineworks/ui/components/blocks/theme-picker';
+import { cn } from '@raineworks/ui/lib/utils';
 import { Outlet } from 'react-router';
 
 interface LayoutProps {

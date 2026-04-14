@@ -23,8 +23,8 @@
  * @module jwt
  */
 
-import type { PrismaClient } from '@rainestack/database';
-import { toDate, toInstant } from '@rainestack/tools/temporal';
+import type { PrismaClient } from '@raineworks/database';
+import { toDate, toInstant } from '@raineworks/tools/temporal';
 import * as tokens from '@server/data/tokens';
 import { env } from '@server/lib/env';
 import { log } from '@server/lib/logger';

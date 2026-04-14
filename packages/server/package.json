@@ -1,5 +1,5 @@
 {
-	"name": "@rainestack/server",
+	"name": "@raineworks/server",
 	"version": "0.0.0",
 	"private": true,
 	"type": "module",
@@ -14,9 +14,9 @@
 		"@orpc/openapi": "catalog:",
 		"@orpc/server": "catalog:",
 		"@orpc/zod": "catalog:",
-		"@rainestack/database": "workspace:*",
-		"@rainestack/tools": "workspace:*",
-		"@simplewebauthn/server": "^13.2.2",
+		"@raineworks/database": "workspace:*",
+		"@raineworks/tools": "workspace:*",
+		"@simplewebauthn/server": "catalog:",
 		"jose": "catalog:",
 		"pino": "catalog:",
 		"zod": "catalog:"

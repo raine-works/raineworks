@@ -1,15 +1,13 @@
 /**
  * Root application component for the web (shell/host) micro-frontend.
  *
- * Owns the top-level routing, layout chrome, and acts as the catch-all
- * for unmatched routes. Additional micro-frontend zones (e.g. `/docs`)
- * are served by their own independent apps via the Turborepo
- * microfrontends proxy.
+ * Owns the top-level routing, layout chrome, and catch-all behavior for the
+ * personal site.
  *
  * @module app
  */
 
-import { NotFound } from '@rainestack/ui/components/blocks/not-found';
+import { NotFound } from '@raineworks/ui/components/blocks/not-found';
 import { Layout } from '@web/components/layout';
 import { Home } from '@web/routes/home';
 import { BrowserRouter, Route, Routes } from 'react-router';

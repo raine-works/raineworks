@@ -1,8 +1,7 @@
 {
-	"extends": "@rainestack/tsconfig/base.json",
+	"extends": "@raineworks/tsconfig/base.json",
 	"compilerOptions": {
-		"rootDir": "./",
-		"baseUrl": "./",
+		"tsBuildInfoFile": "./.types/tsconfig.tsbuildinfo",
 		"paths": {
 			"@tools/*": ["./src/*"]
 		}

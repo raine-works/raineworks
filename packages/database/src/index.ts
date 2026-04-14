@@ -27,11 +27,11 @@
  * The defaults below (max 10, idle timeout 30 s, connect timeout 5 s)
  * work well for small-to-medium workloads.
  *
- * @module @rainestack/database
+ * @module @raineworks/database
  *
  * @example
  * ```ts
- * import { db, DatabaseListener } from "@rainestack/database";
+ * import { db, DatabaseListener } from "@raineworks/database";
  *
  * // Query using the singleton client
  * const users = await db.user.findMany();
@@ -47,11 +47,11 @@ import { PrismaClient } from '@database/generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 // Re-export actor-aware and abortable transaction helpers
-// Also available via the subpath import: '@rainestack/database/actor'
+// Also available via the subpath import: '@raineworks/database/actor'
 export { abortable, TransactionAbortedError, withActor } from '@database/actor';
 export type { RecordNotFoundInfo, UniqueViolationInfo } from '@database/errors';
 // Re-export Prisma error utilities
-// Also available via the subpath import: '@rainestack/database/errors'
+// Also available via the subpath import: '@raineworks/database/errors'
 export { isPrismaError, recordNotFound, uniqueViolation } from '@database/errors';
 // Re-export everything consumers might need from the generated client
 export * from '@database/generated/prisma/client';

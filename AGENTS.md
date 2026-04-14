@@ -1,6 +1,6 @@
 # AGENTS.md
 
-This document describes the **RaineStack** monorepo — its architecture, project structure, conventions, and rules that every contributor (human or AI agent) must follow. Treat this file as the authoritative reference for how to work in this codebase.
+This document describes the **RaineWorks** monorepo — its architecture, project structure, conventions, and rules that every contributor (human or AI agent) must follow. Treat this file as the authoritative reference for how to work in this codebase.
 
 ---
 
@@ -11,14 +11,13 @@ This document describes the **RaineStack** monorepo — its architecture, projec
 - [Monorepo Structure](#monorepo-structure)
 - [Package Dependency Graph](#package-dependency-graph)
 - [Package Details](#package-details)
-  - [`@rainestack/tools`](#rainestacktools)
-  - [`@rainestack/database`](#rainestackdatabase)
-  - [`@rainestack/server`](#rainestackserver)
-  - [`@rainestack/api`](#rainestackapi)
-  - [`@rainestack/ui`](#rainestackui)
-  - [`@rainestack/web`](#rainestackweb)
-  - [`@rainestack/docs`](#rainestackdocs)
-  - [`@rainestack/tsconfig`](#rainestacktsconfig)
+  - [`@raineworks/tools`](#raineworkstools)
+  - [`@raineworks/database`](#raineworksdatabase)
+  - [`@raineworks/server`](#raineworksserver)
+  - [`@raineworks/api`](#raineworksapi)
+  - [`@raineworks/ui`](#raineworksui)
+  - [`@raineworks/web`](#raineworksweb)
+  - [`@raineworks/tsconfig`](#raineworkstsconfig)
 - [Development Rules](#development-rules)
   - [Dependency Management](#dependency-management)
   - [UI Components](#ui-components)
@@ -39,9 +38,9 @@ This document describes the **RaineStack** monorepo — its architecture, projec
 
 ## Overview
 
-RaineStack is a full-stack TypeScript monorepo powered by **Bun**, **Turborepo**, and **Prisma**. It follows a micro-frontend architecture where multiple frontend zones (web shell, docs) are served from a single Bun HTTP server alongside an oRPC-based API.
+RaineWorks is a full-stack TypeScript monorepo powered by **Bun**, **Turborepo**, and **Prisma**. It serves a single React frontend from the same Bun HTTP server that exposes the oRPC API.
 
-The monorepo is organised under `packages/` with shared libraries (`tools`, `database`, `ui`, `api`, `tsconfig`) and deployable applications (`server`, `web`, `docs`).
+The monorepo is organised under `packages/` with shared libraries (`tools`, `database`, `ui`, `api`, `tsconfig`) and deployable applications (`server`, `web`).
 
 ---
 
@@ -49,14 +48,14 @@ The monorepo is organised under `packages/` with shared libraries (`tools`, `dat
 
 | Layer          | Technology                                                    |
 | -------------- | ------------------------------------------------------------- |
-| Runtime        | Bun 1.3.9                                                     |
+| Runtime        | Bun 1.3.12                                                     |
 | Monorepo       | Turborepo with Bun workspaces                                 |
-| Language       | TypeScript 5.9.3 (strict mode)                                |
+| Language       | TypeScript 6.0.2 (strict mode)                                |
 | Backend        | Bun HTTP server, oRPC (contract-first), Pino logging          |
 | Database       | PostgreSQL 18.1, Prisma 7.3 (with `@prisma/adapter-pg`)      |
 | Frontend       | React 19.2, Vite 7.3, React Router 7, TanStack Query 5       |
 | UI             | shadcn/ui (base-vega style), Tailwind CSS 4.1, Lucide icons   |
-| Auth           | JWT (jose), OTP, OIDC (Google/GitHub), WebAuthn passkeys       |
+| Auth           | JWT (jose), OTP, OIDC (GitHub), WebAuthn passkeys              |
 | Linting        | Biome 2.3 (formatting + linting)                               |
 | Validation     | Zod 4.1                                                        |
 | Date/Time      | Temporal API via `temporal-polyfill`                            |
@@ -72,7 +71,7 @@ mystack/
 ├── package.json                 # Root workspace config with dependency catalog
 ├── turbo.json                   # Turborepo task pipeline
 ├── biome.json                   # Biome linter + formatter configuration
-├── tsconfig.json                # Root TypeScript config (extends @rainestack/tsconfig)
+├── tsconfig.json                # Root TypeScript config (extends @raineworks/tsconfig)
 ├── bun.lock                     # Bun lockfile
 ├── .bun-version                 # Pinned Bun version
 ├── docker/
@@ -84,8 +83,7 @@ mystack/
     ├── server/                  # Bun HTTP server, oRPC routes, data layer, auth
     ├── api/                     # Client-side oRPC client factory, TanStack Query utils
     ├── ui/                      # Shared React component library (shadcn/ui)
-    ├── web/                     # Web shell micro-frontend (Vite + React)
-    ├── docs/                    # Docs micro-frontend (Vite + React)
+   ├── web/                     # Website frontend (Vite + React)
     └── tsconfig/                # Shared TypeScript configurations
 ```
 
@@ -107,7 +105,6 @@ api ───────────────┤                          �
 ui ────────────────┤                          │               │
   │                │                          │               │
 web ───────────────┘                          │               │
-docs ─────────────────────────────────────────┘───────────────┘
 ```
 
 - `tools` → standalone (depends on `temporal-polyfill`)
@@ -116,23 +113,22 @@ docs ─────────────────────────
 - `api` → depends on `tools`, type-only dependency on `server` (for `Router` type)
 - `ui` → depends on `tools`
 - `web` → depends on `api`, `ui`, `tools`
-- `docs` → depends on `api`, `ui`, `tools`
 
 ---
 
 ## Package Details
 
-### `@rainestack/tools`
+### `@raineworks/tools`
 
 **Purpose:** Shared, framework-agnostic utility library used across all packages.
 
 **Location:** `packages/tools/`
 
 **Exports (subpath):**
-- `@rainestack/tools/try-catch` — `tryCatch()` error-handling primitive
-- `@rainestack/tools/temporal` — Prisma ↔ Temporal conversion utilities (`toInstant`, `toDate`, `toISO`, `toISOOrNull`)
-- `@rainestack/tools/temporal-polyfill` — Side-effect import that installs the Temporal API globally
-- `@rainestack/tools/prototypes` — Side-effect import that extends Array, Set, Map, Number, String, and Object prototypes with convenience methods
+- `@raineworks/tools/try-catch` — `tryCatch()` error-handling primitive
+- `@raineworks/tools/temporal` — Prisma ↔ Temporal conversion utilities (`toInstant`, `toDate`, `toISO`, `toISOOrNull`)
+- `@raineworks/tools/temporal-polyfill` — Side-effect import that installs the Temporal API globally
+- `@raineworks/tools/prototypes` — Side-effect import that extends Array, Set, Map, Number, String, and Object prototypes with convenience methods
 
 **Key files:**
 | File                    | Description                                                    |
@@ -144,16 +140,16 @@ docs ─────────────────────────
 
 ---
 
-### `@rainestack/database`
+### `@raineworks/database`
 
 **Purpose:** Database schema, Prisma client, actor-tracked transactions, error utilities, and real-time LISTEN/NOTIFY listener.
 
 **Location:** `packages/database/`
 
 **Exports:**
-- `@rainestack/database` — Singleton `db` client, `PrismaClient`, all generated types, `DatabaseListener`, error helpers, actor helpers
-- `@rainestack/database/actor` — `withActor()`, `abortable()`, `TransactionAbortedError`
-- `@rainestack/database/errors` — `isPrismaError()`, `uniqueViolation()`, `recordNotFound()`
+- `@raineworks/database` — Singleton `db` client, `PrismaClient`, all generated types, `DatabaseListener`, error helpers, actor helpers
+- `@raineworks/database/actor` — `withActor()`, `abortable()`, `TransactionAbortedError`
+- `@raineworks/database/errors` — `isPrismaError()`, `uniqueViolation()`, `recordNotFound()`
 
 **Key files:**
 | File                  | Description                                                      |
@@ -211,9 +207,9 @@ SELECT * FROM purge_expired_ephemeral_records();
 
 ---
 
-### `@rainestack/server`
+### `@raineworks/server`
 
-**Purpose:** Bun HTTP server exposing oRPC API routes, static micro-frontend serving, authentication, and real-time database listening.
+**Purpose:** Bun HTTP server exposing oRPC API routes, static frontend serving, authentication, and real-time database listening.
 
 **Location:** `packages/server/`
 
@@ -225,7 +221,7 @@ SELECT * FROM purge_expired_ephemeral_records();
 | `/api/openapi.json` | OpenAPI 3.x specification                |
 | `/api/contract.json`| oRPC contract router (for client factory)|
 | `/healthz`          | Liveness / readiness probe               |
-| `/*`                | Static micro-frontend zones (SPA)        |
+| `/*`                | Static website frontend (SPA)            |
 
 **Directory structure:**
 | Directory      | Purpose                                                      |
@@ -268,18 +264,18 @@ All Zod schemas for input validation and output serialisation are defined in `sr
 
 ---
 
-### `@rainestack/api`
+### `@raineworks/api`
 
 **Purpose:** Client-side API layer providing a fully-typed oRPC client, TanStack Query integration, and token storage.
 
 **Location:** `packages/api/`
 
 **Exports:**
-- `@rainestack/api` — `createApiClient()` factory
-- `@rainestack/api/router` — Re-exports `Router` type from server (type-only bridge)
-- `@rainestack/api/storage` — Async wrapper around `localStorage` / `sessionStorage`
-- `@rainestack/api/query-provider` — `QueryProvider` React component with shared defaults
-- `@rainestack/api/tanstack-query` — Re-exports `createTanstackQueryUtils` from `@orpc/tanstack-query`
+- `@raineworks/api` — `createApiClient()` factory
+- `@raineworks/api/router` — Re-exports `Router` type from server (type-only bridge)
+- `@raineworks/api/storage` — Async wrapper around `localStorage` / `sessionStorage`
+- `@raineworks/api/query-provider` — `QueryProvider` React component with shared defaults
+- `@raineworks/api/tanstack-query` — Re-exports `createTanstackQueryUtils` from `@orpc/tanstack-query`
 
 **Client features:**
 - Automatic JWT authorization header
@@ -290,9 +286,9 @@ All Zod schemas for input validation and output serialisation are defined in `sr
 **Usage in frontend zones:**
 ```ts
 // packages/web/src/lib/api.ts
-import { createApiClient } from '@rainestack/api';
-import type { Router } from '@rainestack/api/router';
-import { createTanstackQueryUtils } from '@rainestack/api/tanstack-query';
+import { createApiClient } from '@raineworks/api';
+import type { Router } from '@raineworks/api/router';
+import { createTanstackQueryUtils } from '@raineworks/api/tanstack-query';
 
 export const api = await createApiClient<Router>(location.origin);
 export const orpc = createTanstackQueryUtils(api);
@@ -300,20 +296,20 @@ export const orpc = createTanstackQueryUtils(api);
 
 ---
 
-### `@rainestack/ui`
+### `@raineworks/ui`
 
 **Purpose:** Shared React component library built on shadcn/ui (base-vega style) with Tailwind CSS, Lucide icons, and Base UI primitives.
 
 **Location:** `packages/ui/`
 
 **Exports (subpath):**
-- `@rainestack/ui` — barrel re-exports of `cn()`, providers (`ThemeProvider`, `LogoProvider`, `Head`)
-- `@rainestack/ui/components/ui/*` — Individual UI primitives (button, card, dialog, table, etc.)
-- `@rainestack/ui/components/blocks/*` — Composed block components (brand-logo, not-found, theme-picker)
-- `@rainestack/ui/providers/*` — Context providers (theme, head/favicon, logo)
-- `@rainestack/ui/hooks/*` — Shared hooks (use-mobile)
-- `@rainestack/ui/lib/*` — Utilities (`cn()` class-name merging)
-- `@rainestack/ui/styles/*` — CSS files (theme.css)
+- `@raineworks/ui` — barrel re-exports of `cn()`, providers (`ThemeProvider`, `LogoProvider`, `Head`)
+- `@raineworks/ui/components/ui/*` — Individual UI primitives (button, card, dialog, table, etc.)
+- `@raineworks/ui/components/blocks/*` — Composed block components (brand-logo, not-found, theme-picker)
+- `@raineworks/ui/providers/*` — Context providers (theme, head/favicon, logo)
+- `@raineworks/ui/hooks/*` — Shared hooks (use-mobile)
+- `@raineworks/ui/lib/*` — Utilities (`cn()` class-name merging)
+- `@raineworks/ui/styles/*` — CSS files (theme.css)
 
 **Available UI components:**
 `accordion`, `alert`, `alert-dialog`, `aspect-ratio`, `avatar`, `badge`, `breadcrumb`, `button`, `button-group`, `calendar`, `card`, `carousel`, `chart`, `checkbox`, `collapsible`, `combobox`, `command`, `context-menu`, `dialog`, `direction`, `drawer`, `dropdown-menu`, `empty`, `field`, `hover-card`, `input`, `input-group`, `input-otp`, `item`, `kbd`, `label`, `menubar`, `native-select`, `navigation-menu`, `pagination`, `popover`, `progress`, `radio-group`, `resizable`, `scroll-area`, `select`, `separator`, `sheet`, `sidebar`, `skeleton`, `slider`, `sonner`, `spinner`, `switch`, `table`, `tabs`, `textarea`, `toggle`, `toggle-group`, `tooltip`
@@ -329,9 +325,9 @@ export const orpc = createTanstackQueryUtils(api);
 
 ---
 
-### `@rainestack/web`
+### `@raineworks/web`
 
-**Purpose:** Web shell (host) micro-frontend — the default application served at `/`. Handles root layout, primary routes, and acts as the catch-all for unmatched URLs.
+**Purpose:** The main website frontend served at `/`. Handles root layout, primary routes, and acts as the catch-all for unmatched URLs.
 
 **Location:** `packages/web/`
 
@@ -344,27 +340,17 @@ export const orpc = createTanstackQueryUtils(api);
 | `src/components/layout.tsx` | Shell layout with `<Outlet />`                  |
 | `src/routes/home.tsx`      | Home page route                                  |
 | `vite.config.ts`           | Vite config with React compiler, Tailwind, proxy |
-| `microfrontends.json`      | Turborepo microfrontend zone configuration       |
+| `microfrontends.json`      | Turborepo local proxy configuration              |
 
 **Entry point initialisation order:**
-1. Import `@rainestack/tools/prototypes` (extends Array prototype)
-2. Import `@rainestack/tools/temporal-polyfill` (installs Temporal globally)
+1. Import `@raineworks/tools/prototypes` (extends Array prototype)
+2. Import `@raineworks/tools/temporal-polyfill` (installs Temporal globally)
 3. Import global CSS
 4. Mount React root with `ThemeProvider` → `QueryProvider` → `App` → `Toaster`
 
 ---
 
-### `@rainestack/docs`
-
-**Purpose:** Docs micro-frontend served under the `/docs` base path. Mirrors the web shell structure.
-
-**Location:** `packages/docs/`
-
-Follows the exact same structure and initialisation pattern as `@rainestack/web` but uses `<BrowserRouter basename="/docs">`.
-
----
-
-### `@rainestack/tsconfig`
+### `@raineworks/tsconfig`
 
 **Purpose:** Shared TypeScript configurations extended by all packages.
 
@@ -375,7 +361,7 @@ Follows the exact same structure and initialisation pattern as `@rainestack/web`
 | -------------------- | -------------------------------- | ------------------------------------------ |
 | `base.json`          | tools, database, server          | Strict, ESNext, bundler resolution, bun-types |
 | `react-library.json` | ui                               | Extends base + DOM libs, JSX, isolatedModules |
-| `react-app.json`     | web, docs                        | Extends react-library, relaxed unused locals  |
+| `react-app.json`     | web                              | Extends react-library, relaxed unused locals  |
 
 ---
 
@@ -404,35 +390,35 @@ Follows the exact same structure and initialisation pattern as `@rainestack/web`
 3. **Workspace dependencies** use `"workspace:*"` syntax:
    ```jsonc
    {
-     "@rainestack/tools": "workspace:*"
+     "@raineworks/tools": "workspace:*"
    }
    ```
 
-4. **Package manager:** Bun 1.3.9 — never use npm or yarn. Run `bun install` to install dependencies.
+4. **Package manager:** Bun 1.3.12 — never use npm or yarn. Run `bun install` to install dependencies.
 
 ---
 
 ### UI Components
 
-> **Always use the UI components from `@rainestack/ui` before creating new ones.**
+> **Always use the UI components from `@raineworks/ui` before creating new ones.**
 
 1. **Check the UI package first.** Before building any UI element, check if a component already exists in `packages/ui/src/components/ui/` or `packages/ui/src/components/blocks/`. The library has 50+ components covering most common patterns.
 
 2. **Import from subpaths, not the barrel:**
    ```tsx
    // ✅ Correct — tree-shakeable subpath import
-   import { Button } from '@rainestack/ui/components/ui/button';
-   import { Card, CardContent } from '@rainestack/ui/components/ui/card';
+   import { Button } from '@raineworks/ui/components/ui/button';
+   import { Card, CardContent } from '@raineworks/ui/components/ui/card';
 
    // ❌ Wrong — barrel import
-   import { Button } from '@rainestack/ui';
+   import { Button } from '@raineworks/ui';
    ```
 
 3. **Use `cn()` for class merging:**
    ```tsx
-   import { cn } from '@rainestack/ui';
+   import { cn } from '@raineworks/ui';
    // or
-   import { cn } from '@rainestack/ui/lib/utils';
+   import { cn } from '@raineworks/ui/lib/utils';
    ```
 
 4. **Use the shared providers:**
@@ -441,7 +427,7 @@ Follows the exact same structure and initialisation pattern as `@rainestack/web`
    - `Head` / `HeadContent` for document head management
 
 5. **Use shared hooks:**
-   - `useMobile` from `@rainestack/ui/hooks/use-mobile`
+   - `useMobile` from `@raineworks/ui/hooks/use-mobile`
 
 6. **New UI components** should be added to `packages/ui/src/components/ui/` (primitives) or `packages/ui/src/components/blocks/` (composed patterns) — not duplicated inside individual apps.
 
@@ -498,10 +484,10 @@ Follows the exact same structure and initialisation pattern as `@rainestack/web`
 
 6. **Never add audit or NOTIFY triggers to ephemeral tables.** Tables classified as ephemeral (`OtpCode`, `RefreshToken`, `PasskeyChallenge`, `OAuthAuthorizationCode`, `OAuthAccessToken`, `OAuthRefreshToken`) must not receive history, trash, or NOTIFY triggers. If you add a new model with an `expiresAt` column, it is ephemeral — add it to the `purge_expired_ephemeral_records()` function in `scripts/triggers.sql` instead.
 
-7. **Use error utilities from `@rainestack/database/errors`** to handle Prisma errors in routes:
+7. **Use error utilities from `@raineworks/database/errors`** to handle Prisma errors in routes:
 
    ```ts
-   import { uniqueViolation, recordNotFound } from '@rainestack/database/errors';
+   import { uniqueViolation, recordNotFound } from '@raineworks/database/errors';
 
    try {
      return await postsData.create(db, actorId, data);
@@ -519,18 +505,18 @@ Follows the exact same structure and initialisation pattern as `@rainestack/web`
 
 ### Temporal API Usage
 
-> **Always use the Temporal API imported from `@rainestack/tools`. Never use native `Date` for date/time logic in application code.**
+> **Always use the Temporal API imported from `@raineworks/tools`. Never use native `Date` for date/time logic in application code.**
 
 1. **Import the polyfill at entry points.** Every application entry point (`main.tsx`, `index.ts`) must import the polyfill as its first side-effect import:
 
    ```ts
-   import '@rainestack/tools/temporal-polyfill';
+   import '@raineworks/tools/temporal-polyfill';
    ```
 
 2. **Use Temporal utilities from the tools package** for Prisma Date ↔ Temporal conversion:
 
    ```ts
-   import { toInstant, toDate, toISO, toISOOrNull } from '@rainestack/tools/temporal';
+   import { toInstant, toDate, toISO, toISOOrNull } from '@raineworks/tools/temporal';
 
    // Prisma Date → Temporal.Instant
    const instant = toInstant(user.createdAt);
@@ -549,12 +535,12 @@ Follows the exact same structure and initialisation pattern as `@rainestack/web`
 
 ### Prototypes
 
-> **Always use the prototypes defined in `@rainestack/tools` and import them at entry points.**
+> **Always use the prototypes defined in `@raineworks/tools` and import them at entry points.**
 
 1. **Import prototypes at entry points:**
 
    ```ts
-   import '@rainestack/tools/prototypes';
+   import '@raineworks/tools/prototypes';
    ```
 
 2. **Available prototype extensions:**
@@ -617,12 +603,12 @@ Follows the exact same structure and initialisation pattern as `@rainestack/web`
 
 ### Error Handling with tryCatch
 
-> **Always use the `tryCatch` function from `@rainestack/tools/try-catch` instead of bare try/catch blocks wherever practical.**
+> **Always use the `tryCatch` function from `@raineworks/tools/try-catch` instead of bare try/catch blocks wherever practical.**
 
 1. **Import from tools:**
 
    ```ts
-   import { tryCatch } from '@rainestack/tools/try-catch';
+   import { tryCatch } from '@raineworks/tools/try-catch';
    ```
 
 2. **Use for async operations:**
@@ -715,7 +701,7 @@ bun run lint
 
 ### TypeScript Configuration
 
-1. **Strict mode is always on.** All packages extend from `@rainestack/tsconfig/base.json` which enables `"strict": true`.
+1. **Strict mode is always on.** All packages extend from `@raineworks/tsconfig/base.json` which enables `"strict": true`.
 
 2. **Module system:** ESNext modules with bundler resolution.
 
@@ -727,26 +713,25 @@ bun run lint
    | `@database/*`  | `packages/database/src/*`      | database, server, web |
    | `@server/*`    | `packages/server/src/*`        | server, web        |
    | `@api/*`       | `packages/api/src/*`           | api, web           |
-   | `@ui/*`        | `packages/ui/src/*`            | ui, web, docs      |
+   | `@ui/*`        | `packages/ui/src/*`            | ui, web            |
    | `@web/*`       | `packages/web/src/*`           | web                |
-   | `@docs/*`      | `packages/docs/src/*`          | docs               |
 
 ---
 
 ### Import Aliases
 
-When importing across workspace packages, use the `@rainestack/*` package names. Within a package, use the `@alias/*` path aliases.
+When importing across workspace packages, use the `@raineworks/*` package names. Within a package, use the `@alias/*` path aliases.
 
 ```ts
 // ✅ Cross-package import (from web → ui)
-import { Button } from '@rainestack/ui/components/ui/button';
+import { Button } from '@raineworks/ui/components/ui/button';
 
 // ✅ Within-package import (inside server)
 import { log } from '@server/lib/logger';
 import * as postsData from '@server/data/posts';
 
 // ✅ Within-package import (inside database)
-import { tryCatch } from '@rainestack/tools/try-catch';
+import { tryCatch } from '@raineworks/tools/try-catch';
 import type { PrismaClient } from '@database/generated/prisma/client';
 ```
 
@@ -757,8 +742,8 @@ import type { PrismaClient } from '@database/generated/prisma/client';
 1. **Entry point imports.** The server entry point (`packages/server/src/index.ts`) imports prototypes and temporal polyfill first:
 
    ```ts
-   import '@rainestack/tools/prototypes';
-   import '@rainestack/tools/temporal-polyfill';
+   import '@raineworks/tools/prototypes';
+   import '@raineworks/tools/temporal-polyfill';
    ```
 
 2. **oRPC procedures.** Routes use `publicProcedure` (no auth) or `authedProcedure` (JWT required):
@@ -789,7 +774,7 @@ import type { PrismaClient } from '@database/generated/prisma/client';
    ```
    In route handlers, use `context.log` (the request-scoped child logger).
 
-6. **Micro-frontend zones.** Frontend builds are served statically. The server discovers zones at startup from `STATIC_DIR` (production) or `packages/<zone>/dist` (development).
+6. **Frontend assets.** The web build is served statically. The server discovers it from `STATIC_DIR/web` (production) or `packages/web/dist` (development).
 
 ---
 
@@ -841,12 +826,10 @@ Required environment variables (validated by Zod in `packages/server/src/lib/env
 | `NODE_ENV`            | No       | `development` / `production` / `test`      |
 | `LOG_LEVEL`           | No       | Pino log level (default: `debug` in dev)   |
 | `STATIC_DIR`          | No       | Root dir for built frontend assets         |
-| `GOOGLE_CLIENT_ID`    | No       | Google OIDC client ID                      |
-| `GOOGLE_CLIENT_SECRET`| No       | Google OIDC client secret                  |
 | `GITHUB_CLIENT_ID`    | No       | GitHub OAuth client ID                     |
 | `GITHUB_CLIENT_SECRET`| No       | GitHub OAuth client secret                 |
 | `RP_ID`               | No       | WebAuthn Relying Party ID (default: `localhost`) |
-| `RP_NAME`             | No       | WebAuthn Relying Party name (default: `RaineStack`) |
+| `RP_NAME`             | No       | WebAuthn Relying Party name (default: `RaineWorks`) |
 | `RP_ORIGIN`           | No       | WebAuthn origin URL (default: `http://localhost:3000`) |
 
 **Turbo global env vars** (from `turbo.json`): `DATABASE_URL`, `HOME`, `LOG_LEVEL`, `NODE_ENV`, `TZ`
@@ -893,11 +876,9 @@ Expired rows in ephemeral tables are purged automatically by a pg_cron job that 
 
 If pg_cron is unavailable in your environment, the purge function still exists and can be called manually or from an application-level scheduler.
 
-**Micro-frontend proxy:**
+**Frontend proxy:**
 
-Turborepo's microfrontend proxy runs on port `3024` and routes:
-- `/docs`, `/docs/*` → `@rainestack/docs` (port `3101`)
-- Everything else → `@rainestack/web` (port `3100`)
+Turborepo's local proxy runs on port `3024` and routes requests to `@raineworks/web` (port `3100`).
 
 In development, `vite.config.ts` proxies `/api` requests to `http://localhost:3000` (the Bun server).
 
@@ -906,12 +887,12 @@ In development, `vite.config.ts` proxies `/api` requests to `http://localhost:30
 ## Rules Summary (Quick Reference)
 
 1. ✅ **Catalog dependencies** — always add to root `package.json` `workspaces.catalog` with exact pinned versions
-2. ✅ **UI components** — always check and use `@rainestack/ui` before creating new components
+2. ✅ **UI components** — always check and use `@raineworks/ui` before creating new components
 3. ✅ **`withActor` wrapper** — always use when performing database writes for audit attribution
 4. ✅ **Data layer** — always define database operations in `packages/server/src/data/`
-5. ✅ **Temporal API** — always import from `@rainestack/tools/temporal` and `@rainestack/tools/temporal-polyfill`
-6. ✅ **Prototypes** — always import `@rainestack/tools/prototypes` at entry points, use the extensions
-7. ✅ **`tryCatch`** — always prefer `tryCatch()` from `@rainestack/tools/try-catch` over bare try/catch
+5. ✅ **Temporal API** — always import from `@raineworks/tools/temporal` and `@raineworks/tools/temporal-polyfill`
+6. ✅ **Prototypes** — always import `@raineworks/tools/prototypes` at entry points, use the extensions
+7. ✅ **`tryCatch`** — always prefer `tryCatch()` from `@raineworks/tools/try-catch` over bare try/catch
 8. ✅ **Documentation** — always update README and AGENTS.md when making changes
 9. ✅ **Biome** — always follow the project's formatting and linting rules
 10. ✅ **Env vars** — always access through the validated `env` object, never `process.env` directly

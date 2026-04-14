@@ -1,7 +1,7 @@
 {
-	"extends": "@rainestack/tsconfig/react-app.json",
+	"extends": "@raineworks/tsconfig/react-app.json",
 	"compilerOptions": {
-		"baseUrl": ".",
+		"tsBuildInfoFile": "./.types/tsconfig.tsbuildinfo",
 		"paths": {
 			"@web/*": ["./src/*"],
 			"@api/*": ["../api/src/*"],

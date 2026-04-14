@@ -15,9 +15,9 @@
  * @module data/otp
  */
 
-import type { PrismaClient } from '@rainestack/database';
-import { withActor } from '@rainestack/database/actor';
-import { toDate } from '@rainestack/tools/temporal';
+import type { PrismaClient } from '@raineworks/database';
+import { withActor } from '@raineworks/database/actor';
+import { toDate } from '@raineworks/tools/temporal';
 
 // ---------------------------------------------------------------------------
 // Types

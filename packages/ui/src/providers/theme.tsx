@@ -46,7 +46,7 @@ const ThemeProviderContext = createContext<ThemeProviderState | undefined>(undef
 // Helpers
 // ---------------------------------------------------------------------------
 
-const STORAGE_KEY_DEFAULT = 'rainestack-theme';
+const STORAGE_KEY_DEFAULT = 'raineworks-theme';
 
 /** Reads the OS preference via `matchMedia`. */
 function getSystemTheme(): 'dark' | 'light' {

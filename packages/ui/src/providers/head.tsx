@@ -118,12 +118,12 @@ function Head({ children }: PropsWithChildren) {
  * Injects a standard set of head elements — page title, meta description,
  * Open Graph tags, Twitter Card tags, and favicon links.
  *
- * Props are optional and fall back to sensible RaineStack defaults. The favicon
+ * Props are optional and fall back to sensible RaineWorks defaults. The favicon
  * path is configurable and the MIME type is auto-detected from the file
  * extension unless overridden via `faviconType`.
  */
 function HeadContent({
-	title = 'RaineStack',
+	title = 'RaineWorks',
 	description = '',
 	image = '',
 	url = '',

@@ -18,8 +18,8 @@
  * @module listener
  */
 
-import '@rainestack/tools/prototypes';
-import { tryCatch } from '@rainestack/tools/try-catch';
+import '@raineworks/tools/prototypes';
+import { tryCatch } from '@raineworks/tools/try-catch';
 import pg from 'pg';
 
 // ---------------------------------------------------------------------------

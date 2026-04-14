@@ -36,8 +36,8 @@
  */
 
 import { os } from '@orpc/server';
-import { DatabaseListener, db, type PrismaClient } from '@rainestack/database';
-import { abortable as abortableFn, withActor as withActorFn } from '@rainestack/database/actor';
+import { DatabaseListener, db, type PrismaClient } from '@raineworks/database';
+import { abortable as abortableFn, withActor as withActorFn } from '@raineworks/database/actor';
 import { env } from '@server/lib/env';
 import { log } from '@server/lib/logger';
 
@@ -49,7 +49,7 @@ const dbLog = log.child({ module: 'database' });
 // The listener requires a dedicated long-lived `pg.Client` connection
 // (not a pool), so we create it once and reuse it for the lifetime of
 // the process — mirroring how the `db` singleton works in
-// @rainestack/database.
+// @raineworks/database.
 //
 // Construction is cheap (no I/O). The actual TCP connection is
 // established later when `connectListener()` is called at startup.

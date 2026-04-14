@@ -154,7 +154,7 @@ SELECT detach_notify_trigger('OAuthRefreshToken');
 --   the `resolve_actor()` helper function:
 --
 --   1. If the API server set `app.current_user_id` via SET LOCAL (the
---      `withActor()` helper in `@rainestack/database/actor`), the value
+--      `withActor()` helper in `@raineworks/database/actor`), the value
 --      is the authenticated user's CUID — e.g. "cm3abc123def456".
 --
 --   2. Otherwise, the value falls back to `session_user` — the

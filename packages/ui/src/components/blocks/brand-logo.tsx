@@ -1,9 +1,9 @@
 /**
- * Brand logo block — icon + two-tone "RaineStack" wordmark.
+ * Brand logo block — icon + two-tone "RaineWorks" wordmark.
  *
  * Two composable pieces are exported:
  *
- * - **`BrandWordmark`** — the two-tone "RaineStack" text on its own. Use
+ * - **`BrandWordmark`** — the two-tone "RaineWorks" text on its own. Use
  *   this in contexts where the icon is rendered separately (e.g. the
  *   sidebar, where the icon and text must be sibling elements for the
  *   collapse animation to work).
@@ -67,8 +67,8 @@ const TEXT_SIZES: Record<BrandSize, string> = {
 // ---------------------------------------------------------------------------
 
 /**
- * Two-tone "RaineStack" wordmark — "Raine" in the foreground colour,
- * "Stack" in the primary accent.
+ * Two-tone "RaineWorks" wordmark — "Raine" in the foreground colour,
+ * "Works" in the primary accent.
  *
  * Renders as an inline `<span>` so it can sit naturally inside sidebar
  * menu buttons, headings, or alongside other inline content.
@@ -76,7 +76,7 @@ const TEXT_SIZES: Record<BrandSize, string> = {
 function BrandWordmark({ size = 'default', className }: BrandWordmarkProps) {
 	return (
 		<span className={cn('font-semibold leading-tight tracking-tight', TEXT_SIZES[size], className)}>
-			Raine<span className="text-primary">Stack</span>
+			Raine<span className="text-primary">Works</span>
 		</span>
 	);
 }

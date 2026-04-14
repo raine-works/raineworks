@@ -5,7 +5,7 @@
  * the Temporal API available globally:
  *
  * ```ts
- * import '@rainestack/tools/temporal-polyfill';
+ * import '@raineworks/tools/temporal-polyfill';
  * ```
  *
  * When runtimes ship native Temporal, delete this file and remove

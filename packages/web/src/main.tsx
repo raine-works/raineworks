@@ -4,19 +4,18 @@
  * Mounts the React root, imports the shared design-system theme, and wraps
  * the application in the provider stack (theme toggling, TanStack Query).
  *
- * This is the host micro-frontend that owns the root layout and acts as
- * the catch-all for unmatched routes.
+ * This is the main frontend entry point for the website.
  *
  * @module main
  */
 
-import '@rainestack/tools/prototypes';
-import '@rainestack/tools/temporal-polyfill';
+import '@raineworks/tools/prototypes';
+import '@raineworks/tools/temporal-polyfill';
 import '@web/styles/global.css';
 
-import { QueryProvider } from '@rainestack/api/query-provider';
-import { Toaster } from '@rainestack/ui/components/ui/sonner';
-import { ThemeProvider } from '@rainestack/ui/providers/theme';
+import { QueryProvider } from '@raineworks/api/query-provider';
+import { Toaster } from '@raineworks/ui/components/ui/sonner';
+import { ThemeProvider } from '@raineworks/ui/providers/theme';
 import { App } from '@web/app';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';

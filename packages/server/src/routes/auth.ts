@@ -4,7 +4,7 @@
  * Exposes endpoints for:
  *
  * - **OTP** — passwordless email one-time passcodes
- * - **OIDC** — federated identity via Google, GitHub, etc.
+ * - **OIDC** — federated identity via GitHub
  * - **Passkeys** — WebAuthn registration and authentication
  * - **Session** — JWT introspection, refresh, and logout
  *
@@ -25,9 +25,9 @@
  */
 
 import { ORPCError } from '@orpc/server';
-import type { User } from '@rainestack/database';
-import { withActor } from '@rainestack/database/actor';
-import { toDate } from '@rainestack/tools/temporal';
+import type { User } from '@raineworks/database';
+import { withActor } from '@raineworks/database/actor';
+import { toDate } from '@raineworks/tools/temporal';
 import * as accountsData from '@server/data/accounts';
 import * as passkeysData from '@server/data/passkeys';
 import * as usersData from '@server/data/users';
@@ -120,23 +120,11 @@ interface OidcProviderConfig {
  * Builds the map of enabled OIDC providers from environment variables.
  *
  * Providers are only included when both their client ID and client
- * secret are configured. This allows operators to selectively enable
- * providers by setting the appropriate env vars.
+ * secret are configured. This allows operators to disable GitHub sign-in
+ * entirely by omitting the provider credentials.
  */
 function getEnabledProviders(): Map<string, OidcProviderConfig> {
 	const providers = new Map<string, OidcProviderConfig>();
-
-	if (env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET) {
-		providers.set('google', {
-			name: 'Google',
-			authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
-			tokenEndpoint: 'https://oauth2.googleapis.com/token',
-			userinfoEndpoint: 'https://openidconnect.googleapis.com/v1/userinfo',
-			scopes: ['openid', 'email', 'profile'],
-			clientId: env.GOOGLE_CLIENT_ID,
-			clientSecret: env.GOOGLE_CLIENT_SECRET
-		});
-	}
 
 	if (env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET) {
 		providers.set('github', {

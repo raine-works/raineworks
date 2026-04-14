@@ -1,16 +1,16 @@
 /**
  * Home route — landing page for the web shell.
  *
- * Displays a welcome hero section with quick links to explore the
- * API and documentation. This is the default route mounted at `/`.
+ * Displays the landing page for the personal site. This is the default route
+ * mounted at `/`.
  *
  * @module routes/home
  */
 
-import { Button } from '@rainestack/ui/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@rainestack/ui/components/ui/card';
+import { Button } from '@raineworks/ui/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@raineworks/ui/components/ui/card';
 import { GitHubIcon } from '@web/components/github-icon';
-import { BookOpen, Code, Database, Layers, Rocket, Zap } from 'lucide-react';
+import { Code, Database, Github, Layers, Rocket, ShieldCheck, Zap } from 'lucide-react';
 
 // ---------------------------------------------------------------------------
 // Feature cards
@@ -20,7 +20,7 @@ const features = [
 	{
 		icon: Layers,
 		title: 'Turborepo Monorepo',
-		description: 'All packages, apps, and shared libraries in a single repository with blazing-fast builds.',
+		description: 'One workspace for the site, server, shared UI, and data layer with fast incremental builds.',
 		href: 'https://turborepo.dev/'
 	},
 	{
@@ -37,9 +37,9 @@ const features = [
 	},
 	{
 		icon: Code,
-		title: 'Micro-Frontends',
-		description: 'Independent React apps served through a unified proxy with shared UI components.',
-		href: 'https://turborepo.dev/docs/guides/microfrontends/'
+		title: 'React + Vite',
+		description: 'A single frontend app with shared components and a fast local feedback loop.',
+		href: 'https://vite.dev/'
 	},
 	{
 		icon: Rocket,
@@ -48,10 +48,16 @@ const features = [
 		href: 'https://bun.sh/'
 	},
 	{
-		icon: BookOpen,
-		title: 'ShadCN UI',
-		description: 'Beautiful, accessible components built with Tailwind CSS, Radix, and class-variance-authority.',
-		href: 'https://ui.shadcn.com/'
+		icon: ShieldCheck,
+		title: 'Passwordless Auth',
+		description: 'Email OTP, passkeys, and optional GitHub sign-in without carrying extra auth providers.',
+		href: 'https://simplewebauthn.dev/'
+	},
+	{
+		icon: Github,
+		title: 'GitHub Integration',
+		description: 'GitHub login stays available for social sign-in and account linking.',
+		href: 'https://docs.github.com/apps/oauth-apps/building-oauth-apps'
 	}
 ];
 
@@ -66,22 +72,15 @@ export function Home() {
 			<section className="flex flex-1 flex-col items-center justify-center gap-8 px-6 py-24 text-center">
 				<div className="flex flex-col items-center gap-4">
 					<h1 className="text-5xl font-bold tracking-tight sm:text-6xl">
-						Raine<span className="text-primary">Stack</span>
+						Raine<span className="text-primary">Works</span>
 					</h1>
 					<p className="max-w-xl text-lg text-muted-foreground">
-						A full-stack monorepo starter with Turborepo, React micro-frontends, oRPC, Prisma, and ShadCN UI &mdash;
-						ready to build on.
+						A personal site foundation with a Bun API, React frontend, shared UI system, and passwordless-first auth.
 					</p>
 				</div>
 
 				<div className="flex gap-3">
-					<a href="/docs">
-						<Button size="lg" variant="outline">
-							<BookOpen className="size-4" />
-							Documentation
-						</Button>
-					</a>
-					<a href="https://github.com/raine-works/rainestack" target="_blank" rel="noopener noreferrer">
+					<a href="https://github.com/raine-works/raineworks" target="_blank" rel="noopener noreferrer">
 						<Button size="lg" variant="outline">
 							<GitHubIcon className="size-4" />
 							GitHub
@@ -111,7 +110,7 @@ export function Home() {
 			{/* Footer */}
 			<footer className="border-t py-6 text-center text-sm text-muted-foreground">
 				<p className="flex items-center justify-center gap-2">
-					RaineStack &middot; Built by
+					RaineWorks &middot; Built by
 					<a
 						href="https://github.com/raine-works"
 						className="inline-flex items-center gap-1.5 font-medium text-foreground underline underline-offset-4 hover:text-primary transition-colors"

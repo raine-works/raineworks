@@ -13,7 +13,7 @@
  *
  * @example
  * ```ts
- * import { uniqueViolation, recordNotFound } from '@rainestack/database/errors';
+ * import { uniqueViolation, recordNotFound } from '@raineworks/database/errors';
  *
  * try {
  *   return await postsData.create(db, actorId, data);

@@ -8,7 +8,7 @@
  */
 
 import { ORPCError } from '@orpc/server';
-import { recordNotFound, uniqueViolation } from '@rainestack/database/errors';
+import { recordNotFound, uniqueViolation } from '@raineworks/database/errors';
 import * as usersData from '@server/data/users';
 import { publicProcedure } from '@server/lib/orpc';
 import {

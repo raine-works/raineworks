@@ -17,7 +17,7 @@
  * @module lib/shutdown
  */
 
-import type { DatabaseListener, PrismaClient } from '@rainestack/database';
+import type { DatabaseListener, PrismaClient } from '@raineworks/database';
 import { log } from '@server/lib/logger';
 
 const shutdownLog = log.child({ module: 'shutdown' });

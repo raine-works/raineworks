@@ -16,7 +16,7 @@
  * @module lib/schemas
  */
 
-import type { User } from '@rainestack/database';
+import type { User } from '@raineworks/database';
 import { z } from 'zod';
 
 // ---------------------------------------------------------------------------
@@ -226,7 +226,7 @@ export const MessageOutputSchema = z.object({
 // ---------------------------------------------------------------------------
 
 export const OidcProviderSchema = z.object({
-	id: z.string().describe('Provider key, e.g. "google", "github".'),
+	id: z.string().describe('Provider key, e.g. "github".'),
 	name: z.string().describe('Human-readable provider name.'),
 	authorizationUrl: z.url().describe('Full authorization URL to redirect the user to.')
 });
@@ -236,7 +236,7 @@ export const OidcProvidersOutputSchema = z.object({
 });
 
 export const OidcAuthorizeInputSchema = z.object({
-	provider: z.string().min(1).describe('Provider key, e.g. "google", "github".'),
+	provider: z.string().min(1).describe('Provider key, e.g. "github".'),
 	redirectUri: z.url().describe('Client-side redirect URI for the callback.')
 });
 
@@ -246,7 +246,7 @@ export const OidcAuthorizeOutputSchema = z.object({
 });
 
 export const OidcCallbackInputSchema = z.object({
-	provider: z.string().min(1).describe('Provider key, e.g. "google", "github".'),
+	provider: z.string().min(1).describe('Provider key, e.g. "github".'),
 	code: z.string().min(1).describe('Authorization code received from the provider.'),
 	state: z.string().min(1).describe('State parameter for CSRF validation.'),
 	redirectUri: z.url().describe('Must match the redirect_uri used in the authorization request.')

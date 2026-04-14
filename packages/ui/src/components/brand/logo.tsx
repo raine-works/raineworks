@@ -1,5 +1,5 @@
 /**
- * Brand logo components — RaineStack visual identity.
+ * Brand logo components — RaineWorks visual identity.
  *
  * Exports a pre-built {@link LogoSet} containing light and dark icon
  * variants ready to pass directly to `<LogoProvider>`.
@@ -51,7 +51,7 @@ interface LogoProps {
 function IconBase({ className, containerClassName }: LogoProps & { containerClassName?: string }) {
 	return (
 		<div className={cn('flex items-center justify-center rounded-lg p-1.5', containerClassName, className)}>
-			<img src={logoIcon} alt="RaineStack" draggable={false} className="size-full object-contain" />
+			<img src={logoIcon} alt="RaineWorks" draggable={false} className="size-full object-contain" />
 		</div>
 	);
 }
@@ -85,7 +85,7 @@ function Icon({ className }: LogoProps) {
 // ---------------------------------------------------------------------------
 
 /**
- * The complete logo set for the RaineStack brand.
+ * The complete logo set for the RaineWorks brand.
  *
  * Pass this directly to `<LogoProvider logos={logos}>` in each zone's
  * `main.tsx` entry point. The provider + `useLogo()` hook will resolve

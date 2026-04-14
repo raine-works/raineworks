@@ -1,26 +1,24 @@
 /**
- * Static file serving for production builds of the frontend micro-frontends.
+ * Static file serving for the production web bundle.
  *
- * Serves pre-built Vite bundles for the frontend zones (web, docs) directly
- * from the same HTTP server that handles the API. Each zone maps a URL prefix
- * to its build directory and falls back to `index.html` for client-side
- * routing (SPA mode).
+ * Serves the pre-built Vite web bundle directly from the same HTTP server that
+ * handles the API. The root app maps `/` to its build directory and falls back
+ * to `index.html` for client-side routing (SPA mode).
  *
  * ## Directory resolution
  *
  * In production, set the `STATIC_DIR` environment variable to the root of
- * the mounted volume containing the zone directories:
+ * the mounted volume containing the built web directory:
  *
  * ```
  * STATIC_DIR=/var/www
- * ├── web/            — contents of packages/web/dist
- * └── docs/           — contents of packages/docs/dist
+ * └── web/            — contents of packages/web/dist
  * ```
  *
- * When `STATIC_DIR` is not set (development), zone directories are resolved
- * relative to the monorepo layout (`packages/<zone>/dist`). Zones whose
- * directories don't exist are automatically skipped, so the server runs
- * cleanly in development without pre-built bundles.
+ * When `STATIC_DIR` is not set (development), the directory is resolved
+ * relative to the monorepo layout (`packages/web/dist`). The static handler is
+ * skipped when the build output is missing so the server runs cleanly in
+ * development without pre-built assets.
  *
  * @module static
  */
@@ -39,13 +37,13 @@ const log = rootLog.child({ module: 'static' });
 // Types
 // ---------------------------------------------------------------------------
 
-/** A frontend zone mapping a URL prefix to a built asset directory. */
+/** The built web app served at the root path. */
 interface Zone {
 	/** Human-readable name for logging. */
 	name: string;
-	/** URL path prefix (e.g. `"/docs"`). The root zone uses `"/"`. */
+	/** URL path prefix. */
 	basePath: string;
-	/** Absolute path to the zone's built asset directory. */
+	/** Absolute path to the built asset directory. */
 	dir: string;
 }
 
@@ -54,7 +52,7 @@ interface Zone {
 // ---------------------------------------------------------------------------
 
 /**
- * Resolves the asset directory for a given zone package.
+ * Resolves the asset directory for a given package.
  *
  * - When `STATIC_DIR` is set, looks for `<STATIC_DIR>/<pkg>/` (the volume
  *   mount is expected to contain the dist contents directly).
@@ -70,13 +68,9 @@ function resolveZoneDir(pkg: string): string {
 }
 
 /**
- * Frontend zones ordered by specificity — more-specific prefixes first,
- * catch-all root zone last. The first matching zone wins.
+ * Available frontend zones. The web app is the only remaining zone.
  */
-const ZONES: Zone[] = [
-	{ name: 'docs', basePath: '/docs', dir: resolveZoneDir('docs') },
-	{ name: 'web', basePath: '/', dir: resolveZoneDir('web') }
-];
+const ZONES: Zone[] = [{ name: 'web', basePath: '/', dir: resolveZoneDir('web') }];
 
 /** Zone base paths whose `index.html` was verified at startup. */
 const availableZones = new Set<string>();

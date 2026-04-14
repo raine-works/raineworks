@@ -19,7 +19,7 @@ import { createORPCClient } from '@orpc/client';
 import type { AnyContractRouter, ContractRouterClient } from '@orpc/contract';
 import type { JsonifiedClient } from '@orpc/openapi-client';
 import { OpenAPILink } from '@orpc/openapi-client/fetch';
-import { tryCatch } from '@rainestack/tools/try-catch';
+import { tryCatch } from '@raineworks/tools/try-catch';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -130,8 +130,6 @@ export const createApiClient = async <T extends AnyContractRouter>(url: string) 
 				}
 
 				return response;
-			} catch (err) {
-				throw err;
 			} finally {
 				clearTimeout(timeoutId);
 			}

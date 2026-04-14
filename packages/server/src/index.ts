@@ -1,5 +1,5 @@
 /**
- * RaineStack server — application entry point.
+ * RaineWorks server — application entry point.
  *
  * Bootstraps the HTTP server, wires up the oRPC router with OpenAPI
  * support, connects the database listener, initialises static zone
@@ -15,13 +15,13 @@
  * | `/api/openapi.json`  | OpenAPI 3.x specification                |
  * | `/api/contract.json` | oRPC contract router (for client factory) |
  * | `/healthz`           | Liveness / readiness probe               |
- * | `/*`                 | Static micro-frontend zones (SPA)        |
+ * | `/*`                 | Static website frontend (SPA)            |
  *
  * @module index
  */
 
-import '@rainestack/tools/prototypes';
-import '@rainestack/tools/temporal-polyfill';
+import '@raineworks/tools/prototypes';
+import '@raineworks/tools/temporal-polyfill';
 
 import { minifyContractRouter } from '@orpc/contract';
 import { OpenAPIGenerator } from '@orpc/openapi';
@@ -70,7 +70,7 @@ const generator = new OpenAPIGenerator({
 });
 
 const spec = await generator.generate(router, {
-	info: { title: 'RaineStack API', version: '1.0.0' },
+	info: { title: 'RaineWorks API', version: '1.0.0' },
 	servers: [{ url: 'http://localhost:3000/api' }]
 });
 
@@ -195,7 +195,7 @@ const server = Bun.serve({
 		}
 
 		// -------------------------------------------------------------
-		// Static file serving — frontend micro-frontend zones
+		// Static file serving — website frontend
 		// -------------------------------------------------------------
 
 		const staticResponse = await serveStaticFile(request);

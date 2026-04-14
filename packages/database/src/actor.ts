@@ -195,7 +195,7 @@ function raceAbort<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
  *
  * @example
  * ```ts
- * import { withActor } from '@rainestack/database/actor';
+ * import { withActor } from '@raineworks/database/actor';
  *
  * // Actor-tracked transaction:
  * const updated = await withActor(db, context.user.id, async (tx) => {
@@ -281,8 +281,8 @@ export async function withActor<T>(
  *
  * @example
  * ```ts
- * import { abortable, TransactionAbortedError } from '@rainestack/database/actor';
- * import { tryCatch } from '@rainestack/tools/try-catch';
+ * import { abortable, TransactionAbortedError } from '@raineworks/database/actor';
+ * import { tryCatch } from '@raineworks/tools/try-catch';
  *
  * const controller = new AbortController();
  *

@@ -12,7 +12,7 @@
  *
  * **Polyfill-agnostic** — every function references `globalThis.Temporal`
  * (provided today by `temporal-polyfill/global`, loaded at each entry
- * point via `@rainestack/tools/temporal-polyfill`). When runtimes ship
+ * point via `@raineworks/tools/temporal-polyfill`). When runtimes ship
  * native Temporal, these utilities continue to work with zero changes.
  *
  * @module temporal

@@ -17,8 +17,8 @@
  * @module data/tokens
  */
 
-import type { PrismaClient } from '@rainestack/database';
-import { withActor } from '@rainestack/database/actor';
+import type { PrismaClient } from '@raineworks/database';
+import { withActor } from '@raineworks/database/actor';
 
 // ---------------------------------------------------------------------------
 // Types

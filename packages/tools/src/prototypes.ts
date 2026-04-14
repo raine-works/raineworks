@@ -5,7 +5,7 @@
  * these methods available across your application:
  *
  * ```ts
- * import "@rainestack/tools/prototypes";
+ * import "@raineworks/tools/prototypes";
  * const items = [1, 2, 3];
  * items.isEmpty(); // false
  * items.flush();   // items is now []

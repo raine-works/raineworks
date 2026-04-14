@@ -1,5 +1,5 @@
 {
-	"name": "@rainestack/ui",
+	"name": "@raineworks/ui",
 	"private": true,
 	"type": "module",
 	"exports": {
@@ -18,7 +18,7 @@
 	"dependencies": {
 		"@base-ui/react": "catalog:",
 		"@hookform/resolvers": "catalog:",
-		"@rainestack/tools": "workspace:*",
+		"@raineworks/tools": "workspace:*",
 		"class-variance-authority": "catalog:",
 		"clsx": "catalog:",
 		"cmdk": "catalog:",
@@ -37,7 +37,7 @@
 		"zod": "catalog:"
 	},
 	"devDependencies": {
-		"@rainestack/tsconfig": "workspace:*",
+		"@raineworks/tsconfig": "workspace:*",
 		"@types/react": "catalog:",
 		"@types/react-dom": "catalog:",
 		"typescript": "catalog:"

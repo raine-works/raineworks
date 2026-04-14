@@ -1,12 +1,12 @@
 /**
- * @rainestack/ui — Shared component library.
+ * @raineworks/ui — Shared component library.
  *
  * Consumers should import components directly from their subpaths rather than
  * from this barrel to enable fine-grained tree-shaking:
  *
  * ```ts
- * import { Button } from '@rainestack/ui/components/ui/button';
- * import { Card }   from '@rainestack/ui/components/ui/card';
+ * import { Button } from '@raineworks/ui/components/ui/button';
+ * import { Card }   from '@raineworks/ui/components/ui/card';
  * ```
  *
  * This entry point re-exports only the shared utilities and providers that are

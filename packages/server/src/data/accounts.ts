@@ -2,8 +2,8 @@
  * OIDC account data access.
  *
  * Pure query functions for the `Account` table. Each row links an
- * external identity provider account (Google, GitHub, etc.) to a
- * local `User` via the OIDC federated identity model.
+ * external identity provider account (currently GitHub) to a local `User`
+ * via the OIDC federated identity model.
  *
  * All mutation functions accept an `actorId` parameter and wrap their
  * operations in {@link withActor} so audit triggers attribute changes
@@ -18,8 +18,8 @@
  * @module data/accounts
  */
 
-import type { PrismaClient } from '@rainestack/database';
-import { withActor } from '@rainestack/database/actor';
+import type { PrismaClient } from '@raineworks/database';
+import { withActor } from '@raineworks/database/actor';
 
 // ---------------------------------------------------------------------------
 // Types

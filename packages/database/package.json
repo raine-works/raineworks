@@ -1,5 +1,5 @@
 {
-	"name": "@rainestack/database",
+	"name": "@raineworks/database",
 	"version": "0.0.0",
 	"private": true,
 	"type": "module",
@@ -19,7 +19,7 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@rainestack/tools": "workspace:*",
+		"@raineworks/tools": "workspace:*",
 		"@prisma/adapter-pg": "catalog:",
 		"@prisma/client": "catalog:",
 		"pg": "catalog:"

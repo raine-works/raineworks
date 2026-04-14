@@ -4,7 +4,6 @@
 	"extends": "./react-library.json",
 	"compilerOptions": {
 		"noUnusedLocals": false,
-		"noUnusedParameters": false,
-		"tsBuildInfoFile": "./.types/tsconfig.tsbuildinfo"
+		"noUnusedParameters": false
 	}
 }
