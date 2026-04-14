@@ -1,0 +1,29 @@
+name: rainestack
+
+services:
+  database:
+    container_name: database
+    build:
+      context: .
+      dockerfile: Dockerfile.yaml
+    command: postgres -c timezone=UTC -c shared_preload_libraries=pg_cron -c cron.database_name=dev_db
+    environment:
+      POSTGRES_USER: dev_user
+      POSTGRES_PASSWORD: dev_password
+      POSTGRES_DB: dev_db
+      TZ: UTC
+    ports:
+      - 5432:5432
+    volumes:
+      - database_data:/var/lib/postgresql
+    networks:
+      - dev_network
+
+volumes:
+  database_data:
+
+networks:
+  dev_network:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.host_binding_ipv4: 127.0.0.1

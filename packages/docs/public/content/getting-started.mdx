@@ -1,0 +1,405 @@
+---
+title: Getting Started
+description: Get RaineStack up and running in minutes with this comprehensive installation guide.
+---
+
+# Getting Started
+
+Welcome to **RaineStack**! This guide will help you set up your local development environment and get your first full-stack TypeScript application running.
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+### Required
+
+- **[Bun 1.3.9](https://bun.sh)** — Fast all-in-one JavaScript runtime
+  ```bash
+  curl -fsSL https://bun.sh/install | bash
+  ```
+
+- **[Docker Desktop](https://www.docker.com/products/docker-desktop/)** — For running PostgreSQL locally
+  - Alternatively, you can use your own PostgreSQL 18.1+ instance
+
+- **[Git](https://git-scm.com/)** — Version control
+  ```bash
+  git --version
+  ```
+
+### Optional
+
+- **[VS Code](https://code.visualstudio.com/)** — Recommended IDE with excellent TypeScript support
+- **PostgreSQL Client** — For database inspection (TablePlus, pgAdmin, psql)
+
+---
+
+## Installation
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/yourusername/rainestack.git
+cd rainestack
+```
+
+### 2. Install Dependencies
+
+RaineStack uses **Bun workspaces** with a dependency catalog. All dependencies are pinned to exact versions:
+
+```bash
+bun install
+```
+
+This installs dependencies for all 8 packages in the monorepo (~30 seconds).
+
+### 3. Set Up Environment Variables
+
+Create a `.env` file in the root directory:
+
+```env
+# Required
+DATABASE_URL=postgresql://dev_user:dev_password@localhost:5432/dev_db
+JWT_SECRET=your-super-secret-key-at-least-32-characters-long
+
+# Optional - Development
+NODE_ENV=development
+LOG_LEVEL=debug
+
+# Optional - OIDC Providers
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GITHUB_CLIENT_ID=your-github-client-id
+GITHUB_CLIENT_SECRET=your-github-client-secret
+
+# Optional - WebAuthn
+RP_ID=localhost
+RP_NAME=RaineStack
+RP_ORIGIN=http://localhost:3000
+```
+
+> **Important:** Generate a secure `JWT_SECRET` (minimum 32 characters):
+>
+> ```bash
+> # Using openssl
+> openssl rand -base64 32
+> 
+> # Using Bun
+> bun -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+> ```
+
+### 4. Start PostgreSQL
+
+RaineStack includes a custom PostgreSQL image with `pg_cron` for scheduled jobs:
+
+```bash
+bun run db:start
+```
+
+This command:
+- Builds a custom PostgreSQL 18.1 + pg_cron image (first time only)
+- Starts the container via Docker Compose
+- Creates database `dev_db` with user `dev_user`
+
+**Connection Details:**
+- **Host:** localhost
+- **Port:** 5432
+- **Database:** dev_db
+- **User:** dev_user
+- **Password:** dev_password
+
+### 5. Run Database Migrations
+
+Apply the Prisma schema and set up database triggers:
+
+```bash
+bun run db:dev
+```
+
+This command:
+- Runs all Prisma migrations
+- Generates the Prisma client
+- Applies SQL triggers (NOTIFY, audit, purge, cron)
+
+### 6. Start Development Servers
+
+Launch all packages in development mode:
+
+```bash
+bun run dev
+```
+
+This starts:
+- **Server** — Bun HTTP server (port 3000)
+- **Web** — Vite dev server (port 3100)
+- **Docs** — Vite dev server (port 3101)
+- **Proxy** — Turborepo microfrontend proxy (port 3024)
+
+---
+
+## Access Your Application
+
+Once all servers are running:
+
+| Service | URL | Description |
+|---------|-----|-------------|
+| **Main App** | http://localhost:3024 | Web shell (main entry point) |
+| **Docs** | http://localhost:3024/docs | This documentation site |
+| **API** | http://localhost:3000/api | oRPC API endpoints |
+| **OpenAPI Spec** | http://localhost:3000/api/openapi.json | Auto-generated API specification |
+| **Health Check** | http://localhost:3000/healthz | Server health status |
+
+> **Tip:** Use the proxy URL (port 3024) for the most realistic development experience. It routes requests to the appropriate zone.
+
+---
+
+## Project Structure
+
+```
+rainestack/
+├── packages/
+│   ├── tools/        # Shared utilities (tryCatch, Temporal, prototypes)
+│   ├── database/     # Prisma schema, client, migrations, triggers
+│   ├── server/       # Bun HTTP server with oRPC API
+│   ├── api/          # Type-safe API client factory
+│   ├── ui/           # shadcn/ui component library (50+ components)
+│   ├── web/          # Main application (React + Vite)
+│   ├── docs/         # Documentation site (this site!)
+│   └── tsconfig/     # Shared TypeScript configurations
+├── docker/           # PostgreSQL + pg_cron Docker setup
+├── AGENTS.md         # Comprehensive project rules
+├── README.md         # Project overview
+└── package.json      # Root workspace with dependency catalog
+```
+
+---
+
+## Common Commands
+
+### Development
+
+```bash
+bun run dev         # Start all packages
+bun run build       # Build all packages
+bun run typecheck   # Type-check all packages
+bun run lint        # Lint all packages
+bun run format      # Format all files
+```
+
+### Database
+
+```bash
+bun run db:start    # Start PostgreSQL (Docker)
+bun run db:dev      # Run migrations + apply triggers (development)
+bun run db:deploy   # Run migrations + apply triggers (production)
+
+# Prisma commands (from packages/database)
+cd packages/database
+bunx --bun prisma studio          # Open Prisma Studio (database GUI)
+bunx --bun prisma migrate dev     # Create a new migration
+bunx --bun prisma generate        # Regenerate Prisma Client
+```
+
+---
+
+## Verify Your Setup
+
+### 1. Check the Web App
+
+Visit http://localhost:3024 and you should see the main application.
+
+### 2. Test the API
+
+```bash
+curl http://localhost:3000/healthz
+
+# Response: {"status":"ok"}
+```
+
+### 3. View the OpenAPI Spec
+
+Visit http://localhost:3000/api/openapi.json to see your auto-generated API documentation.
+
+### 4. Check the Database
+
+```bash
+cd packages/database
+bunx --bun prisma studio
+```
+
+This opens a visual database browser at http://localhost:5555.
+
+---
+
+## Next Steps
+
+Now that you have RaineStack running, here's what to explore:
+
+### 1. Understand the Stack
+
+- **Bun Runtime** — Fast package manager, bundler, and HTTP server
+- **Turborepo** — Monorepo with task caching and parallel builds
+- **Prisma + PostgreSQL** — Type-safe database with migrations
+- **oRPC** — Contract-first APIs with OpenAPI generation
+- **React + Vite** — Modern frontend with HMR
+- **shadcn/ui** — Beautiful, accessible components
+
+### 2. Explore the Codebase
+
+**Backend:**
+- `packages/server/src/routes/` — API endpoint definitions
+- `packages/server/src/data/` — Database operations (data layer)
+- `packages/database/prisma/schema.prisma` — Database schema
+
+**Frontend:**
+- `packages/web/src/routes/` — Application pages
+- `packages/ui/src/components/` — Reusable UI components
+- `packages/api/src/` — Type-safe API client
+
+### 3. Make Your First Change
+
+#### Add a Database Model
+
+Edit `packages/database/prisma/schema.prisma`:
+
+```prisma
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+```
+
+Create a migration:
+
+```bash
+cd packages/database
+bunx --bun prisma migrate dev --name add_products
+```
+
+#### Create an API Endpoint
+
+1. **Data layer** (`packages/server/src/data/products.ts`):
+
+```typescript
+import type { PrismaClient as Db } from '@rainestack/database';
+import { withActor } from '@rainestack/database/actor';
+
+export async function findMany(db: Db) {
+  return db.product.findMany();
+}
+
+export async function create(db: Db, actorId: string | null, data: CreateData) {
+  return withActor(db, actorId, async (tx) => {
+    return tx.product.create({ data });
+  });
+}
+```
+
+2. **Route** (`packages/server/src/routes/products.ts`):
+
+```typescript
+import { publicProcedure } from '@server/lib/orpc';
+import * as productsData from '@server/data/products';
+
+export const list = publicProcedure
+  .handler(async ({ context }) => {
+    return productsData.findMany(context.db);
+  });
+```
+
+3. **Use in frontend**:
+
+```typescript
+const products = await api.products.list();
+// Fully typed! TypeScript knows the shape.
+```
+
+### 4. Customize the UI
+
+Components are in `packages/ui/src/components/ui/`. Use them anywhere:
+
+```typescript
+import { Button } from '@rainestack/ui/components/ui/button';
+import { Card } from '@rainestack/ui/components/ui/card';
+
+<Button variant="default">Click me</Button>
+```
+
+---
+
+## Troubleshooting
+
+### Database Connection Issues
+
+**Error:** `Can't reach database server at localhost:5432`
+
+**Solution:**
+
+```bash
+docker ps  # Check if container is running
+bun run db:start  # Restart PostgreSQL
+```
+
+### Port Already in Use
+
+**Error:** `EADDRINUSE: address already in use :::3000`
+
+**Solution:**
+
+```bash
+# macOS/Linux
+lsof -ti:3000 | xargs kill -9
+
+# Windows
+netstat -ano | findstr :3000
+taskkill /PID <PID> /F
+```
+
+### Stale Prisma Client
+
+**Error:** `PrismaClient is unable to run...`
+
+**Solution:**
+
+```bash
+cd packages/database
+bunx --bun prisma generate
+```
+
+### TypeScript Errors After Pulling Changes
+
+**Solution:**
+
+```bash
+bun install
+cd packages/database
+bunx --bun prisma generate
+bun run typecheck
+```
+
+---
+
+## Learn More
+
+- **[AGENTS.md](../../AGENTS.md)** — Comprehensive project rules and architecture
+- **[API Reference](http://localhost:3000/api/openapi.json)** — OpenAPI specification
+- **[GitHub](https://github.com/yourusername/rainestack)** — Source code and issues
+
+---
+
+## What's Next?
+
+You're all set! 🎉
+
+- Replace the example `Post` model with your domain models
+- Customize the UI theme in `packages/ui/src/styles/theme.css`
+- Add your own API endpoints in `packages/server/src/routes/`
+- Build your application pages in `packages/web/src/routes/`
+- Configure authentication providers (Google, GitHub, WebAuthn)
+
+**This is your starter template** — make it your own!
+
+Happy coding! 🚀

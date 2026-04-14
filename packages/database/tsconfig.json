@@ -1,0 +1,12 @@
+{
+	"extends": "@rainestack/tsconfig/base.json",
+	"compilerOptions": {
+		"rootDir": "./",
+		"baseUrl": "./",
+		"paths": {
+			"@database/*": ["./src/*"],
+			"@tools/*": ["../tools/src/*"]
+		}
+	},
+	"include": ["src", "prisma.config.ts"]
+}

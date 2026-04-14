@@ -1,0 +1,35 @@
+{
+	"name": "@rainestack/database",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./actor": "./src/actor.ts",
+		"./errors": "./src/errors.ts"
+	},
+	"scripts": {
+		"build": "bunx --bun prisma generate",
+		"db:dev": "bunx --bun prisma migrate dev --name $(date +%s) && bun run scripts/apply-triggers.ts",
+		"db:deploy": "bunx --bun prisma migrate deploy && bun run scripts/apply-triggers.ts",
+		"lint": "biome lint ./",
+		"migrate:dev": "bunx --bun prisma migrate dev",
+		"migrate:deploy": "bunx --bun prisma migrate deploy",
+		"triggers": "bun run scripts/apply-triggers.ts",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@rainestack/tools": "workspace:*",
+		"@prisma/adapter-pg": "catalog:",
+		"@prisma/client": "catalog:",
+		"pg": "catalog:"
+	},
+	"devDependencies": {
+		"@types/pg": "catalog:",
+		"bun-types": "catalog:",
+		"prisma": "catalog:"
+	},
+	"peerDependencies": {
+		"typescript": "catalog:"
+	}
+}

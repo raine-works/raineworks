@@ -1,0 +1,13 @@
+/**
+ * Web shell — global stylesheet.
+ *
+ * Imports the shared RaineStack design-system theme (Tailwind v4 + custom tokens)
+ * and adds any web-app-specific base styles or overrides.
+ *
+ * @module styles/global
+ */
+
+@import "@rainestack/ui/styles/theme.css";
+
+@source "./**/*.{ts,tsx}";
+@source "../../../ui/src/**/*.{ts,tsx}";

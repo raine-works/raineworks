@@ -1,0 +1,22 @@
+{
+	"name": "@rainestack/tools",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		"./*": "./src/*.ts"
+	},
+	"scripts": {
+		"lint": "biome lint ./src",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"temporal-polyfill": "catalog:"
+	},
+	"devDependencies": {
+		"bun-types": "catalog:"
+	},
+	"peerDependencies": {
+		"typescript": "catalog:"
+	}
+}

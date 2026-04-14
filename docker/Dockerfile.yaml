@@ -1,0 +1,27 @@
+# ---------------------------------------------------------------------------
+# Development PostgreSQL image with pg_cron.
+#
+# The official postgres image does not ship the pg_cron extension.
+# This Dockerfile builds it from source so the daily ephemeral-record
+# purge job can be registered inside the database.
+#
+# Build context: docker/
+# Used by:       docker/docker-compose.dev.yaml
+# ---------------------------------------------------------------------------
+
+FROM postgres:18.1
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+       build-essential \
+       ca-certificates \
+       git \
+       postgresql-server-dev-$PG_MAJOR \
+    && git clone --depth 1 https://github.com/citusdata/pg_cron.git /tmp/pg_cron \
+    && cd /tmp/pg_cron \
+    && make && make install \
+    && apt-get purge -y --auto-remove \
+       build-essential \
+       git \
+       postgresql-server-dev-$PG_MAJOR \
+    && rm -rf /var/lib/apt/lists/* /tmp/pg_cron

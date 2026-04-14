@@ -1,0 +1,30 @@
+{
+	"$schema": "https://turborepo.dev/microfrontends/schema.json",
+	"options": {
+		"localProxyPort": 3024
+	},
+	"applications": {
+		"web": {
+			"packageName": "@rainestack/web",
+			"development": {
+				"local": {
+					"port": 3100
+				}
+			}
+		},
+		"docs": {
+			"packageName": "@rainestack/docs",
+			"development": {
+				"local": {
+					"port": 3101
+				}
+			},
+			"routing": [
+				{
+					"group": "docs",
+					"paths": ["/docs", "/docs/:path*"]
+				}
+			]
+		}
+	}
+}

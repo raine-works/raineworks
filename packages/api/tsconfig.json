@@ -1,0 +1,22 @@
+{
+	"extends": "@rainestack/tsconfig/react-library.json",
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"@api/*": ["./src/*"],
+			"@ui/*": ["../ui/src/*"],
+			"@rainestack/ui/*": ["../ui/src/*"],
+			"@server/*": ["../server/src/*"],
+			"@database/*": ["../database/src/*"],
+			"@tools/*": ["../tools/src/*"]
+		},
+		"tsBuildInfoFile": "./.types/tsconfig.tsbuildinfo"
+	},
+	"include": [
+		"src",
+		"../ui/src",
+		"../server/src",
+		"../database/src",
+		"../tools/src"
+	]
+}

@@ -1,0 +1,38 @@
+{
+	"$schema": "https://turborepo.org/schema.json",
+	"ui": "tui",
+	"globalPassThroughEnv": ["GITHUB_TOKEN"],
+	"globalEnv": ["DATABASE_URL", "HOME", "LOG_LEVEL", "NODE_ENV", "TZ"],
+	"tasks": {
+		"build": {
+			"dependsOn": ["^build"],
+			"outputs": ["./dist/**", "./src/generated/**"]
+		},
+		"build:docker": {
+			"cache": false
+		},
+		"db:dev": {
+			"dependsOn": ["^build"],
+			"cache": false,
+			"interactive": true
+		},
+		"db:deploy": {
+			"dependsOn": ["^build"],
+			"cache": false
+		},
+		"dev": {
+			"dependsOn": ["^build"],
+			"persistent": true,
+			"cache": false
+		},
+		"lint": {
+			"inputs": ["src/**", "../../biome.json"],
+			"outputs": []
+		},
+		"typecheck": {
+			"dependsOn": ["^build"],
+			"inputs": ["src/**", "tsconfig.json", "../../packages/tsconfig/**"],
+			"outputs": []
+		}
+	}
+}

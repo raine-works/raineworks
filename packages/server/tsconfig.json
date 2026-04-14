@@ -1,0 +1,13 @@
+{
+	"extends": "@rainestack/tsconfig/base.json",
+	"compilerOptions": {
+		"rootDir": "./",
+		"baseUrl": "./",
+		"paths": {
+			"@server/*": ["./src/*"],
+			"@database/*": ["../database/src/*"],
+			"@tools/*": ["../tools/src/*"]
+		}
+	},
+	"include": ["src"]
+}

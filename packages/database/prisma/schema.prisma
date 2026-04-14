@@ -1,0 +1,408 @@
+// ---------------------------------------------------------------------------
+// RaineStack — Prisma schema
+//
+// This is the single source of truth for the database structure.
+// Run `bun run db:dev` from the database package (or `turbo db:dev`
+// from the repo root) to generate migrations and apply them.
+//
+// The datasource URL is configured in `prisma.config.ts` — not here —
+// following the Prisma 7 convention.
+//
+// Models:
+//   - Core user accounts & content
+//   - Federated identity (OIDC — Google, GitHub, etc.)
+//   - Passwordless authentication (OTP codes)
+//   - JWT authentication (refresh tokens)
+//   - WebAuthn passkeys
+//   - OAuth 2.0 Authorization Server (third-party API access)
+// ---------------------------------------------------------------------------
+
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+  runtime  = "bun"
+}
+
+// ===========================================================================
+// Core
+// ===========================================================================
+
+/// Application user. Every authenticated person has exactly one User row.
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime? /// Set when the user's email is confirmed (via OTP or OIDC).
+  name          String?
+  avatarUrl     String?
+  role          UserRole  @default(USER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Identity & authentication
+  accounts          Account[]
+  refreshTokens     RefreshToken[]
+  otpCodes          OtpCode[]
+  passkeys          Passkey[]
+  passkeyChallenges PasskeyChallenge[]
+
+  // Content
+  posts Post[]
+
+  // OAuth2 — as a resource owner
+  oauthConsents           OAuthConsent[]
+  oauthAccessTokens       OAuthAccessToken[]
+  oauthRefreshTokens      OAuthRefreshToken[]
+  oauthAuthorizationCodes OAuthAuthorizationCode[]
+
+  // OAuth2 — as a client developer
+  oauthClients OAuthClient[]
+}
+
+/// User-authored content.
+model Post {
+  id          String     @id @default(cuid())
+  title       String
+  slug        String     @unique
+  content     String?
+  excerpt     String?
+  status      PostStatus @default(DRAFT)
+  publishedAt DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([authorId])
+  @@index([status, publishedAt])
+}
+
+// ===========================================================================
+// Enums
+// ===========================================================================
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+// ===========================================================================
+// Federated Identity (OIDC — Google, GitHub, etc.)
+// ===========================================================================
+// Each row links an external identity provider account to a local User.
+// A user can have multiple accounts (e.g. Google + GitHub).
+// ===========================================================================
+
+model Account {
+  id                String @id @default(cuid())
+  provider          String /// Provider key, e.g. "google".
+  providerAccountId String /// The `sub` claim (or equivalent) from the provider.
+
+  // Tokens received from the provider during the OIDC flow.
+  // Stored so we can call provider APIs on behalf of the user if needed.
+  accessToken          String?
+  refreshToken         String?
+  accessTokenExpiresAt DateTime?
+  tokenType            String?
+  scope                String?
+  idToken              String?   @db.Text /// The raw OIDC id_token JWT.
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // A provider + providerAccountId pair must be globally unique.
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+// ===========================================================================
+// Passwordless Authentication (OTP)
+// ===========================================================================
+// One-time passcodes sent via email. No passwords are stored anywhere.
+// The code is short-lived and single-use. The `attempts` counter enables
+// rate-limiting on verification to prevent brute-force guessing.
+// ===========================================================================
+
+model OtpCode {
+  id        String    @id @default(cuid())
+  email     String /// Delivery address — may belong to an existing user or a new sign-up.
+  code      String /// The OTP value (e.g. 6-digit numeric code).
+  expiresAt DateTime /// Hard expiry — code is invalid after this timestamp.
+  attempts  Int       @default(0) /// Number of failed verification attempts.
+  usedAt    DateTime? /// Set once the code is successfully verified.
+  createdAt DateTime  @default(now())
+
+  // Nullable because the code may be issued before a User record exists
+  // (e.g. during initial sign-up).
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([email])
+  @@index([userId])
+}
+
+// ===========================================================================
+// Refresh Tokens (JWT authentication)
+// ===========================================================================
+// Long-lived tokens used to obtain new short-lived JWT access tokens
+// without requiring the user to re-authenticate. The token value is
+// stored as a SHA-256 hash — lookups use a hash of the presented token.
+//
+// Access tokens are stateless JWTs (15 min TTL) verified by signature
+// alone — no database hit. Refresh tokens (24 h TTL) are the only
+// artefact that touches the database, and only when the client
+// explicitly requests a new access token.
+// ===========================================================================
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  token     String    @unique /// SHA-256 hash of the opaque token sent to the client.
+  expiresAt DateTime /// Hard expiry — token is invalid after this timestamp.
+  revokedAt DateTime? /// Set when the token is explicitly revoked (logout).
+  ipAddress String? /// Captured at issuance for audit / anomaly detection.
+  userAgent String? /// Raw User-Agent header at issuance time.
+  createdAt DateTime  @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ===========================================================================
+// WebAuthn Passkeys
+// ===========================================================================
+// Registered WebAuthn credentials. Each row represents one authenticator
+// (platform biometric, security key, synced passkey, etc.) that a user
+// has enrolled for passwordless login.
+// ===========================================================================
+
+model Passkey {
+  id                   String    @id @default(cuid())
+  credentialId         String    @unique /// Base64url-encoded credential ID from the authenticator.
+  publicKey            Bytes /// COSE-encoded public key used to verify assertion signatures.
+  counter              Int       @default(0) /// Signature counter for clone detection.
+  transports           String[] /// Eligible transports: "usb", "ble", "nfc", "internal", "hybrid".
+  aaguid               String? /// Authenticator model identifier (UUID).
+  credentialDeviceType String /// "singleDevice" or "multiDevice".
+  credentialBackedUp   Boolean   @default(false) /// Whether the credential is synced (iCloud Keychain, Google Password Manager, etc.).
+  name                 String    @default("My passkey") /// User-editable friendly label.
+  lastUsedAt           DateTime? /// Updated on each successful authentication.
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ===========================================================================
+// WebAuthn Passkey Challenges
+// ===========================================================================
+// Ephemeral challenges for WebAuthn registration and authentication
+// ceremonies. Analogous to OtpCode — short-lived, single-use, and
+// consumed once verified.
+// ===========================================================================
+
+model PasskeyChallenge {
+  id        String    @id @default(cuid())
+  challenge String    @unique /// Base64url-encoded challenge bytes.
+  type      String /// "registration" or "authentication".
+  expiresAt DateTime /// Hard expiry — challenge is invalid after this timestamp.
+  usedAt    DateTime? /// Set once the challenge is successfully verified.
+  createdAt DateTime  @default(now())
+
+  // Nullable — discoverable credential (resident key) authentication flows
+  // don't know the user upfront.
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ===========================================================================
+// OAuth 2.0 Authorization Server — Client Registration
+// ===========================================================================
+// Third-party applications that want to access our API register as an
+// OAuthClient. Each client receives a unique clientId (public) and a
+// clientSecret (confidential, stored hashed).
+// ===========================================================================
+
+model OAuthClient {
+  id           String  @id @default(cuid())
+  clientId     String  @unique @default(cuid()) /// Public identifier exposed to third parties.
+  clientSecret String /// Hashed client secret — never stored in plain text.
+  name         String /// Human-readable display name shown on the consent screen.
+  description  String?
+  logoUrl      String?
+  homepageUrl  String?
+
+  // Legal / compliance links shown on the consent screen.
+  privacyPolicyUrl String?
+  tosUrl           String?
+
+  // Security configuration
+  redirectUris  String[] /// Allowlisted redirect URIs for the authorization flow.
+  allowedScopes String[] /// Scopes this client is permitted to request.
+  clientType    String   @default("confidential") /// "confidential" (server-side) or "public" (SPA / native).
+  isActive      Boolean  @default(true) /// Disabled clients are rejected at the authorization endpoint.
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // The developer who registered this client.
+  ownerId String
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  // Relations
+  authorizationCodes OAuthAuthorizationCode[]
+  accessTokens       OAuthAccessToken[]
+  refreshTokens      OAuthRefreshToken[]
+  consents           OAuthConsent[]
+
+  @@index([ownerId])
+}
+
+// ===========================================================================
+// OAuth 2.0 Authorization Server — Authorization Codes
+// ===========================================================================
+// Short-lived codes issued during the authorization code grant flow.
+// Exchanged exactly once for an access + refresh token pair.
+// PKCE fields (codeChallenge / codeChallengeMethod) are required for
+// public clients and recommended for confidential clients.
+// ===========================================================================
+
+model OAuthAuthorizationCode {
+  id                  String    @id @default(cuid())
+  code                String    @unique /// Opaque authorization code.
+  redirectUri         String /// Must match the redirect_uri from the authorization request.
+  scope               String /// Space-delimited list of granted scopes.
+  codeChallenge       String? /// PKCE code challenge (base64url-encoded).
+  codeChallengeMethod String? /// "S256" (recommended) or "plain".
+  expiresAt           DateTime /// Typically 10 minutes from issuance.
+  usedAt              DateTime? /// Set on first exchange — prevents replay.
+  createdAt           DateTime  @default(now())
+
+  clientId String
+  client   OAuthClient @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([userId])
+}
+
+// ===========================================================================
+// OAuth 2.0 Authorization Server — Access Tokens
+// ===========================================================================
+// Bearer tokens that third-party clients present to access protected
+// resources. The token value is stored hashed — lookups use a hash of
+// the presented token.
+// ===========================================================================
+
+model OAuthAccessToken {
+  id        String    @id @default(cuid())
+  token     String    @unique /// Hashed token value.
+  scope     String /// Space-delimited granted scopes.
+  expiresAt DateTime /// Typically 1 hour from issuance.
+  revokedAt DateTime? /// Set when the token is explicitly revoked.
+  createdAt DateTime  @default(now())
+
+  clientId String
+  client   OAuthClient @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // A single access token may have one associated refresh token.
+  refreshToken OAuthRefreshToken?
+
+  @@index([clientId])
+  @@index([userId])
+}
+
+// ===========================================================================
+// OAuth 2.0 Authorization Server — Refresh Tokens
+// ===========================================================================
+// Long-lived tokens used to obtain new access tokens without requiring
+// the user to re-authorize. Tied 1:1 to an access token.
+// ===========================================================================
+
+model OAuthRefreshToken {
+  id        String    @id @default(cuid())
+  token     String    @unique /// Hashed token value.
+  scope     String /// Space-delimited scopes (may be a subset of the original grant).
+  expiresAt DateTime /// Typically 30–90 days from issuance.
+  revokedAt DateTime? /// Set on explicit revocation or token rotation.
+  createdAt DateTime  @default(now())
+
+  // 1:1 link to the access token this refresh token was issued alongside.
+  accessTokenId String           @unique
+  accessToken   OAuthAccessToken @relation(fields: [accessTokenId], references: [id], onDelete: Cascade)
+
+  clientId String
+  client   OAuthClient @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([userId])
+}
+
+// ===========================================================================
+// OAuth 2.0 Authorization Server — Scope Registry
+// ===========================================================================
+// Canonical list of scopes the authorization server recognises.
+// Used for validation and to render human-readable descriptions on
+// the consent screen.
+// ===========================================================================
+
+model OAuthScope {
+  id          String   @id @default(cuid())
+  name        String   @unique /// Machine-readable scope name, e.g. "read:profile".
+  description String /// Human-readable explanation shown on the consent screen.
+  createdAt   DateTime @default(now())
+}
+
+// ===========================================================================
+// OAuth 2.0 Authorization Server — User Consent
+// ===========================================================================
+// Records that a user has authorised a specific client to access a set
+// of scopes. Prevents re-prompting the consent screen on subsequent
+// logins for the same client + scope combination.
+// ===========================================================================
+
+model OAuthConsent {
+  id        String   @id @default(cuid())
+  scopes    String[] /// Scopes the user has approved for this client.
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  clientId String
+  client   OAuthClient @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  // A user can only have one consent record per client.
+  // Updated (not duplicated) when the user grants additional scopes.
+  @@unique([userId, clientId])
+  @@index([userId])
+  @@index([clientId])
+}

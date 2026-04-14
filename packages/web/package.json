@@ -1,0 +1,33 @@
+{
+	"name": "@rainestack/web",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "vite --port $TURBO_MFE_PORT",
+		"build": "vite build",
+		"typecheck": "tsc --noEmit",
+		"lint": "biome check ./src",
+		"preview": "vite preview"
+	},
+	"dependencies": {
+		"@rainestack/api": "workspace:*",
+		"@rainestack/ui": "workspace:*",
+		"@rainestack/tools": "workspace:*",
+		"@tanstack/react-query": "catalog:",
+		"react": "catalog:",
+		"lucide-react": "catalog:",
+		"react-dom": "catalog:",
+		"react-router": "catalog:"
+	},
+	"devDependencies": {
+		"@rainestack/tsconfig": "workspace:*",
+		"@tailwindcss/vite": "catalog:",
+		"@types/react": "catalog:",
+		"@types/react-dom": "catalog:",
+		"@vitejs/plugin-react": "catalog:",
+		"babel-plugin-react-compiler": "catalog:",
+		"tailwindcss": "catalog:",
+		"typescript": "catalog:",
+		"vite": "catalog:"
+	}
+}

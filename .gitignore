@@ -1,0 +1,26 @@
+# dependencies
+node_modules
+
+# output
+generated
+out
+dist
+.history
+.turbo
+.types
+*.tgz
+
+# code coverage
+coverage
+*.lcov
+
+# logs
+logs
+*.log
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# dotenv environment variable files
+.env*
+
+# prisma
+src/generated

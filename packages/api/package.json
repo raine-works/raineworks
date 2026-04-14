@@ -1,0 +1,33 @@
+{
+	"name": "@rainestack/api",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./router": "./src/router.ts",
+		"./storage": "./src/lib/storage.ts",
+		"./query-provider": "./src/lib/query-provider.tsx",
+		"./tanstack-query": "./src/lib/tanstack-query.ts"
+	},
+	"scripts": {
+		"lint": "biome check ./src",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@rainestack/tools": "workspace:*",
+		"@orpc/client": "catalog:",
+		"@orpc/contract": "catalog:",
+		"@orpc/openapi-client": "catalog:",
+		"@orpc/tanstack-query": "catalog:",
+		"@tanstack/react-query": "catalog:"
+	},
+	"devDependencies": {
+		"@rainestack/server": "workspace:*",
+		"@rainestack/tsconfig": "workspace:*",
+		"@types/react": "catalog:",
+		"typescript": "catalog:"
+	},
+	"peerDependencies": {
+		"react": "catalog:"
+	}
+}

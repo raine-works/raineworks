@@ -1,0 +1,10 @@
+{
+	"$schema": "https://json.schemastore.org/tsconfig",
+	"display": "React App (Vite)",
+	"extends": "./react-library.json",
+	"compilerOptions": {
+		"noUnusedLocals": false,
+		"noUnusedParameters": false,
+		"tsBuildInfoFile": "./.types/tsconfig.tsbuildinfo"
+	}
+}

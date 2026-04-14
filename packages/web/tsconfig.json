@@ -1,0 +1,14 @@
+{
+	"extends": "@rainestack/tsconfig/react-app.json",
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"@web/*": ["./src/*"],
+			"@api/*": ["../api/src/*"],
+			"@server/*": ["../server/src/*"],
+			"@database/*": ["../database/src/*"],
+			"@ui/*": ["../ui/src/*"]
+		}
+	},
+	"include": ["src", "vite-env.d.ts"]
+}
