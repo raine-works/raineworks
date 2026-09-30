@@ -97,10 +97,10 @@ export const hobbies: HobbyEntry[] = [
 	},
 	{
 		name: 'Motorcycles',
-		note: 'Riding, and working on the bikes as much as riding them.',
+		note: 'Nothing beats an open road on two wheels.',
 	},
 	{
 		name: 'Cars',
-		note: 'Anything with an engine worth talking about — driving, wrenching, and following the scene.',
+		note: 'I just enjoy driving — a good car and a good road.',
 	},
 ];
