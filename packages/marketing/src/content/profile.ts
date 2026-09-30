@@ -54,12 +54,6 @@ export const work: WorkEntry[] = [
 		period: 'TODO(raine): 20XX — present',
 		summary: 'TODO(raine): what you did there.',
 	},
-	{
-		role: 'TODO(raine): role',
-		org: 'Solcius',
-		period: 'TODO(raine): 20XX — 20XX',
-		summary: 'TODO(raine): what you did there.',
-	},
 ];
 
 export const education: EducationEntry[] = [
