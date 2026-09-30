@@ -66,11 +66,31 @@ export const education: EducationEntry[] = [
 
 export const projects: ProjectEntry[] = [
 	{
+		name: 'devcontainer-features',
+		description: 'Dev container features for installing Bun and Deno.',
+		stack: ['Shell', 'Dev Containers'],
+		href: 'https://github.com/raine-works/devcontainer-features',
+	},
+	{
+		name: '.dotfiles',
+		description:
+			'My macOS development environment, managed with GNU Stow. One command sets up a new machine: Ghostty, Starship, shell tooling, and editor config.',
+		stack: ['Shell', 'GNU Stow', 'macOS'],
+		href: 'https://github.com/raine-works/.dotfiles',
+	},
+	{
 		name: 'rainestack',
 		description:
 			'A production-ready full-stack TypeScript monorepo starter: contract-first oRPC APIs with generated OpenAPI, Postgres + Prisma with an automatic audit trail, and real-time updates over LISTEN/NOTIFY.',
 		stack: ['Bun', 'Turborepo', 'React 19', 'Prisma', 'PostgreSQL', 'oRPC'],
 		href: 'https://github.com/raine-works/rainestack',
+	},
+	{
+		name: 'raineworks',
+		description:
+			'This site. A Bun workspace monorepo: a Hono backend that compiles to a single binary with every micro-frontend embedded, serving a React 19 terminal-themed front end.',
+		stack: ['Bun', 'React 19', 'TypeScript', 'Hono', 'Tailwind v4', 'Docker'],
+		href: undefined,
 	},
 	{
 		name: 'sendspin-a1s-source',
@@ -85,26 +105,6 @@ export const projects: ProjectEntry[] = [
 			'A self-hosted Turborepo remote cache server, shipped as a Docker image, so a whole team can share one build cache.',
 		stack: ['TypeScript', 'Docker', 'Turborepo'],
 		href: 'https://github.com/raine-works/turbo-cache',
-	},
-	{
-		name: 'devcontainer-features',
-		description: 'Dev container features for installing Bun and Deno.',
-		stack: ['Shell', 'Dev Containers'],
-		href: 'https://github.com/raine-works/devcontainer-features',
-	},
-	{
-		name: '.dotfiles',
-		description:
-			'My macOS development environment, managed with GNU Stow. One command sets up a new machine: Ghostty, Starship, shell tooling, and editor config.',
-		stack: ['Shell', 'GNU Stow', 'macOS'],
-		href: 'https://github.com/raine-works/.dotfiles',
-	},
-	{
-		name: 'raineworks',
-		description:
-			'This site. A Bun workspace monorepo: a Hono backend that compiles to a single binary with every micro-frontend embedded, serving a React 19 terminal-themed front end.',
-		stack: ['Bun', 'React 19', 'TypeScript', 'Hono', 'Tailwind v4', 'Docker'],
-		href: undefined,
 	},
 ];
 
