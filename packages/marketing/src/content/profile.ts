@@ -36,7 +36,7 @@ export const profile = {
 	bio: 'TODO(raine): a few sentences about your professional background — what you architect at bndl and Lux Financial and what you care about.',
 	contact: {
 		email: 'TODO@example.com',
-		github: 'https://github.com/TODO',
+		github: 'https://github.com/raine-works',
 		linkedin: 'https://www.linkedin.com/in/rainepetersen',
 	},
 };
@@ -65,6 +65,40 @@ export const education: EducationEntry[] = [
 ];
 
 export const projects: ProjectEntry[] = [
+	{
+		name: 'rainestack',
+		description:
+			'A production-ready full-stack TypeScript monorepo starter: contract-first oRPC APIs with generated OpenAPI, Postgres + Prisma with an automatic audit trail, and real-time updates over LISTEN/NOTIFY.',
+		stack: ['Bun', 'Turborepo', 'React 19', 'Prisma', 'PostgreSQL', 'oRPC'],
+		href: 'https://github.com/raine-works/rainestack',
+	},
+	{
+		name: 'sendspin-a1s-source',
+		description:
+			'ESPHome firmware that turns an ESP32-A1S audio kit into an encrypted line-in source for Music Assistant, streaming turntables and other analog gear to synchronized multi-room speakers.',
+		stack: ['C++', 'ESPHome', 'ESP-IDF', 'Noise Protocol', 'Opus'],
+		href: 'https://github.com/raine-works/sendspin-a1s-source',
+	},
+	{
+		name: 'turbo-cache',
+		description:
+			'A self-hosted Turborepo remote cache server, shipped as a Docker image, so a whole team can share one build cache.',
+		stack: ['TypeScript', 'Docker', 'Turborepo'],
+		href: 'https://github.com/raine-works/turbo-cache',
+	},
+	{
+		name: 'devcontainer-features',
+		description: 'Dev container features for installing Bun and Deno.',
+		stack: ['Shell', 'Dev Containers'],
+		href: 'https://github.com/raine-works/devcontainer-features',
+	},
+	{
+		name: '.dotfiles',
+		description:
+			'My macOS development environment, managed with GNU Stow. One command sets up a new machine: Ghostty, Starship, shell tooling, and editor config.',
+		stack: ['Shell', 'GNU Stow', 'macOS'],
+		href: 'https://github.com/raine-works/.dotfiles',
+	},
 	{
 		name: 'raineworks',
 		description:
