@@ -30,10 +30,10 @@ export interface HobbyEntry {
 
 export const profile = {
 	name: 'Raine Petersen',
-	title: 'Chief Systems Architect @ bndl',
-	location: 'Mapleton, Utah',
-	tagline: 'Driven, responsible, and quick to learn — building systems at bndl.',
-	bio: 'TODO(raine): a few sentences about your professional background — what you architect at bndl and what you care about.',
+	title: 'Co-founder & Chief Systems Architect @ bndl + Lux Financial',
+	location: 'Salem, Utah',
+	tagline: 'Driven, responsible, and quick to learn — co-founder building the systems behind bndl and Lux Financial.',
+	bio: 'TODO(raine): a few sentences about your professional background — what you architect at bndl and Lux Financial and what you care about.',
 	contact: {
 		email: 'TODO@example.com',
 		github: 'https://github.com/TODO',
@@ -43,15 +43,15 @@ export const profile = {
 
 export const work: WorkEntry[] = [
 	{
-		role: 'Chief Systems Architect',
+		role: 'Co-founder & Chief Systems Architect',
 		org: 'bndl',
 		period: 'TODO(raine): 20XX — present',
 		summary: 'TODO(raine): what you own and build at bndl. Based in Lehi, Utah.',
 	},
 	{
-		role: 'TODO(raine): role',
+		role: 'Co-founder & Chief Systems Architect',
 		org: 'Lux Financial',
-		period: 'TODO(raine): 20XX — 20XX',
+		period: 'TODO(raine): 20XX — present',
 		summary: 'TODO(raine): what you did there.',
 	},
 	{
@@ -82,7 +82,31 @@ export const projects: ProjectEntry[] = [
 
 export const hobbies: HobbyEntry[] = [
 	{
-		name: 'TODO(raine): hobby',
-		note: 'TODO(raine): a line about it.',
+		name: 'Homelab',
+		note: 'Self-hosting on my own hardware — servers, networking, and containers. Always something new running on the rack.',
+	},
+	{
+		name: 'Software development',
+		note: 'Writing code for fun as much as for work. Side projects are where I try the new tools first.',
+	},
+	{
+		name: 'Tinkering',
+		note: 'Taking things apart to see how they work, and occasionally getting them back together.',
+	},
+	{
+		name: 'Video games',
+		note: 'Winding down with a controller, and appreciating the engineering behind a well-built game.',
+	},
+	{
+		name: 'Golf',
+		note: 'Time outside on the course, chasing a better round.',
+	},
+	{
+		name: 'Motorcycles',
+		note: 'Riding, and working on the bikes as much as riding them.',
+	},
+	{
+		name: 'Cars',
+		note: 'Anything with an engine worth talking about — driving, wrenching, and following the scene.',
 	},
 ];
