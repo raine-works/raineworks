@@ -1,0 +1,24 @@
+{
+	"name": "@app/marketing",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build": "bun scripts/build.ts",
+		"dev": "bun scripts/build.ts --watch",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@app/tools": "workspace:*",
+		"@tanstack/react-router": "catalog:",
+		"react": "catalog:",
+		"react-dom": "catalog:"
+	},
+	"devDependencies": {
+		"@types/bun": "catalog:",
+		"@types/react": "catalog:",
+		"@types/react-dom": "catalog:",
+		"bun-plugin-tailwind": "catalog:",
+		"tailwindcss": "catalog:",
+		"typescript": "catalog:"
+	}
+}

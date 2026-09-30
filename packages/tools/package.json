@@ -1,0 +1,23 @@
+{
+	"name": "@app/tools",
+	"private": true,
+	"type": "module",
+	"main": "./src/index.ts",
+	"types": "./src/index.ts",
+	"exports": {
+		".": "./src/index.ts",
+		"./build": "./src/build.ts",
+		"./http": "./src/http.ts",
+		"./cli": "./src/cli.ts",
+		"./*": "./src/*"
+	},
+	"scripts": {
+		"typecheck": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"@types/bun": "catalog:",
+		"bun-plugin-tailwind": "catalog:",
+		"tailwindcss": "catalog:",
+		"typescript": "catalog:"
+	}
+}

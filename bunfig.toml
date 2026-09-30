@@ -1,0 +1,11 @@
+[install]
+# Pin exact versions when installing packages
+save = true
+exact = true
+
+[test]
+coverage = false
+
+[serve.static]
+sourcemap = "linked"
+plugins = ["bun-plugin-tailwind"]

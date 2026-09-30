@@ -1,0 +1,19 @@
+{
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		"jsx": "react-jsx",
+		"types": ["bun", "react", "react-dom"],
+		"paths": {
+			"@/*": ["./src/*"],
+			"@marketing": ["./src/index.tsx"],
+			"@marketing/*": ["./src/*"],
+			"@app/marketing": ["./src/index.tsx"],
+			"@app/marketing/*": ["./src/*"],
+			"@tools": ["../tools/src/index.ts"],
+			"@tools/*": ["../tools/src/*"],
+			"@app/tools": ["../tools/src/index.ts"],
+			"@app/tools/*": ["../tools/src/*"]
+		}
+	},
+	"include": ["src/**/*", "scripts/**/*"]
+}

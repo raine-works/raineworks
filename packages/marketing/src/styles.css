@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+@theme {
+	--font-mono:
+		ui-monospace, "JetBrains Mono", "Fira Code", "SFMono-Regular", Menlo,
+		Consolas, monospace;
+	--color-bg: #0a0e14;
+	--color-surface: #0d1117;
+	--color-border: #1c2430;
+	--color-text: #c9d1d9;
+	--color-text-dim: #6e7681;
+	--color-accent: #39d353;
+	--color-accent-dim: #1f6f34;
+	--color-highlight: #ffb454;
+}
+
+@layer base {
+	* {
+		border-color: var(--color-border);
+	}
+
+	body {
+		background-color: var(--color-bg);
+		color: var(--color-text);
+		font-family: var(--font-mono);
+		min-height: 100vh;
+	}
+
+	::selection {
+		background-color: var(--color-accent-dim);
+		color: var(--color-text);
+	}
+}
+
+@layer components {
+	.crt-scanlines {
+		background-image: repeating-linear-gradient(
+			to bottom,
+			rgba(255, 255, 255, 0.02),
+			rgba(255, 255, 255, 0.02) 1px,
+			transparent 1px,
+			transparent 2px
+		);
+	}
+}
+
+@keyframes caret-blink {
+	0%,
+	49% {
+		opacity: 1;
+	}
+	50%,
+	100% {
+		opacity: 0;
+	}
+}
+
+.animate-caret {
+	animation: caret-blink 1s step-end infinite;
+}

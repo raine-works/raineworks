@@ -1,0 +1,18 @@
+{
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		"types": ["bun"],
+		"paths": {
+			"@/*": ["./src/*"],
+			"@backend": ["./src/index.ts"],
+			"@backend/*": ["./src/*"],
+			"@app/backend": ["./src/index.ts"],
+			"@app/backend/*": ["./src/*"],
+			"@tools": ["../tools/src/index.ts"],
+			"@tools/*": ["../tools/src/*"],
+			"@app/tools": ["../tools/src/index.ts"],
+			"@app/tools/*": ["../tools/src/*"]
+		}
+	},
+	"include": ["src/**/*", "scripts/**/*"]
+}
