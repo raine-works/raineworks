@@ -38,6 +38,7 @@ export const profile = {
 		email: 'TODO@example.com',
 		github: 'https://github.com/raine-works',
 		linkedin: 'https://www.linkedin.com/in/rainepetersen',
+		coffee: 'https://buymeacoffee.com/raineworks',
 	},
 };
 
