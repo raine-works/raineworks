@@ -7,6 +7,7 @@ export interface WorkEntry {
 	org: string;
 	period: string;
 	summary: string;
+	href: string;
 }
 
 export interface EducationEntry {
@@ -45,6 +46,7 @@ export const work: WorkEntry[] = [
 	{
 		role: 'Co-founder & Chief Systems Architect',
 		org: 'bndl',
+		href: 'https://bndl.co',
 		period: 'Apr 2024 — present',
 		summary:
 			'I drive the design and development of our software stack and help shape the technical vision and strategy. I oversee the architecture and implementation of multiple projects, keeping them scalable, high-performing, and aligned with business goals, with a focus on SaaS products that streamline business operations. Lehi, Utah.',
@@ -52,6 +54,7 @@ export const work: WorkEntry[] = [
 	{
 		role: 'Co-founder & Chief Systems Architect',
 		org: 'Lux Financial',
+		href: 'https://luxfinancial.io',
 		period: 'Aug 2022 — present',
 		summary:
 			'I lead the creation and evolution of our proprietary software platform, owning architecture and development across projects so they meet demands of scale and performance. The work is software built for the unique financial landscape of the solar industry. Lehi, Utah.',

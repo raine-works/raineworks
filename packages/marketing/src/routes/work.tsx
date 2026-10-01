@@ -9,7 +9,14 @@ export function WorkPage() {
 					<article key={`${entry.org}-${entry.role}`} className="border-border border-l-2 pl-4">
 						<div className="flex flex-wrap items-baseline gap-2">
 							<h2 className="font-bold">{entry.role}</h2>
-							<span className="text-text-dim">@ {entry.org}</span>
+							<a
+								href={entry.href}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="text-text-dim hover:text-accent hover:underline"
+							>
+								@ {entry.org}
+							</a>
 						</div>
 						<div className="text-highlight text-xs">{entry.period}</div>
 						<p className="mt-1 text-text-dim leading-relaxed">{entry.summary}</p>
