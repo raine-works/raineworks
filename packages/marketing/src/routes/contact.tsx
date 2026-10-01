@@ -1,3 +1,4 @@
+import { BuyMeACoffeeButton } from '@/components/BuyMeACoffeeButton';
 import { profile } from '@/content/profile';
 
 export function ContactPage() {
@@ -14,6 +15,9 @@ export function ContactPage() {
 				<a href={profile.contact.linkedin} className="text-text-dim hover:text-accent">
 					linkedin: <span className="text-text">{profile.contact.linkedin}</span>
 				</a>
+			</div>
+			<div className="pt-2">
+				<BuyMeACoffeeButton />
 			</div>
 		</div>
 	);
