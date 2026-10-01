@@ -21,6 +21,7 @@ FROM gcr.io/distroless/cc-debian12
 
 COPY --from=builder /app/packages/backend/dist/server /server
 
+ENV NODE_ENV=production
 ENV PORT=3000
 EXPOSE 3000
 
