@@ -1,4 +1,5 @@
 import { createRootRoute, Link, Outlet } from '@tanstack/react-router';
+import { CoffeeButton } from '@/components/CoffeeButton';
 import { NotFoundPage } from '@/routes/not-found';
 
 const NAV_LINKS = [
@@ -41,8 +42,9 @@ function RootLayout() {
 				<Outlet />
 			</main>
 
-			<footer className="border-border border-t pt-4 text-text-dim text-xs">
+			<footer className="flex flex-wrap items-center justify-between gap-3 border-border border-t pt-4 text-text-dim text-xs">
 				<span>raineworks/marketing</span>
+				<CoffeeButton />
 			</footer>
 		</div>
 	);
