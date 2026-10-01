@@ -3,6 +3,6 @@
  * `env` from here instead of touching `Bun.env` / `process.env` directly.
  */
 export const env = {
-	PORT: Number(Bun.env.PORT ?? 3000),
+	PORT: Number(Bun.env.PORT ?? 3032),
 	NODE_ENV: Bun.env.NODE_ENV ?? 'development',
 };
