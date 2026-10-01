@@ -1,6 +1,5 @@
 /**
- * Sourced from Raine's public LinkedIn (linkedin.com/in/rainepetersen) and public listings.
- * Anything still marked TODO(raine) couldn't be verified and needs real copy.
+ * Sourced from Raine's LinkedIn (linkedin.com/in/rainepetersen) and public listings.
  */
 
 export interface WorkEntry {
@@ -33,7 +32,7 @@ export const profile = {
 	title: 'Co-founder & Chief Systems Architect @ bndl + Lux Financial',
 	location: 'Salem, Utah',
 	tagline: 'Driven, responsible, and quick to learn — co-founder building the systems behind bndl and Lux Financial.',
-	bio: 'TODO(raine): a few sentences about your professional background — what you architect at bndl and Lux Financial and what you care about.',
+	bio: 'I co-founded bndl and Lux Financial and lead the architecture behind both. My focus is building scalable, high-performing software that ties directly to business goals: SaaS products that streamline how companies operate, and a platform for the financial side of the solar industry.',
 	contact: {
 		email: 'hello@raineworks.com',
 		github: 'https://github.com/raine-works',
@@ -46,14 +45,16 @@ export const work: WorkEntry[] = [
 	{
 		role: 'Co-founder & Chief Systems Architect',
 		org: 'bndl',
-		period: 'TODO(raine): 20XX — present',
-		summary: 'TODO(raine): what you own and build at bndl. Based in Lehi, Utah.',
+		period: 'Apr 2024 — present',
+		summary:
+			'I drive the design and development of our software stack and help shape the technical vision and strategy. I oversee the architecture and implementation of multiple projects, keeping them scalable, high-performing, and aligned with business goals, with a focus on SaaS products that streamline business operations. Lehi, Utah.',
 	},
 	{
 		role: 'Co-founder & Chief Systems Architect',
 		org: 'Lux Financial',
-		period: 'TODO(raine): 20XX — present',
-		summary: 'TODO(raine): what you did there.',
+		period: 'Aug 2022 — present',
+		summary:
+			'I lead the creation and evolution of our proprietary software platform, owning architecture and development across projects so they meet demands of scale and performance. The work is software built for the unique financial landscape of the solar industry. Lehi, Utah.',
 	},
 ];
 
