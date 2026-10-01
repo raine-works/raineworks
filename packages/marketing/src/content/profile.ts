@@ -35,7 +35,7 @@ export const profile = {
 	tagline: 'Driven, responsible, and quick to learn — co-founder building the systems behind bndl and Lux Financial.',
 	bio: 'TODO(raine): a few sentences about your professional background — what you architect at bndl and Lux Financial and what you care about.',
 	contact: {
-		email: 'TODO@example.com',
+		email: 'hello@raineworks.com',
 		github: 'https://github.com/raine-works',
 		linkedin: 'https://www.linkedin.com/in/rainepetersen',
 		coffee: 'https://buymeacoffee.com/raineworks',
