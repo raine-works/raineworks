@@ -1,0 +1,19 @@
+{
+	"name": "@app/ssh",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@app/marketing": "workspace:*",
+		"ink": "8.0.0",
+		"react": "catalog:"
+	},
+	"devDependencies": {
+		"@types/bun": "catalog:",
+		"@types/react": "catalog:",
+		"ink-testing-library": "4.0.0",
+		"typescript": "catalog:"
+	}
+}

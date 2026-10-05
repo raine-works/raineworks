@@ -1,0 +1,15 @@
+{
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		"jsx": "react-jsx",
+		"types": ["bun", "react"],
+		"paths": {
+			"@/*": ["./src/*"],
+			"@ssh/*": ["./src/*"],
+			"@app/ssh/*": ["./src/*"],
+			"@marketing/*": ["../marketing/src/*"],
+			"@app/marketing/*": ["../marketing/src/*"]
+		}
+	},
+	"include": ["src/**/*"]
+}
