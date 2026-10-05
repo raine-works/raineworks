@@ -33,7 +33,7 @@ export const profile = {
 	title: 'Co-founder & Chief Systems Architect @ bndl + Lux Financial',
 	location: 'Salem, Utah',
 	tagline: 'Driven, responsible, and quick to learn — co-founder building the systems behind bndl and Lux Financial.',
-	bio: 'I co-founded bndl and Lux Financial and lead the architecture behind both. My focus is building scalable, high-performing software that ties directly to business goals: SaaS products that streamline how companies operate, and a platform for the financial side of the solar industry.',
+	bio: "I'm a co-founder and Chief Systems Architect at bndl and Lux Financial, where I own the architecture and the code behind both. I like software that is fast, simple to operate, and tied to a real business goal, whether that's SaaS that takes work off a company's plate or tooling for the financial side of solar. Off the clock I run a homelab, tinker with hardware, and publish what I build as open source.",
 	contact: {
 		email: 'hello@raineworks.com',
 		github: 'https://github.com/raine-works',
