@@ -20,3 +20,8 @@
 - Screens live in `packages/ssh/src/screens` and render with plain Ink, so they are testable without SSH (`ink-testing-library`, see `src/App.test.tsx`).
 - All text from content must go through `sanitize()` (`src/sanitize.ts`) before rendering so it can't inject terminal escape sequences.
 - Keep the TUI read-only and the width responsive (`useWindowSize`); don't assume a fixed terminal size or color support.
+- **SSH server** (`src/server`, entry `src/main.ts`) uses `ssh2`. It accepts `none` auth only and serves a single pty `shell` session running the Ink app. Exec, subsystems, port forwarding, agent/X11 forwarding and shells without a pty are rejected; do not add handlers for them. Connection and rate limits live in `src/server/limits.ts` (unit-tested); pty sizes are clamped.
+- **Build** with `bun run --filter @app/ssh build` (`scripts/build.ts`) -> `dist/ssh-server`. Keep `target: 'bun'` and `keepNames: true`: without them the compiled binary crashes on disconnect because `ssh2` checks `channel.constructor.name === 'Session'`. `react-devtools-core` and `cpu-features` are stubbed out on purpose.
+- **Container** is `packages/ssh/Dockerfile` (distroless, non-root, no shell), published by CI as `ghcr.io/<repo>-ssh`. It listens on `SSH_PORT` (default `2222`); map host port 22 to it. The host key is **never** baked in or generated: mount an ed25519 private key at `SSH_HOST_KEY_PATH` (default `/run/secrets/ssh_host_key`), or clients get a host-key-changed warning on every deploy. The server exits if the key is missing.
+- `ssh raineworks.com` needs the apex DNS record to point at a host that exposes port 22 to this container; move that host's own sshd to another port.
+

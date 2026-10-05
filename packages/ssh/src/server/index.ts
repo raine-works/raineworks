@@ -88,7 +88,11 @@ export function createServer(options: ServerOptions) {
 						input.push(data);
 					});
 
-					const app = render(createElement(App), { stdin: input as never, stdout: output as never, exitOnCtrlC: false });
+					const app = render(createElement(App), {
+						stdin: input as never,
+						stdout: output as never,
+						exitOnCtrlC: false,
+					});
 					cleanup = () => {
 						clearTimeout(idle);
 						app.unmount();
