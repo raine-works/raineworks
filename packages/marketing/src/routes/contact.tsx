@@ -1,5 +1,4 @@
 import { type FormEvent, useState } from 'react';
-import { CoffeeButton } from '@/components/CoffeeButton';
 import { profile } from '@/content/profile';
 
 type Status = 'idle' | 'sending' | 'sent' | 'error';
@@ -73,9 +72,6 @@ export function ContactPage() {
 				</a>
 			</div>
 			<ContactForm />
-			<div className="pt-2">
-				<CoffeeButton />
-			</div>
 		</div>
 	);
 }
