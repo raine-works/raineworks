@@ -6,12 +6,12 @@ Personal site for Raine Petersen, themed as a terminal. A Bun workspace monorepo
 
 | Package | Purpose |
 |---------|---------|
-| `packages/marketing` | React 19 + TanStack Router + Tailwind v4 front end, bundled with `Bun.build` |
+| `packages/web` | React 19 + TanStack Router + Tailwind v4 front end, bundled with `Bun.build` |
 | `packages/backend` | Hono server: serves the built front ends and exposes `/api/*` |
 | `packages/ssh` | `ssh raineworks.com` terminal UI: Ink screens plus an `ssh2` server, compiled to its own binary |
 | `packages/tools` | Shared build and HTTP helpers |
 
-Content (bio, work, projects, hobbies) lives in `packages/marketing/src/content/profile.ts`.
+Content (bio, work, projects, hobbies) lives in `packages/web/src/content/profile.ts`.
 
 ## Requirements
 

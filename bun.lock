@@ -13,35 +13,18 @@
     "packages/backend": {
       "name": "@app/backend",
       "dependencies": {
-        "@app/marketing": "workspace:*",
         "@app/tools": "workspace:*",
+        "@app/web": "workspace:*",
         "hono": "catalog:",
       },
       "devDependencies": {
         "@types/bun": "catalog:",
       },
     },
-    "packages/marketing": {
-      "name": "@app/marketing",
-      "dependencies": {
-        "@app/tools": "workspace:*",
-        "@tanstack/react-router": "catalog:",
-        "react": "catalog:",
-        "react-dom": "catalog:",
-      },
-      "devDependencies": {
-        "@types/bun": "catalog:",
-        "@types/react": "catalog:",
-        "@types/react-dom": "catalog:",
-        "bun-plugin-tailwind": "catalog:",
-        "tailwindcss": "catalog:",
-        "typescript": "catalog:",
-      },
-    },
     "packages/ssh": {
       "name": "@app/ssh",
       "dependencies": {
-        "@app/marketing": "workspace:*",
+        "@app/web": "workspace:*",
         "ink": "8.0.0",
         "react": "catalog:",
         "ssh2": "1.17.0",
@@ -58,6 +41,23 @@
       "name": "@app/tools",
       "devDependencies": {
         "@types/bun": "catalog:",
+        "bun-plugin-tailwind": "catalog:",
+        "tailwindcss": "catalog:",
+        "typescript": "catalog:",
+      },
+    },
+    "packages/web": {
+      "name": "@app/web",
+      "dependencies": {
+        "@app/tools": "workspace:*",
+        "@tanstack/react-router": "catalog:",
+        "react": "catalog:",
+        "react-dom": "catalog:",
+      },
+      "devDependencies": {
+        "@types/bun": "catalog:",
+        "@types/react": "catalog:",
+        "@types/react-dom": "catalog:",
         "bun-plugin-tailwind": "catalog:",
         "tailwindcss": "catalog:",
         "typescript": "catalog:",
@@ -83,11 +83,11 @@
 
     "@app/backend": ["@app/backend@workspace:packages/backend"],
 
-    "@app/marketing": ["@app/marketing@workspace:packages/marketing"],
-
     "@app/ssh": ["@app/ssh@workspace:packages/ssh"],
 
     "@app/tools": ["@app/tools@workspace:packages/tools"],
+
+    "@app/web": ["@app/web@workspace:packages/web"],
 
     "@biomejs/biome": ["@biomejs/biome@2.5.15", "", { "optionalDependencies": { "@biomejs/cli-darwin-arm64": "2.5.15", "@biomejs/cli-darwin-x64": "2.5.15", "@biomejs/cli-linux-arm64": "2.5.15", "@biomejs/cli-linux-arm64-musl": "2.5.15", "@biomejs/cli-linux-x64": "2.5.15", "@biomejs/cli-linux-x64-musl": "2.5.15", "@biomejs/cli-win32-arm64": "2.5.15", "@biomejs/cli-win32-x64": "2.5.15" }, "bin": { "biome": "bin/biome" } }, "sha512-WZTW4slm/pdkh92K6t/3aEN++44JD1PQ7squ7RCMLI1flHGl43DVOIGXvCjHiZgBMO1V4uYxoFNtqrIA4qGuIQ=="],
 

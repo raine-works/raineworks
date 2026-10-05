@@ -12,7 +12,7 @@
 		"test": "bun test"
 	},
 	"dependencies": {
-		"@app/marketing": "workspace:*",
+		"@app/web": "workspace:*",
 		"@app/tools": "workspace:*",
 		"hono": "catalog:"
 	},

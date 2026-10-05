@@ -17,21 +17,21 @@
 		"paths": {
 			"@/*": [
 				"./packages/backend/src/*",
-				"./packages/marketing/src/*",
+				"./packages/web/src/*",
 				"./packages/ssh/src/*",
 				"./packages/tools/src/*"
 			],
 			"@backend": ["./packages/backend/src/index.ts"],
 			"@backend/*": ["./packages/backend/src/*"],
-			"@marketing": ["./packages/marketing/src/index.tsx"],
-			"@marketing/*": ["./packages/marketing/src/*"],
+			"@web": ["./packages/web/src/index.tsx"],
+			"@web/*": ["./packages/web/src/*"],
 			"@ssh/*": ["./packages/ssh/src/*"],
 			"@tools": ["./packages/tools/src/index.ts"],
 			"@tools/*": ["./packages/tools/src/*"],
 			"@app/backend": ["./packages/backend/src/index.ts"],
 			"@app/backend/*": ["./packages/backend/src/*"],
-			"@app/marketing": ["./packages/marketing/src/index.tsx"],
-			"@app/marketing/*": ["./packages/marketing/src/*"],
+			"@app/web": ["./packages/web/src/index.tsx"],
+			"@app/web/*": ["./packages/web/src/*"],
 			"@app/ssh/*": ["./packages/ssh/src/*"],
 			"@app/tools": ["./packages/tools/src/index.ts"],
 			"@app/tools/*": ["./packages/tools/src/*"]

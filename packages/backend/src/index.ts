@@ -11,7 +11,7 @@ import { cors } from 'hono/cors';
  * Staged into `mfes/<route>/` (or `mfes/__root__/` for the root entry) by
  * `scripts/build.ts` when compiling the standalone binary.
  */
-const frontends: MicroFrontend[] = [{ route: '', distDir: resolveLocalDist('marketing') }];
+const frontends: MicroFrontend[] = [{ route: '', distDir: resolveLocalDist('web') }];
 
 export const app = new Hono()
 	.use(
