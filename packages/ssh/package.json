@@ -3,16 +3,20 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
+		"build": "bun scripts/build.ts",
+		"start": "bun src/main.ts",
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@app/marketing": "workspace:*",
 		"ink": "8.0.0",
-		"react": "catalog:"
+		"react": "catalog:",
+		"ssh2": "1.17.0"
 	},
 	"devDependencies": {
 		"@types/bun": "catalog:",
 		"@types/react": "catalog:",
+		"@types/ssh2": "1.15.6",
 		"ink-testing-library": "4.0.0",
 		"typescript": "catalog:"
 	}
