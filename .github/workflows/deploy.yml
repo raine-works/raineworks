@@ -40,7 +40,7 @@ jobs:
         include:
           - name: web
             image_suffix: ''
-            dockerfile: ${{ matrix.dockerfile }}
+            dockerfile: packages/backend/Dockerfile
           - name: ssh
             image_suffix: '-ssh'
             dockerfile: packages/ssh/Dockerfile

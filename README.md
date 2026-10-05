@@ -53,12 +53,15 @@ CI (`.github/workflows/deploy.yml`) verifies and publishes the image on merges t
 
 ```sh
 ssh-keygen -t ed25519 -N '' -f host_key
+sudo chown 65532:65532 host_key && chmod 400 host_key   # the container runs as uid 65532
 docker build -f packages/ssh/Dockerfile -t raineworks-ssh .
 docker run -p 22:2222 -v "$PWD/host_key:/run/secrets/ssh_host_key:ro" --read-only --cap-drop ALL raineworks-ssh
 ssh localhost
 ```
 
-Configuration: `SSH_PORT` (default `2222`) and `SSH_HOST_KEY_PATH` (required). For local development without Docker: `SSH_HOST_KEY_PATH=./host_key bun run --filter @app/ssh start`.
+Configuration: `SSH_PORT` (default `2222`), `SSH_HOST_KEY_PATH` (required), and optional limit overrides `SSH_MAX_CONNECTIONS` (200), `SSH_MAX_PER_IP` (5) and `SSH_RATE_PER_IP` (10 new connections/minute).
+
+Limits are per client IP, so the server must see real client addresses: publish the port directly or use an L4 passthrough that preserves the source IP. Behind a proxy that rewrites it (or PROXY-protocol, which is not supported), every visitor shares one bucket and a few users will trip the limit; raise `SSH_MAX_PER_IP` and `SSH_RATE_PER_IP` in that case. For local development without Docker: `SSH_HOST_KEY_PATH=./host_key bun run --filter @app/ssh start`.
 
 See `AGENTS.md` for repository conventions (import aliases, build rules).
 

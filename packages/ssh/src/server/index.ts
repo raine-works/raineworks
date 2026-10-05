@@ -41,7 +41,8 @@ export function createServer(options: ServerOptions) {
 		});
 
 		client.on('ready', () => {
-			clearTimeout(handshake);
+			// `handshake` keeps running until a shell starts, so an authenticated
+			// client cannot hold a slot by never opening one.
 			// No handlers for tcpip, forwarding, exec, subsystem, env, x11 or agent:
 			// ssh2 rejects any request type that has no listener.
 			client.on('session', (accept) => {
@@ -70,6 +71,7 @@ export function createServer(options: ServerOptions) {
 						rejectShell();
 						return;
 					}
+					clearTimeout(handshake);
 					const channel = acceptShell();
 					const input = new TerminalInput();
 					output = new TerminalOutput(channel, columns, rows);
