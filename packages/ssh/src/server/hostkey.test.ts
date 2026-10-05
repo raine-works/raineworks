@@ -17,6 +17,11 @@ describe('loadHostKey', () => {
 		expect(loadHostKey({ SSH_HOST_KEY: oneLine }).toString()).toBe(pem.trim());
 	});
 
+	test('tolerates surrounding quotes from .env-style stores', () => {
+		const quoted = `"${pem.trim().replace(/\n/g, '\\n')}"`;
+		expect(loadHostKey({ SSH_HOST_KEY: quoted }).toString()).toBe(pem.trim());
+	});
+
 	test('reads from SSH_HOST_KEY_PATH', () => {
 		const path = join(mkdtempSync(join(tmpdir(), 'hk-')), 'key');
 		writeFileSync(path, pem);

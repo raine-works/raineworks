@@ -123,7 +123,8 @@ export function createServer(options: ServerOptions) {
  * file at `SSH_HOST_KEY_PATH`. Throws a descriptive error instead of dumping a stack.
  */
 export function loadHostKey(env: Record<string, string | undefined>): Buffer {
-	const inline = env.SSH_HOST_KEY?.trim();
+	// .env-style stores may keep the surrounding quotes literally.
+	const inline = env.SSH_HOST_KEY?.trim().replace(/^(['"])([\s\S]*)\1$/, '$2');
 	let key: Buffer;
 	if (inline) {
 		key = Buffer.from(inline.replace(/\\n/g, '\n'));
