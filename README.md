@@ -59,7 +59,9 @@ docker run -p 22:2222 -v "$PWD/host_key:/run/secrets/ssh_host_key:ro" --read-onl
 ssh localhost
 ```
 
-Configuration: `SSH_PORT` (default `2222`), `SSH_HOST_KEY_PATH` (required), and optional limit overrides `SSH_MAX_CONNECTIONS` (200), `SSH_MAX_PER_IP` (5) and `SSH_RATE_PER_IP` (10 new connections/minute).
+Configuration: `SSH_PORT` (default `2222`), the host key (below), and optional limit overrides `SSH_MAX_CONNECTIONS` (200), `SSH_MAX_PER_IP` (5) and `SSH_RATE_PER_IP` (10 new connections/minute).
+
+Host key: set **either** `SSH_HOST_KEY` (the private key's PEM text; a single line with literal `\n` escapes also works, which is what `.env`-style stores such as Dokploy's environment tab need since values can't span lines; produce it with `awk '{printf "%s\\n", $0}' host_key`) **or** `SSH_HOST_KEY_PATH` (a mounted file, default `/run/secrets/ssh_host_key`). `SSH_HOST_KEY` wins if both are set. The key must stay the same across redeploys, and the server refuses to start without one. For Dokploy, publish TCP port 22 -> 2222 on the SSH service and move the host's own sshd off port 22 first.
 
 Limits are per client IP, so the server must see real client addresses: publish the port directly or use an L4 passthrough that preserves the source IP. Behind a proxy that rewrites it (or PROXY-protocol, which is not supported), every visitor shares one bucket and a few users will trip the limit; raise `SSH_MAX_PER_IP` and `SSH_RATE_PER_IP` in that case. For local development without Docker: `SSH_HOST_KEY_PATH=./host_key bun run --filter @app/ssh start`.
 

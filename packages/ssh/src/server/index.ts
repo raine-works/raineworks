@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { render } from 'ink';
 import { createElement } from 'react';
-import { Server } from 'ssh2';
+import { Server, utils } from 'ssh2';
 import { App } from '@/App';
 import { ConnectionGuard, clampSize, defaultLimits, type Limits } from '@/server/limits';
 import { TerminalInput, TerminalOutput } from '@/server/terminal';
@@ -117,6 +117,31 @@ export function createServer(options: ServerOptions) {
 	};
 }
 
-export function loadHostKey(path: string): Buffer {
-	return readFileSync(path);
+/**
+ * Resolves the host key from `SSH_HOST_KEY` (PEM text; literal `\n` sequences are
+ * accepted for platforms that store secrets on one line) or, failing that, the
+ * file at `SSH_HOST_KEY_PATH`. Throws a descriptive error instead of dumping a stack.
+ */
+export function loadHostKey(env: Record<string, string | undefined>): Buffer {
+	// .env-style stores may keep the surrounding quotes literally.
+	const inline = env.SSH_HOST_KEY?.trim().replace(/^(['"])([\s\S]*)\1$/, '$2');
+	let key: Buffer;
+	if (inline) {
+		key = Buffer.from(inline.replace(/\\n/g, '\n'));
+	} else if (env.SSH_HOST_KEY_PATH) {
+		try {
+			key = readFileSync(env.SSH_HOST_KEY_PATH);
+		} catch (error) {
+			const code = (error as NodeJS.ErrnoException).code;
+			throw new Error(`cannot read SSH_HOST_KEY_PATH (${env.SSH_HOST_KEY_PATH}): ${code ?? error}`);
+		}
+	} else {
+		throw new Error('no host key: set SSH_HOST_KEY (PEM text) or mount a key at SSH_HOST_KEY_PATH');
+	}
+	const parsed = utils.parseKey(key);
+	if (parsed instanceof Error) throw new Error(`host key is not a valid private key: ${parsed.message}`);
+	if (Array.isArray(parsed) ? parsed[0]?.isPrivateKey() === false : !parsed.isPrivateKey()) {
+		throw new Error('host key must be a private key');
+	}
+	return key;
 }
