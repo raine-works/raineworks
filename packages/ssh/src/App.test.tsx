@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { profile, projects } from '@marketing/content/profile';
+import { profile, projects } from '@web/content/profile';
 import { render } from 'ink-testing-library';
 import { App } from '@/App';
 import { sanitize } from '@/sanitize';

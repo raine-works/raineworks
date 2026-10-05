@@ -6,7 +6,7 @@ import tailwind from 'bun-plugin-tailwind';
  * Options for configuring the frontend build runner.
  */
 export interface FrontendBuildOptions {
-	/** Human-readable name of the application/micro-frontend (e.g. 'marketing'). */
+	/** Human-readable name of the application/micro-frontend (e.g. 'web'). */
 	name: string;
 	/** Root directory of the package (containing `src/` and `index.html`). */
 	packageDir: string;

@@ -7,8 +7,8 @@
 			"@/*": ["./src/*"],
 			"@ssh/*": ["./src/*"],
 			"@app/ssh/*": ["./src/*"],
-			"@marketing/*": ["../marketing/src/*"],
-			"@app/marketing/*": ["../marketing/src/*"]
+			"@web/*": ["../web/src/*"],
+			"@app/web/*": ["../web/src/*"]
 		}
 	},
 	"include": ["src/**/*"]

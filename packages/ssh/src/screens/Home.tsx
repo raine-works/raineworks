@@ -1,4 +1,4 @@
-import { profile } from '@marketing/content/profile';
+import { profile } from '@web/content/profile';
 import { Box, Text } from 'ink';
 import { sanitize } from '@/sanitize';
 import { Block, Dim, Heading } from '@/screens/Section';

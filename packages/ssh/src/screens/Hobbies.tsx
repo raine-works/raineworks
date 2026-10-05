@@ -1,4 +1,4 @@
-import { hobbies } from '@marketing/content/profile';
+import { hobbies } from '@web/content/profile';
 import { Box, Text } from 'ink';
 import { sanitize } from '@/sanitize';
 import { Heading } from '@/screens/Section';
