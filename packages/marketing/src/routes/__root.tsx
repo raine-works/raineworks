@@ -43,7 +43,7 @@ function RootLayout() {
 			</main>
 
 			<footer className="flex flex-wrap items-center justify-between gap-3 border-border border-t pt-4 text-text-dim text-xs">
-				<span>raineworks/marketing</span>
+				<span>raineworks/</span>
 				<CoffeeButton />
 			</footer>
 		</div>

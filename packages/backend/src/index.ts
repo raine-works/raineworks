@@ -1,5 +1,6 @@
 import { env } from '@backend/lib/env';
 import { type MicroFrontend, resolveLocalDist, serveMicroFrontends } from '@backend/lib/mfe';
+import { contactRouter } from '@backend/routers/contact';
 import { healthRouter } from '@backend/routers/health';
 import { Hono } from 'hono';
 import { compress } from 'hono/compress';
@@ -23,6 +24,7 @@ export const app = new Hono()
 	)
 	.use('*', compress())
 	.route('/api/health', healthRouter)
+	.route('/api/contact', contactRouter)
 	.all('*', async (c) => {
 		if (c.req.path.startsWith('/api')) {
 			return c.json({ error: 'API route not found', path: c.req.path }, 404);
