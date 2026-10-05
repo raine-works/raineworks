@@ -1,8 +1,10 @@
 import { createServer, loadHostKey } from '@/server';
 
-const keyPath = process.env.SSH_HOST_KEY_PATH;
-if (!keyPath) {
-	console.error('SSH_HOST_KEY_PATH is required (mounted ed25519 private key)');
+let hostKey: Buffer;
+try {
+	hostKey = loadHostKey(process.env);
+} catch (error) {
+	console.error(`ssh: ${(error as Error).message}`);
 	process.exit(1);
 }
 
@@ -24,6 +26,6 @@ const limits = {
 	...(intFromEnv('SSH_MAX_PER_IP') && { maxPerIp: intFromEnv('SSH_MAX_PER_IP') }),
 	...(intFromEnv('SSH_RATE_PER_IP') && { ratePerIp: intFromEnv('SSH_RATE_PER_IP') }),
 };
-const { listen } = createServer({ hostKey: loadHostKey(keyPath), port, limits });
+const { listen } = createServer({ hostKey, port, limits });
 await listen();
 console.log(`ssh listening on :${port}`);
