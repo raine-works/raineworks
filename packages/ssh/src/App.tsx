@@ -1,4 +1,4 @@
-import { profile } from '@marketing/content/profile';
+import { profile } from '@web/content/profile';
 import { Box, Text, useApp, useInput, useWindowSize } from 'ink';
 import { useState } from 'react';
 import { sanitize } from '@/sanitize';

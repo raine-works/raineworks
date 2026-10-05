@@ -8,7 +8,7 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@app/marketing": "workspace:*",
+		"@app/web": "workspace:*",
 		"ink": "8.0.0",
 		"react": "catalog:",
 		"ssh2": "1.17.0"

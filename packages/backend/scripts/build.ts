@@ -13,7 +13,7 @@ import { cleanBunBuildArtifacts } from '@app/tools/cli';
  *    embedding every staged frontend into the binary.
  *
  * To add a new micro-frontend: create `packages/<name>` (same shape as
- * `packages/marketing`), then add it to the list below AND register its
+ * `packages/web`), then add it to the list below AND register its
  * route in `src/index.ts`'s `frontends` array.
  */
 
@@ -26,7 +26,7 @@ const stagedMfesDir = join(backendDist, 'mfes');
 const outfile = join(backendDist, 'server');
 
 /** Frontend packages to build and embed. Keep in sync with `src/index.ts`. */
-const frontends = [{ name: '@app/marketing', path: 'packages/marketing', route: '__root__' }];
+const frontends = [{ name: '@app/web', path: 'packages/web', route: '__root__' }];
 
 cleanBunBuildArtifacts(repoRoot);
 cleanBunBuildArtifacts(packageDir);

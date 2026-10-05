@@ -4,7 +4,7 @@ import { runFrontendBuildCli } from '@app/tools/build';
 const packageDir = join(import.meta.dir, '..');
 
 await runFrontendBuildCli({
-	name: 'marketing',
+	name: 'web',
 	packageDir,
 	publicPath: '/',
 });

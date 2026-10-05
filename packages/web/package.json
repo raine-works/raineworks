@@ -1,5 +1,5 @@
 {
-	"name": "@app/marketing",
+	"name": "@app/web",
 	"private": true,
 	"type": "module",
 	"scripts": {
