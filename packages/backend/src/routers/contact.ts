@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { bodyLimit } from 'hono/body-limit';
 
 const MAX_BODY_BYTES = 10_000;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -24,20 +25,26 @@ function parseContact(body: unknown): ContactRequest | null {
  * Accepts contact form submissions. Storage/delivery is intentionally not
  * implemented yet: valid submissions are acknowledged and discarded.
  */
-export const contactRouter = new Hono().post('/', async (c) => {
-	const text = await c.req.text();
-	if (text.length > MAX_BODY_BYTES) return c.json({ error: 'Payload too large' }, 413);
+export const contactRouter = new Hono().post(
+	'/',
+	bodyLimit({
+		maxSize: MAX_BODY_BYTES,
+		onError: (c) => c.json({ error: 'Payload too large' }, 413),
+	}),
+	async (c) => {
+		const text = await c.req.text();
 
-	let body: unknown;
-	try {
-		body = JSON.parse(text);
-	} catch {
-		return c.json({ error: 'Invalid JSON' }, 400);
-	}
+		let body: unknown;
+		try {
+			body = JSON.parse(text);
+		} catch {
+			return c.json({ error: 'Invalid JSON' }, 400);
+		}
 
-	const contact = parseContact(body);
-	if (!contact) return c.json({ error: 'Invalid contact submission' }, 400);
+		const contact = parseContact(body);
+		if (!contact) return c.json({ error: 'Invalid contact submission' }, 400);
 
-	// TODO: persist or forward `contact` once a handling strategy is chosen.
-	return c.json({ received: true }, 202);
-});
+		// TODO: persist or forward `contact` once a handling strategy is chosen.
+		return c.json({ received: true }, 202);
+	},
+);
