@@ -26,7 +26,7 @@ Raine as schema.org JSON-LD). The projects load in the browser, never prerendere
 
 The articles are off until the server has an X API token (`X_BEARER_TOKEN`): `GET /api/articles` says
 `{ enabled: false }`, the nav leaves Articles out (it's listed only once the browser hears they're on, never
-prerendered), the server sends the 404 for `/articles`, and there's no `/feed.xml`. The page is `unlisted`, so
+prerendered), the server sends the 404 for `/articles` (and the route's `beforeLoad` makes it the 404 in the browser too, so it hydrates as one), and there's no `/feed.xml`. The page is `unlisted`, so
 `sitemap.xml` never names it.
 
 ```bash
