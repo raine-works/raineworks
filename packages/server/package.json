@@ -1,0 +1,27 @@
+{
+	"name": "@raineworks/server",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./app": "./src/app.ts",
+		"./*": "./src/*.ts"
+	},
+	"scripts": {
+		"dev": "NODE_ENV=development bun run --watch src/main.ts",
+		"start": "bun run src/main.ts",
+		"build": "bun scripts/build.ts",
+		"docker:build": "docker build --build-arg VERSION=$(bun run --silent release next) --build-arg GIT_SHA=$(git rev-parse HEAD) -f ./Dockerfile -t raineworks-server:latest ../..",
+		"test": "bun test",
+		"typecheck": "bun check"
+	},
+	"dependencies": {
+		"@raineworks/tools": "workspace:*",
+		"hono": "catalog:",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@raineworks/tsconfig": "workspace:*",
+		"@types/bun": "catalog:dev"
+	}
+}

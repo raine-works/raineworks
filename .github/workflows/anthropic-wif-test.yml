@@ -1,0 +1,38 @@
+# Checks that GitHub Actions can sign in to Anthropic with workload identity federation: the job's GitHub OIDC token
+# is exchanged for a short-lived Anthropic access token (printed redacted), with no API key stored. Run it by hand
+# (Actions → anthropic-wif-test → Run workflow) after changing the federation rule; release-note.yml signs in the same
+# way, through anthropics/claude-code-action.
+name: anthropic-wif-test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  call-claude:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch GitHub OIDC token
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const token = await core.getIDToken('https://api.anthropic.com');
+            core.setSecret(token);
+            core.exportVariable('JWT', token);
+      - name: Exchange for an Anthropic access token
+        run: |
+          curl -sS https://api.anthropic.com/v1/oauth/token \
+            -H "content-type: application/json" \
+            --data @- <<JSON | jq 'with_entries(if (.key | test("token$")) then .value = "<redacted>" else . end)'
+          {
+            "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
+            "assertion": "$JWT",
+            "federation_rule_id": "fdrl_015cLigViCEJyWAtahH5ytSC",
+            "organization_id": "34318a61-fac0-4077-a795-808d80efef19",
+            "service_account_id": "svac_015F3BEwDj2EJr7bHDgKmFkL",
+            "workspace_id": "wrkspc_01G5WKL4tLYspnSa4BYdzUCS"
+          }
+          JSON

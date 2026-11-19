@@ -1,37 +1,64 @@
 {
 	"name": "raineworks",
 	"private": true,
+	"license": "MIT",
 	"type": "module",
-	"workspaces": [
-		"packages/*"
-	],
-	"catalog": {
-		"@biomejs/biome": "2.5.15",
-		"react": "19.3.0",
-		"react-dom": "19.3.0",
-		"@types/react": "19.3.0",
-		"@types/react-dom": "19.3.0",
-		"@types/bun": "1.4.2",
-		"typescript": "7.0.2",
-		"tailwindcss": "4.3.3",
-		"bun-plugin-tailwind": "0.1.2",
-		"@tanstack/react-router": "1.170.40",
-		"clsx": "2.1.1",
-		"hono": "4.13.12"
+	"scripts": {
+		"build": "bun run --filter @raineworks/server build",
+		"build:web": "bun run --parallel --filter '@raineworks/web-*' build",
+		"clean": "find . -name node_modules -type d -prune -exec rm -rf {} + && find packages -name dist -type d -prune -exec rm -rf {} +",
+		"dev": "bun run --parallel --filter '@raineworks/web-*' --filter @raineworks/server dev",
+		"dev:kill": "bun scripts/kill-ports.ts",
+		"format": "bun fmt",
+		"images": "bun packages/tools/src/images-cli.ts",
+		"lint": "bun fmt --check",
+		"lint:fix": "bun fmt",
+		"release": "bun packages/tools/src/release-cli.ts",
+		"start": "bun run --filter @raineworks/server start",
+		"test": "bun run --sequential --filter '*' test",
+		"typecheck": "bun check -b"
+	},
+	"workspaces": {
+		"packages": [
+			"packages/*"
+		],
+		"catalog": {
+			"@fontsource-variable/geist": "5.3.0",
+			"@fontsource-variable/geist-mono": "5.3.0",
+			"@tanstack/react-query": "5.107.1",
+			"@tanstack/react-router": "1.170.46",
+			"@ui-sdk/core": "0.1.0-beta.10",
+			"@ui-sdk/react": "0.1.0-beta.10",
+			"class-variance-authority": "0.7.1",
+			"clsx": "2.1.1",
+			"highlight.js": "11.12.0",
+			"hono": "4.13.17",
+			"lucide-react": "1.63.0",
+			"radix-ui": "1.8.1",
+			"react": "19.3.1",
+			"react-dom": "19.3.1",
+			"sonner": "2.0.8",
+			"tailwind-merge": "3.7.0",
+			"tw-animate-css": "1.4.0",
+			"zod": "4.6.7"
+		},
+		"catalogs": {
+			"dev": {
+				"@types/bun": "1.4.4",
+				"@types/react": "19.3.0",
+				"@types/react-dom": "19.3.0",
+				"bun-plugin-tailwind": "0.1.2",
+				"tailwindcss": "4.3.5"
+			}
+		}
 	},
 	"devDependencies": {
-		"@biomejs/biome": "catalog:",
-		"@types/bun": "catalog:",
-		"typescript": "catalog:"
+		"@raineworks/tools": "workspace:*",
+		"@raineworks/tsconfig": "workspace:*",
+		"@types/bun": "catalog:dev"
 	},
-	"scripts": {
-		"build": "bun run --filter '*' build",
-		"dev": "bun run --parallel --filter '*' dev",
-		"format": "biome format --write .",
-		"lint": "biome check .",
-		"lint:fix": "biome check --write .",
-		"start": "bun run --filter @app/backend start",
-		"test": "bun test --parallel",
-		"typecheck": "tsc --noEmit"
-	}
+	"engines": {
+		"bun": "1.4.4"
+	},
+	"packageManager": "bun@1.4.4"
 }

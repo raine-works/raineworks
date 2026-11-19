@@ -1,0 +1,12 @@
+@import '@raineworks/ui/globals.css';
+
+@source './';
+
+/* A faint grid behind the home page's hero, fading out from the top. Lines in the border colour, so it follows the theme. */
+@utility bg-grid {
+	background-image:
+		linear-gradient(to right, var(--border) 1px, transparent 1px),
+		linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+	background-size: 2.5rem 2.5rem;
+	mask-image: radial-gradient(ellipse 50% 65% at 50% 0%, black 25%, transparent 100%);
+}

@@ -1,0 +1,229 @@
+# The third of the three release workflows (see release-plan.yml). Its caller runs it on master once the
+# plan says it's a release, its own checks passed and the images are in the registry. It:
+#
+#   1. checks the planned version is still this run's to take (a re-run after a newer release tags nothing);
+#   2. runs the repository's `before-command`, if any: what a release needs built before anything is tagged, so one
+#      that can't have it stops with nothing done;
+#   3. tags every image with the version, `latest` and its commit: a registry copy of the image built from its
+#      inputs, never a rebuild;
+#   4. runs the repository's `after-tag-command`, if any, with what was tagged (`IMAGES`);
+#   5. tags the repository v<version> and publishes its GitHub release: from its note (<notes-dir>/<version>.md) if
+#      one was written, else the pull requests merged since the last release, with every file the commands left
+#      in `$RELEASE_ASSETS` attached.
+#
+# The images are tagged first, so a version that's tagged in git always has its images. Each step does nothing a
+# second time, so a release that fails part way is finished with "Re-run failed jobs".
+#
+# The two commands are the repository's own, and get VERSION, RELEASE_ASSETS (a folder: what's in it is attached to
+# the release) and, after tagging, IMAGES (JSON: { "<service>": "ghcr.io/…@sha256:…" }). They run while no registry
+# credentials are on disk: before the login, and after the logout.
+#
+# Its caller grants it contents: write and packages: write. If the repository has a .github/actions/setup action
+# (its toolchain and dependencies), it's run before its commands.
+name: Release publish
+
+on:
+  workflow_call:
+    inputs:
+      name:
+        description: The project's name, as its releases are titled (e.g. raineworks, for "raineworks 2026.11.1").
+        type: string
+        required: true
+      version:
+        description: The version to release (release-plan.yml's `version`).
+        type: string
+        required: true
+      services:
+        description: Every image, as JSON (release-plan.yml's `services`).
+        type: string
+        required: true
+      changed:
+        description: The services whose image changed (release-plan.yml's `changed`), for the summary.
+        type: string
+        default: '[]'
+      image-prefix:
+        description: What every image's name starts with (<image-prefix>-<service>). Without it, the repository's name.
+        type: string
+        default: ''
+      notes-dir:
+        description: The folder the repository keeps its release notes in, one <version>.md each.
+        type: string
+        default: packages/ui/src/release-notes
+      notes-command:
+        description: >-
+          A command that prints a note as a GitHub release's text, run with the version after it. Empty to use the
+          note's file as it is.
+        type: string
+        default: bun packages/tools/src/release-cli.ts notes
+      before-command:
+        description: A command run before anything is tagged. Empty for none.
+        type: string
+        default: ''
+      after-tag-command:
+        description: A command run once the images are tagged, before the repository is. Empty for none.
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: release
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      packages: write
+    env:
+      VERSION: ${{ inputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Every tag, as of now: master's runs take turns (a re-run too), so none is being made meanwhile.
+          fetch-depth: 0
+          filter: blob:none
+          # Nothing is left on disk for later steps: the steps that tag and publish bring their own token.
+          persist-credentials: false
+      # Before the registry login below: no package's install script runs with a token that can push images on disk.
+      # The calling repository's own action, if it has one (a local path is read from the checkout).
+      - uses: ./.github/actions/setup
+        if: hashFiles('.github/actions/setup/action.yml', '.github/actions/setup/action.yaml') != ''
+
+      # The version was planned when the run started. Re-run later (a flaky check), another run may have released it,
+      # or a newer one, since: tagging the images then would point that version, or `latest`, at this older commit.
+      # Only the run whose version is still to come, or already its own, tags anything.
+      - name: Check the version is still this release's
+        run: |
+          if ! printf '%s' "$VERSION" | grep -qE '^[A-Za-z0-9][A-Za-z0-9._+-]*$'; then
+            echo "::error::That isn't a version."
+            exit 1
+          fi
+          if git rev-parse -q --verify "refs/tags/v$VERSION" >/dev/null; then
+            released="$(git rev-parse "v$VERSION^{commit}")"
+            if [ "$released" != "$GITHUB_SHA" ]; then
+              echo "::error::v$VERSION was released from ${released::7} since this run was planned. Nothing is tagged; a newer push releases this one's changes."
+              exit 1
+            fi
+          fi
+          newest="$(git tag --list 'v*' | sort -V | tail -n 1)"
+          if [ -n "$newest" ] && [ "$newest" != "v$VERSION" ] && [ "$(printf '%s\n' "$newest" "v$VERSION" | sort -V | tail -n 1)" = "$newest" ]; then
+            echo "::error::$newest is newer than v$VERSION: tagging this run's images would move latest back. Nothing is tagged."
+            exit 1
+          fi
+          # Where the commands below leave what the release should have attached.
+          mkdir -p "$RUNNER_TEMP/release-assets"
+          echo "RELEASE_ASSETS=$RUNNER_TEMP/release-assets" >> "$GITHUB_ENV"
+
+      # The repository's own (its workflow file's), before the registry login, like the install.
+      - name: Before the release
+        if: inputs.before-command != ''
+        env:
+          COMMAND: ${{ inputs.before-command }}
+        run: bash -c "$COMMAND"
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Tagging is a registry copy of the image built from its inputs: no build, seconds each. Run again, it tags the
+      # same images the same way.
+      - name: Tag the images
+        id: tag
+        env:
+          OWNER: ${{ github.repository_owner }}
+          PREFIX: ${{ inputs.image-prefix || github.event.repository.name }}
+          NAME: ${{ inputs.name }}
+          SERVICES: ${{ inputs.services }}
+          CHANGED: ${{ inputs.changed }}
+        run: |
+          {
+            echo "### $NAME $VERSION"
+            echo
+            echo "| Image | Tags | From | Digest |"
+            echo "| --- | --- | --- | --- |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          images='{}'
+          while read -r row; do
+            service="$(jq -r .service <<<"$row")"
+            inputs="$(jq -r .inputs <<<"$row")"
+            image="ghcr.io/$OWNER/$PREFIX-$service"
+            docker buildx imagetools create \
+              --tag "$image:$VERSION" --tag "$image:latest" --tag "$image:sha-$GITHUB_SHA" \
+              "$image:inputs-$inputs"
+            if jq -e --arg s "$service" 'index($s)' <<<"$CHANGED" >/dev/null; then from=changed; else from=unchanged; fi
+            # What to pin it by: the image this version tagged, whichever run built it.
+            digest="$(docker buildx imagetools inspect "$image:$VERSION" --format '{{json .Manifest.Digest}}' | jq -r .)"
+            images="$(jq -c --arg s "$service" --arg ref "$image@$digest" '. + {($s): $ref}' <<<"$images")"
+            echo "| $PREFIX-$service | \`$VERSION\`, \`latest\`, \`sha-${GITHUB_SHA::7}\` | \`inputs-$inputs\` ($from) | \`$digest\` |" >> "$GITHUB_STEP_SUMMARY"
+          done < <(jq -c '.[]' <<<"$SERVICES")
+          echo "images=$images" >> "$GITHUB_OUTPUT"
+      # Nothing after this needs the registry: its credentials don't stay on disk for the steps that run the
+      # repository's code.
+      - name: Log out of the registry
+        run: docker logout ghcr.io
+
+      - name: After the images are tagged
+        if: inputs.after-tag-command != ''
+        env:
+          COMMAND: ${{ inputs.after-tag-command }}
+          IMAGES: ${{ steps.tag.outputs.images }}
+        run: bash -c "$COMMAND"
+
+      # A tag isn't a push to master, so the ruleset doesn't cover it: the workflow's own token makes it (an annotated
+      # tag object, then its ref), through the API. A tag made by that token starts no workflow, so whatever rolls a
+      # release out follows the registry, or is started from the caller.
+      - name: Tag the repository
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NAME: ${{ inputs.name }}
+        run: |
+          # Run again for the same commit, the tag is already there: nothing to do (the check above saw it's ours).
+          if gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/v$VERSION" >/dev/null 2>&1; then
+            echo "v$VERSION is already tagged."
+            exit 0
+          fi
+          tag="$(gh api "repos/$GITHUB_REPOSITORY/git/tags" -f tag="v$VERSION" -f message="$NAME $VERSION" \
+            -f object="$GITHUB_SHA" -f type=commit \
+            -f 'tagger[name]=github-actions[bot]' -f 'tagger[email]=41898282+github-actions[bot]@users.noreply.github.com' \
+            -q .sha)"
+          gh api "repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/tags/v$VERSION" -f sha="$tag" >/dev/null
+          echo "Tagged v$VERSION (${GITHUB_SHA::7})."
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NAME: ${{ inputs.name }}
+          NOTES_DIR: ${{ inputs.notes-dir }}
+          NOTES_COMMAND: ${{ inputs.notes-command }}
+        run: |
+          assets=()
+          while IFS= read -r -d '' asset; do assets+=("$asset"); done < <(find "$RELEASE_ASSETS" -maxdepth 1 -type f -print0 | sort -z)
+          if gh release view "v$VERSION" >/dev/null 2>&1; then
+            echo "v$VERSION is already published."
+            # Run again: attach what's missing, never replace what's there (it may be in use by its checksum already).
+            attached="$(gh release view "v$VERSION" --json assets --jq '.assets[].name')"
+            for asset in "${assets[@]}"; do
+              if grep -qxF "$(basename "$asset")" <<<"$attached"; then
+                echo "$(basename "$asset") is already attached."
+              else
+                gh release upload "v$VERSION" "$asset"
+              fi
+            done
+            exit 0
+          fi
+          note="${NOTES_DIR%/}/$VERSION.md"
+          if [ -n "$NOTES_DIR" ] && [ -f "$note" ]; then
+            if [ -n "$NOTES_COMMAND" ]; then
+              bash -c "$NOTES_COMMAND $VERSION" > "$RUNNER_TEMP/release.md"
+            else
+              cp "$note" "$RUNNER_TEMP/release.md"
+            fi
+            gh release create "v$VERSION" --title "$NAME $VERSION" --notes-file "$RUNNER_TEMP/release.md" --verify-tag "${assets[@]}"
+          else
+            # No note: the pull requests merged since the last release.
+            gh release create "v$VERSION" --title "$NAME $VERSION" --generate-notes --verify-tag "${assets[@]}"
+          fi

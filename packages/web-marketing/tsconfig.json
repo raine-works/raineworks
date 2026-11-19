@@ -1,0 +1,10 @@
+{
+	"extends": "@raineworks/tsconfig/react-app.json",
+	"compilerOptions": {
+		"rootDir": "../",
+		"paths": {
+			"@raineworks/web-marketing/*": ["./src/*"]
+		}
+	},
+	"include": ["src", "scripts", "../ui/src/lib/build-env.d.ts"]
+}
