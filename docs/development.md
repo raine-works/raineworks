@@ -28,6 +28,7 @@ Run at the root.
 | `bun run typecheck` | `bun check -b`: every package, through the root `tsconfig.json`'s references |
 | `bun run test` | Every package's `bun test`, one after another |
 | `bun run release` | Starts the next release's note; see [Releases](#releases) |
+| `bun run openapi` | Prints the API's OpenAPI 3.1 document (`--out api.json` writes it); the same one `GET /api/openapi.json` serves |
 | `bun run clean` | Removes every `node_modules` and `dist` |
 
 The server reads `packages/server/.env.local` if present (`.env.example` lists the settings: `PORT`, `HOST`,

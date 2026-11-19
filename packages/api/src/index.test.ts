@@ -17,9 +17,9 @@ describe('the API client', () => {
 		const build = { build: 'abc', version: '2026.11.1', commit: '1234567' };
 		const { seen, fetch } = recording(() => Response.json(build));
 		const api = createApiClient({ url: 'http://api.test/', fetch });
-		const response = await api.api.build.$get();
+		const response = await api.api.build.$get({ query: { zone: 'marketing' } });
 		expect(await response.json()).toEqual(build);
-		expect(seen.map((request) => request.url)).toEqual(['http://api.test/api/build']);
+		expect(seen.map((request) => request.url)).toEqual(['http://api.test/api/build?zone=marketing']);
 	});
 
 	describe('with no server origin', () => {
@@ -32,14 +32,14 @@ describe('the API client', () => {
 		test('calls the page’s own origin in a browser', async () => {
 			Object.defineProperty(globalThis, 'location', { value: { origin: 'https://app.test' }, configurable: true });
 			const { seen, fetch } = recording(() => Response.json({ environment: 'test' }));
-			await createApiClient({ url: '', fetch }).api.build.$get();
-			expect(seen.map((request) => request.url)).toEqual(['https://app.test/api/build']);
+			await createApiClient({ url: '', fetch }).api.build.$get({ query: { zone: 'marketing' } });
+			expect(seen.map((request) => request.url)).toEqual(['https://app.test/api/build?zone=marketing']);
 		});
 
 		test('calls a path of its own where there’s no page', async () => {
 			Reflect.deleteProperty(globalThis, 'location');
 			const { seen, fetch } = recording(() => Response.json({ environment: 'test' }));
-			await createApiClient({ url: '/', fetch }).api.build.$get();
+			await createApiClient({ url: '/', fetch }).api.build.$get({ query: { zone: 'marketing' } });
 			expect(seen.map((request) => new URL(request.url, 'http://x').pathname)).toEqual(['/api/build']);
 		});
 	});

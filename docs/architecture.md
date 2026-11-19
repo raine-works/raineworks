@@ -53,14 +53,18 @@ Every zone shares the origin, so they share cookies and `localStorage` (the them
 /healthz, /readyz            probes (outside /api)
 /api/build                   the build a zone is serving, for its update check
 /api/contact                 the contact form (POST; validated and acknowledged with a 202, not yet stored or delivered)
+/api/openapi.json            the OpenAPI 3.1 document of every /api route, generated from the routes (lib/openapi)
 /api/*                       anything else: a JSON 404
 /*                           the zones (lib/spa)
 ```
 
 - `src/main.ts` starts `Bun.serve` (loopback in development, every interface otherwise) and stops gracefully on
   SIGTERM: `/readyz` fails for `SHUTDOWN_DRAIN_MS`, then the server stops taking connections and lets requests finish.
-- `src/app.ts` builds the app (`createApp`): secure headers on everything, the API, then `lib/spa`. `AppType` (the
-  `/api` tree) types `@raineworks/api`.
+- `src/app.ts` builds the app (`createApp`): secure headers on everything, the API, then `lib/spa`, and one error
+  handler so every refusal is `{ error: { code, message } }`. `AppType` (the `/api` tree) types `@raineworks/api`.
+- The API documents itself: `hono-openapi` builds the OpenAPI document from the routes, their requests from their
+  validators (`lib/validate`, the Zod schemas that check them) and their responses from `describeRoute`
+  (`lib/openapi`). The docs can't drift from what the routes accept.
 - `lib/env` parses the environment with Zod. `NODE_ENV` unset is production (fail closed).
 
 ### Serving the zones (`lib/spa`)

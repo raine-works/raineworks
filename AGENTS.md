@@ -60,7 +60,14 @@ Full detail in [STYLEGUIDE.md](STYLEGUIDE.md). The ones that break things if ign
 - `src/main.ts` is the process entry (and the binary's), `src/app.ts` builds the Hono app (`createApp`, `AppType`),
   `src/index.ts` is the public entry. Probes are `/healthz` and `/readyz`, outside `/api`.
 - Routers are `<name>Router` in `src/routers/`, chained so RPC types flow to `@raineworks/api`, and mounted on `api`
-  in `app.ts`, whose module comment lists every route. Validate every input with Zod at the boundary.
+  in `app.ts`, whose module comment lists every route.
+- **Every input is validated with `validate(target, schema)`** (`lib/validate`): Zod at the boundary, a 400
+  `invalid_request` naming the problem, and the request documented from the same schema. Give each field a
+  `.meta({ description, examples })`.
+- **Every route is documented** (`GET /api/openapi.json`, `bun run openapi`): a `describeRoute` with an
+  `operationId`, a `summary`, a `description`, and **every response it can give**, each with its body's schema
+  (`jsonResponse`, `errorResponse` with its exact codes, `invalidRequest`; `lib/openapi`). A response a route can send
+  that its `describeRoute` doesn't list is a bug (`lib/openapi.test.ts` checks every one has a body).
 - Errors are `{ error: { code, message } }`: a snake_case code and a user-facing sentence.
 - Zones are served by `lib/spa` from `@raineworks/tools/zones`; never hand-roll static file serving.
 - The server listens on `PORT` (3032, what production expects).

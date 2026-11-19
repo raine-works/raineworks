@@ -14,6 +14,10 @@ standalone binary with every zone embedded, run from a distroless image. How it 
 | `src/lib/shutdown.ts` | SIGTERM: `/readyz` fails for the drain, then the server stops and requests finish |
 | `src/routers/health.ts` | `/healthz`, `/readyz` |
 | `src/routers/build.ts` | `GET /api/build?zone=`: the build a zone serves, for pages' update check |
+| `src/routers/contact.ts` | `POST /api/contact`: the contact form (validated, acknowledged with a 202) |
+| `src/lib/validate.ts` | `validate(target, schema)`: Zod at the boundary, a 400 `invalid_request`, and the request documented |
+| `src/lib/openapi.ts` | The OpenAPI document (`GET /api/openapi.json`): `jsonResponse`, `errorResponse`, `invalidRequest` for each route's `describeRoute`; tagging; the version |
+| `scripts/openapi.ts` | `bun run openapi [--out api.json]`: the same document, from the routes alone |
 | `scripts/build.ts` | `bun run build`: every zone, then `dist/server` with them embedded (`--skip-web` reuses the zones' builds) |
 | `Dockerfile` | The image: built on `oven/bun:1.4.4`, run on distroless; `VERSION` / `GIT_SHA` build args stamp it |
 
