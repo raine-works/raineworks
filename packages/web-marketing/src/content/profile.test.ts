@@ -8,9 +8,13 @@ describe('the projects', () => {
 		expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b)));
 	});
 
-	test('link to their repositories on GitHub, but for this site', () => {
-		for (const project of projects.filter((each) => each.name !== 'raineworks'))
-			expect(project.href, project.name).toStartWith('https://github.com/raine-works/');
+	test('link to their repositories on GitHub, named as each is, this site’s included', () => {
+		for (const project of projects)
+			expect(project.href, project.name).toBe(`https://github.com/raine-works/${project.name}`);
+	});
+
+	test('mark this site, and only it, as the one you’re looking at', () => {
+		expect(projects.filter((project) => project.here).map((project) => project.name)).toEqual(['raineworks']);
 	});
 
 	test('feature three on the home page', () => {

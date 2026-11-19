@@ -25,9 +25,11 @@ export interface ProjectEntry {
 	name: string;
 	description: string;
 	stack: string[];
-	href?: string;
+	href: string;
 	/** Shown on the home page. */
 	featured?: boolean;
+	/** This site: marked as the one you're looking at. */
+	here?: boolean;
 }
 
 export interface HobbyEntry {
@@ -116,7 +118,8 @@ export const projects: ProjectEntry[] = [
 		description:
 			'This site. A Bun workspace monorepo: a Hono backend that compiles to a single binary with every micro-frontend embedded, serving a React 19 front end built on shadcn/ui and ui-sdk.',
 		stack: ['Bun', 'React 19', 'TypeScript', 'Hono', 'Tailwind v4', 'shadcn/ui', 'ui-sdk', 'Docker'],
-		href: undefined,
+		href: 'https://github.com/raine-works/raineworks',
+		here: true,
 	},
 	{
 		name: 'sendspin-a1s-source',

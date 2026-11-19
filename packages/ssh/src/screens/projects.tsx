@@ -50,16 +50,13 @@ export function Projects({ index, onPick, width }: { index: number; onPick: (ind
 						<text fg={theme.dim}>built with</text>
 						<Chips items={project.stack.map(sanitize)} />
 						<box style={{ height: 1 }} />
-						{project.href ? (
-							<text>
-								<span fg={theme.dim}>{'repo  '}</span>
-								<a href={project.href} fg={theme.accent}>
-									{project.href.replace('https://', '')}
-								</a>
-							</text>
-						) : (
-							<text fg={theme.success}>● you’re looking at it (in a terminal, this time)</text>
-						)}
+						<text>
+							<span fg={theme.dim}>{'repo  '}</span>
+							<a href={project.href} fg={theme.accent}>
+								{project.href.replace('https://', '')}
+							</a>
+						</text>
+						{project.here && <text fg={theme.success}>● you’re looking at it (in a terminal, this time)</text>}
 						<box style={{ height: 1 }} />
 					</Card>
 				)}
