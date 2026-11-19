@@ -3,12 +3,15 @@
  *
  * ```
  * /healthz, /readyz            probes
+ * /api/articles                Raine's articles on X (lib/x; cached an hour; `enabled: false` without X_BEARER_TOKEN)
  * /api/build                   the build a zone is serving, for its update check (lib/spa)
  * /api/contact                 the contact form (POST; acknowledged, not yet stored or delivered)
  * /api/projects                Raine's projects: repositories tagged `raineworks` on GitHub (lib/github; cached ten minutes)
  * /api/openapi.json            OpenAPI 3.1 document of every /api route (lib/openapi; cached publicly an hour)
  * /api/*                       anything else under /api: a JSON 404
- * /*                           the web zones (lib/spa), one per entry in @raineworks/tools/zones; `/` is `marketing`
+ * /feed.xml                    the articles as RSS (lib/rss; only with X_BEARER_TOKEN)
+ * /*                           the web zones (lib/spa), one per entry in @raineworks/tools/zones; `/` is `marketing`;
+ *                              `/articles` is their 404 without X_BEARER_TOKEN
  * ```
  *
  * `AppType` is the type root for the `hc` RPC client in `@raineworks/api`.
@@ -17,7 +20,10 @@
  */
 
 import { specFor } from '@raineworks/server/lib/openapi';
+import { articlesFeed } from '@raineworks/server/lib/rss';
 import { serveSpa } from '@raineworks/server/lib/spa';
+import { articles, ARTICLES_TTL_MS, articlesEnabled } from '@raineworks/server/lib/x';
+import { articlesRouter } from '@raineworks/server/routers/articles';
 import { buildRouter } from '@raineworks/server/routers/build';
 import { contactRouter } from '@raineworks/server/routers/contact';
 import { healthRouter } from '@raineworks/server/routers/health';
@@ -28,6 +34,7 @@ import { secureHeaders } from 'hono/secure-headers';
 
 /** Every `/api` route. Chained so an RPC client can infer request/response types. */
 export const api = new Hono()
+	.route('/articles', articlesRouter)
 	.route('/build', buildRouter)
 	.route('/contact', contactRouter)
 	.route('/projects', projectsRouter);
@@ -79,7 +86,19 @@ export function createApp() {
 	app.route('/api', api);
 	app.all('/api/*', (c) => c.json({ error: { code: 'not_found', message: 'Not found.' } }, 404));
 
-	app.get('*', async (c) => (await serveSpa(c.req.raw)) ?? c.text('Not Found', 404));
+	// The articles as RSS; without an X API token, nothing here (the zone's 404 for an unknown file).
+	app.get('/feed.xml', async (c, next) => {
+		if (!articlesEnabled()) return next();
+		const list = await articles();
+		if (!list) return c.text('The articles aren’t available right now.', 503);
+		c.header('Cache-Control', `public, max-age=${ARTICLES_TTL_MS / 1000}`);
+		return c.body(articlesFeed(list.articles), 200, { 'Content-Type': 'application/rss+xml; charset=utf-8' });
+	});
+
+	app.get(
+		'*',
+		async (c) => (await serveSpa(c.req.raw, articlesEnabled() ? [] : ['/articles'])) ?? c.text('Not Found', 404),
+	);
 
 	app.onError(renderError);
 

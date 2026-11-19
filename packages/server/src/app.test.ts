@@ -18,6 +18,10 @@ await Bun.write(
 	'<!doctype html><html><head><title>Work · raineworks</title></head><body><div id="root"><h1>Work</h1></div></body></html>',
 );
 await Bun.write(
+	join(zoneDir, 'articles/index.html'),
+	'<!doctype html><html><head><title>Articles · raineworks</title></head><body><div id="root"><h1>Articles</h1></div></body></html>',
+);
+await Bun.write(
 	join(zoneDir, '404.html'),
 	'<!doctype html><html><head><title>Page not found · raineworks</title></head><body><div id="root"></div></body></html>',
 );
@@ -29,6 +33,8 @@ Bun.env.WEB_DIST = webDist;
 
 const { createApp } = await import('@raineworks/server/app');
 const { resetProjects } = await import('@raineworks/server/lib/github');
+const { env } = await import('@raineworks/server/lib/env');
+const { resetArticles } = await import('@raineworks/server/lib/x');
 const app = createApp();
 const get = (path: string, headers: Record<string, string> = {}) =>
 	app.request(`http://raineworks.test${path}`, { headers });
@@ -135,6 +141,63 @@ describe('the projects', () => {
 		const response = await get('/api/projects');
 		expect(response.status).toBe(503);
 		expect(((await response.json()) as { error: { code: string } }).error.code).toBe('projects_unavailable');
+	});
+});
+
+describe('the articles', () => {
+	const realFetch = globalThis.fetch;
+	afterEach(() => {
+		globalThis.fetch = realFetch;
+		env.X_BEARER_TOKEN = undefined;
+		resetArticles();
+	});
+
+	test('are off without an X API token: the API says so, the page is the 404, and there’s no feed', async () => {
+		globalThis.fetch = (async () => {
+			throw new Error('X was asked');
+		}) as unknown as typeof fetch;
+		expect(await (await get('/api/articles')).json()).toEqual({ enabled: false });
+		const page = await get('/articles');
+		expect(page.status).toBe(404);
+		expect(await page.text()).toContain('Page not found');
+		expect((await get('/feed.xml')).status).toBe(404);
+	});
+
+	test('are on with one: the list, the page, and the feed', async () => {
+		env.X_BEARER_TOKEN = 'token';
+		globalThis.fetch = (async (input: string | URL | Request) =>
+			String(input).includes('/users/by/username/')
+				? Response.json({ data: { id: '42' } })
+				: Response.json({
+						data: [
+							{
+								id: '7',
+								text: 'x.com/i/article/7',
+								created_at: '2026-11-18T12:00:00.000Z',
+								article: { title: 'On homelabs', preview_text: 'One small machine.' },
+							},
+						],
+						meta: { newest_id: '7' },
+					})) as unknown as typeof fetch;
+		const response = await get('/api/articles');
+		expect(response.headers.get('cache-control')).toBe('public, max-age=3600');
+		expect(await response.json()).toMatchObject({
+			enabled: true,
+			articles: [{ id: '7', title: 'On homelabs', url: 'https://x.com/raineworks/status/7' }],
+		});
+		expect(await (await get('/articles')).text()).toContain('<h1>Articles</h1>');
+		const feed = await get('/feed.xml');
+		expect(feed.headers.get('content-type')).toBe('application/rss+xml; charset=utf-8');
+		expect(await feed.text()).toContain('<title>On homelabs</title>');
+	});
+
+	test('are a 503, never cached, when X hasn’t answered yet', async () => {
+		env.X_BEARER_TOKEN = 'token';
+		globalThis.fetch = (async () => new Response('down', { status: 503 })) as unknown as typeof fetch;
+		const response = await get('/api/articles');
+		expect(response.status).toBe(503);
+		expect(response.headers.get('cache-control')).toBe('no-store');
+		expect(await response.json()).toMatchObject({ error: { code: 'articles_unavailable' } });
 	});
 });
 

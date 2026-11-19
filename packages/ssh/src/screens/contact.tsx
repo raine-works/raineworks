@@ -128,6 +128,7 @@ export function Contact({
 							['email', profile.contact.email, `mailto:${profile.contact.email}`],
 							['github', 'raine-works', profile.contact.github],
 							['linkedin', 'rainepetersen', profile.contact.linkedin],
+							['x', '@raineworks', profile.contact.x],
 						].map(([label, value, href]) => (
 							<text key={label}>
 								<span fg={theme.dim}>{(label ?? '').padEnd(10)}</span>

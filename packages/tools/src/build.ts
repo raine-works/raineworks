@@ -80,6 +80,8 @@ export interface PrerenderedPage {
 	head: string;
 	/** The zone's markup for it, rendered into `#root` for the client to hydrate. */
 	markup: string;
+	/** Left out of `sitemap.xml`: a page that may be off (the articles, without an X API token). */
+	unlisted?: boolean;
 }
 
 /** A zone's prerender module (`PrerenderOptions.entry`). */
@@ -168,10 +170,10 @@ export function hydrateAfterLoad(html: string): string {
 
 const escapeXml = (text: string) => text.replace(/[<>&'"]/g, (char) => `&#${char.charCodeAt(0)};`);
 
-/** Every page found (not the 404) as a `sitemap.xml`, at `siteUrl` under the zone's `publicPath`. */
+/** Every page found (not the 404, nor one `unlisted`) as a `sitemap.xml`, at `siteUrl` under the zone's `publicPath`. */
 export function sitemapXml(pages: PrerenderedPage[], siteUrl: string, publicPath: string): string {
 	const urls = pages
-		.filter((page) => page.status === 200)
+		.filter((page) => page.status === 200 && !page.unlisted)
 		.map((page) => new URL(`${publicPath}${page.path.replace(/^\/+/, '')}`, siteUrl).href)
 		.map((url) => `<url><loc>${escapeXml(url)}</loc></url>`);
 	return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.join('')}</urlset>\n`;

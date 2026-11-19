@@ -16,6 +16,8 @@ export interface PageHead {
 	description: string;
 	/** Kept out of search results (the 404). */
 	noindex?: boolean;
+	/** Left out of `sitemap.xml`: a page that may be off (the articles, without an X API token). */
+	unlisted?: boolean;
 	/** schema.org structured data about the page, written as JSON-LD. */
 	structuredData?: Record<string, unknown>;
 }
