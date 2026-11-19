@@ -17,6 +17,8 @@ const CHANNELS = [
 	{ label: 'LinkedIn', value: 'rainepetersen', href: profile.contact.linkedin, Icon: LinkedInIcon },
 ] as const;
 
+const isMail = (href: string) => href.startsWith('mailto:');
+
 export function ContactPage() {
 	return (
 		<Page
@@ -31,6 +33,8 @@ export function ContactPage() {
 							<li key={label}>
 								<a
 									href={href}
+									// GitHub and LinkedIn open in a new tab; email opens the mail app, so it stays (a new tab would be left blank).
+									{...(isMail(href) ? {} : { target: '_blank', rel: 'noopener noreferrer' })}
 									className="group flex items-center gap-4 px-5 py-4 transition-colors outline-none hover:bg-accent/60 focus-visible:bg-accent/60"
 								>
 									<span
@@ -43,7 +47,11 @@ export function ContactPage() {
 										<span className="text-xs text-muted-foreground">{label}</span>
 										<span className="font-medium">{value}</span>
 									</span>
-									<ArrowUpRightIcon className="ml-auto size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground" />
+									{!isMail(href) && <span className="sr-only">(opens in a new tab)</span>}
+									<ArrowUpRightIcon
+										aria-hidden="true"
+										className="ml-auto size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-foreground"
+									/>
 								</a>
 							</li>
 						))}
