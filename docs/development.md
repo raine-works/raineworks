@@ -116,6 +116,16 @@ makes the change and opens a pull request for it (`.github/workflows/claude.yml`
 start it. It signs in to Anthropic the same way as the release note (workload identity federation, no stored key), and
 can run the checks (`bun run lint`, `typecheck`, `test`) but nothing else.
 
+**Code review** (`.github/workflows/code-review.yml`, the check `Code review / review`): on every pull request (not
+drafts or forks), Claude reviews the change against `AGENTS.md` and the docs it lists, inline, with one summary comment
+ending `Reviewed up to <sha>`. On each push it follows up on its own findings (resolving what's fixed) and reviews
+what's new; a reply to one of its inline comments is answered in that thread (one mentioning `@claude` is
+`claude.yml`'s instead). It reviews the docs-sync app's pull requests too. It fails when it couldn't finish, so a review
+that didn't happen never passes quietly, and on a pull request that changes `code-review.yml` itself (Claude runs only
+`master`'s copy), so a person reviews that one. It posts as `claude[bot]`: the [Claude GitHub
+App](https://github.com/apps/claude) must be installed on the repository. How a pull request handles the review:
+[AGENTS.md](../AGENTS.md#pull-requests-and-code-review).
+
 **Docs sync** (`.github/workflows/docs-sync.yml`): once `master`'s CI passes, Claude checks whether what's new since its
 last run made any doc wrong (`AGENTS.md`, `STYLEGUIDE.md`, `README.md`, `docs/*.md`, the packages' READMEs) and, if so,
 opens (or updates) the `claude/docs-sync` pull request fixing them. It edits only those docs, never code or release
@@ -132,6 +142,23 @@ token would start no checks. Each run makes a token only after Claude's step, so
    `gh variable set DOCS_SYNC_APP_CLIENT_ID --body <client id>`, `gh secret set DOCS_SYNC_APP_PRIVATE_KEY < key.pem`.
 
 Without it, both workflows stop at their first step, saying what's missing.
+
+### Protecting `master`
+
+Two repository rulesets protect `master` (Settings → Rules), defined in `.github/rulesets/` and applied with
+`gh api -X POST repos/raine-works/raineworks/rulesets --input .github/rulesets/<file>.json` (`PUT
+…/rulesets/<id>` to change one: edit the file first, so the repository holds what's applied):
+
+- **Protect master** (`protect-master.json`): no deleting it or force-pushing; every change through a pull request,
+  with one approval of its last push (stale approvals dismissed) and its review threads resolved.
+- **raineworks checks** (`checks.json`): `plan / plan` (CI's plan, with its `release check`), `checks / Lint`,
+  `checks / Typecheck`, `checks / Test` and `Code review / review` must pass, with the pull request up to date with
+  `master`, so its checks ran on what lands: `plan / plan` fails a release note whose version another release took
+  while it waited.
+
+The repository's admin may bypass both, only to merge a pull request: GitHub doesn't let anyone approve their own, so
+the owner's pull requests are merged that way, after reading them and the review; and a pull request that changes
+`code-review.yml` (whose review fails on purpose) needs it too.
 
 ## Deployment
 
