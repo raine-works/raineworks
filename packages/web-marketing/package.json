@@ -12,6 +12,7 @@
 		"typecheck": "bun check"
 	},
 	"dependencies": {
+		"@raineworks/api": "workspace:*",
 		"@raineworks/tools": "workspace:*",
 		"@raineworks/ui": "workspace:*",
 		"@tanstack/react-query": "catalog:",

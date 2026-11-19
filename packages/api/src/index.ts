@@ -8,11 +8,11 @@
  * @module @raineworks/api
  */
 
-import type { AppType } from '@raineworks/server';
+import type { AppType, Project } from '@raineworks/server';
 import '@raineworks/tools/prototypes';
 import { hc } from 'hono/client';
 
-export type { AppType };
+export type { AppType, Project };
 
 const REQUEST_TIMEOUT_MS = 60_000;
 
