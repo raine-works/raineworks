@@ -48,4 +48,4 @@ jobs:
           }
           JSON
           jq 'with_entries(if (.key | test("token$")) then .value = "<redacted>" else . end)' "$RUNNER_TEMP/exchange.json"
-          jq -e '.access_token | strings' "$RUNNER_TEMP/exchange.json" >/dev/null || { echo "::error::Anthropic refused the exchange (above)."; exit 1; }
+          jq -e '.access_token | strings' "$RUNNER_TEMP/exchange.json" >/dev/null || { echo "::error::No access token came back (Anthropic's answer is above: an authentication_error is the rule refusing it, an overloaded_error is worth a re-run)."; exit 1; }
