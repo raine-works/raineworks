@@ -8,11 +8,11 @@
 import { AppLogo } from '@raineworks/ui/blocks/brand';
 import { VersionLabel } from '@raineworks/ui/blocks/release-notes';
 import { ThemeToggle } from '@raineworks/ui/blocks/theme-toggle';
+import { COPYRIGHT_HOLDER } from '@raineworks/ui/lib/brand';
 import { CoffeeButton } from '@raineworks/web-marketing/components/coffee-button';
 import { MobileNav } from '@raineworks/web-marketing/components/mobile-nav';
 import { NAV_LINKS } from '@raineworks/web-marketing/components/nav';
 import { SocialLinks } from '@raineworks/web-marketing/components/social-links';
-import { profile } from '@raineworks/web-marketing/content/profile';
 import { Link } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
 
@@ -56,7 +56,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
 					<div className="flex flex-col gap-2">
 						<AppLogo className="h-5 self-start text-muted-foreground" />
 						<p className="text-sm text-muted-foreground">
-							© {new Date().getFullYear()} {profile.name}. Open source under the MIT License.
+							© {new Date().getFullYear()} {COPYRIGHT_HOLDER}. Open source under the MIT License.
 						</p>
 						<VersionLabel className="-mx-1" />
 					</div>

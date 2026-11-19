@@ -63,7 +63,7 @@ and Geist Mono. The brand is monochrome, like the logo.
   build time (`@raineworks/tools/markdown`, the `raineworks:release-notes` module), so no Markdown parser ships. The
   list loads with the page; each note's text is its own chunk, loaded when shown. The release the page is from is
   marked **Yours**. Parts in `::: for <zones>` blocks show only in those zones.
-- **Legal** (`blocks/notices`): the site's own licence (MIT, © Raine Petersen, linking to the source on GitHub), then the
+- **Legal** (`blocks/notices`): the site's own licence (MIT, © raineworks LLC, linking to the source on GitHub), then the
   third-party notices: every open-source package the zone is built with, its licence and that licence's text, searchable.
   The zone's build works them out from what it bundled (the metafile) and writes `dist/notices.json`, fetched when the
   tab opens; packages sharing a licence text are one row. Only permissive licences (and the fonts' OFL-1.1) may ship:
