@@ -52,6 +52,7 @@ export const profile = {
 		email: 'hello@raineworks.com',
 		github: 'https://github.com/raine-works',
 		linkedin: 'https://www.linkedin.com/in/rainepetersen',
+		x: 'https://x.com/raineworks',
 		coffee: 'https://buymeacoffee.com/raineworks',
 	},
 };

@@ -11,13 +11,14 @@ import { ThemeToggle } from '@raineworks/ui/blocks/theme-toggle';
 import { COPYRIGHT_HOLDER } from '@raineworks/ui/lib/brand';
 import { CoffeeButton } from '@raineworks/web-marketing/components/coffee-button';
 import { MobileNav } from '@raineworks/web-marketing/components/mobile-nav';
-import { NAV_LINKS } from '@raineworks/web-marketing/components/nav';
+import { useNavLinks } from '@raineworks/web-marketing/components/nav';
 import { SocialLinks } from '@raineworks/web-marketing/components/social-links';
 import { Link } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
 
 /** The header, `children` (the page), and the footer. */
 export function SiteShell({ children }: { children: ReactNode }) {
+	const links = useNavLinks();
 	return (
 		<div className="relative flex min-h-screen flex-col">
 			<header className="sticky top-0 z-40 border-b border-border/60 bg-background/75 backdrop-blur-md">
@@ -30,17 +31,19 @@ export function SiteShell({ children }: { children: ReactNode }) {
 						<AppLogo className="h-6" />
 					</Link>
 					<nav aria-label="Main" className="ml-auto hidden items-center gap-0.5 md:flex">
-						{NAV_LINKS.filter((link) => link.to !== '/').map((link) => (
-							<Link
-								key={link.to}
-								to={link.to}
-								activeProps={{ className: 'text-foreground bg-accent' }}
-								inactiveProps={{ className: 'text-muted-foreground' }}
-								className="rounded-md px-3 py-1.5 text-sm font-medium transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-							>
-								{link.label}
-							</Link>
-						))}
+						{links
+							.filter((link) => link.to !== '/')
+							.map((link) => (
+								<Link
+									key={link.to}
+									to={link.to}
+									activeProps={{ className: 'text-foreground bg-accent' }}
+									inactiveProps={{ className: 'text-muted-foreground' }}
+									className="rounded-md px-3 py-1.5 text-sm font-medium transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+								>
+									{link.label}
+								</Link>
+							))}
 					</nav>
 					<div className="ml-auto flex items-center gap-1 md:ml-2">
 						<ThemeToggle />

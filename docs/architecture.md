@@ -52,12 +52,14 @@ Every zone shares the origin, so they share cookies and `localStorage` (the them
 
 ```
 /healthz, /readyz            probes (outside /api)
+/api/articles                Raine's articles on X (lib/x; cached an hour; `{ enabled: false }` without X_BEARER_TOKEN)
 /api/build                   the build a zone is serving, for its update check
 /api/contact                 the contact form (POST; validated and acknowledged with a 202, not yet stored or delivered)
 /api/projects/stars          star counts of Raine's repositories on GitHub, for the project cards (lib/github; cached)
 /api/openapi.json            the OpenAPI 3.1 document of every /api route, generated from the routes (lib/openapi)
 /api/*                       anything else: a JSON 404
-/*                           the zones (lib/spa)
+/feed.xml                    the articles as RSS (lib/rss; only with X_BEARER_TOKEN)
+/*                           the zones (lib/spa); `/articles` is the 404 without X_BEARER_TOKEN
 ```
 
 - `src/main.ts` starts `Bun.serve` (loopback in development, every interface otherwise) and stops gracefully on

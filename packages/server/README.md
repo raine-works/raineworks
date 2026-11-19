@@ -9,11 +9,14 @@ standalone binary with every zone embedded, run from a distroless image. How it 
 | `src/main.ts` | Process entry (and the binary's): `Bun.serve`, graceful shutdown |
 | `src/app.ts` | `createApp()`: headers, `/api`, the zones; `AppType` for `@raineworks/api`. Its module comment lists every route |
 | `src/index.ts` | The public entry: `createApp`, `AppType` (zones `import type` only) |
-| `src/lib/env.ts` | Settings, parsed with Zod: `PORT`, `HOST`, `WEB_DIST`, `SHUTDOWN_DRAIN_MS` (`.env.example`) |
-| `src/lib/spa.ts` | Serves the zones: embedded or from disk, each prerendered page at its path and the 404 page with its status (deep links fall back to `index.html`), precompression, ETags, the build stamp; `zoneBuild` |
+| `src/lib/env.ts` | Settings, parsed with Zod: `PORT`, `HOST`, `WEB_DIST`, `SHUTDOWN_DRAIN_MS`, `X_BEARER_TOKEN` (`.env.example`) |
+| `src/lib/spa.ts` | Serves the zones: embedded or from disk, each prerendered page at its path and the 404 page with its status (deep links fall back to `index.html`; a page that's off is the 404), precompression, ETags, the build stamp; `zoneBuild` |
 | `src/lib/shutdown.ts` | SIGTERM: `/readyz` fails for the drain, then the server stops and requests finish |
 | `src/routers/health.ts` | `/healthz`, `/readyz` |
 | `src/routers/build.ts` | `GET /api/build?zone=`: the build a zone serves, for pages' update check |
+| `src/routers/articles.ts` | `GET /api/articles`: Raine's articles on X, or `{ enabled: false }` without `X_BEARER_TOKEN` |
+| `src/lib/x.ts` | The articles from the X API: the account looked up once, then only posts newer than the newest seen, an hour apart; the last list served while X is down |
+| `src/lib/rss.ts` | The articles as RSS 2.0, for `GET /feed.xml` (only with `X_BEARER_TOKEN`) |
 | `src/routers/contact.ts` | `POST /api/contact`: the contact form (validated, acknowledged with a 202) |
 | `src/routers/projects.ts` | `GET /api/projects/stars`: each repository's GitHub stars, for the project cards |
 | `src/lib/github.ts` | The stars from GitHub: one request for every repository, kept ten minutes, the last ones served while GitHub is down |

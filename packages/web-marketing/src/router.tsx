@@ -6,7 +6,8 @@
  * /work        experience and education
  * /projects    every open-source project
  * /hobbies     what Raine does away from work
- * /contact     email, GitHub, LinkedIn
+ * /articles    Raine's articles on X (only with the server's X API token; otherwise its 404, and out of the nav)
+ * /contact     email, GitHub, LinkedIn, X
  * ```
  *
  * Every page but the home page loads lazily. Each says what it is in `staticData.head` (`@raineworks/ui/lib/head`):
@@ -57,7 +58,7 @@ const homeHead: PageHead = {
 		worksFor: work.map((entry) => ({ '@type': 'Organization', name: entry.org, url: entry.href })),
 		homeLocation: { '@type': 'Place', name: profile.location },
 		email: `mailto:${profile.contact.email}`,
-		sameAs: [profile.contact.github, profile.contact.linkedin],
+		sameAs: [profile.contact.github, profile.contact.linkedin, profile.contact.x],
 	},
 };
 
@@ -112,15 +113,29 @@ const contactRoute = createRoute({
 		head: {
 			title: 'Contact',
 			description:
-				'Get in touch with Raine Petersen: email, GitHub, LinkedIn, or a message sent straight from the site.',
+				'Get in touch with Raine Petersen: email, GitHub, LinkedIn, X, or a message sent straight from the site.',
 		},
 	},
 	component: lazyRouteComponent(() => import('@raineworks/web-marketing/routes/contact'), 'ContactPage'),
 });
 
+const articlesRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: '/articles',
+	staticData: {
+		head: {
+			title: 'Articles',
+			description: 'Articles Raine Petersen writes on X, each linking to it there, with an RSS feed.',
+			// Off until the server has an X API token: the sitemap doesn't promise it.
+			unlisted: true,
+		},
+	},
+	component: lazyRouteComponent(() => import('@raineworks/web-marketing/routes/articles'), 'ArticlesPage'),
+});
+
 /** The marketing zone's router, at `/`. Preloads a page's chunk on intent (hover, focus). */
 export const router = createRouter({
-	routeTree: rootRoute.addChildren([homeRoute, workRoute, projectsRoute, hobbiesRoute, contactRoute]),
+	routeTree: rootRoute.addChildren([homeRoute, workRoute, projectsRoute, articlesRoute, hobbiesRoute, contactRoute]),
 	basepath: ZONES.marketing.basepath,
 	context: { queryClient },
 	defaultPreload: 'intent',
