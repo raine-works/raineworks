@@ -1,11 +1,21 @@
 [install]
 # Pin exact versions when installing packages
-save = true
 exact = true
 
 [test]
 coverage = false
 
-[serve.static]
-sourcemap = "linked"
-plugins = ["bun-plugin-tailwind"]
+# `bun fmt` (`bun run format`; `bun run lint` checks it): Prettier's options, in camelCase.
+[fmt]
+printWidth = 120
+useTabs = true
+singleQuote = true
+trailingComma = "all"
+arrowParens = "always"
+sortImports = true
+# Prose and tables are laid out by hand; workflows and pages kept as written.
+ignorePatterns = ["**/*.md", "**/*.yml", "**/*.yaml", "**/*.html", "bun.lock"]
+
+# Classes in Tailwind's order, by the theme every zone imports (so its own colours, `bg-brand`, sort as known).
+[fmt.sortTailwindcss]
+stylesheet = "./packages/ui/src/styles/globals.css"

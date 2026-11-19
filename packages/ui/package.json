@@ -1,0 +1,45 @@
+{
+	"name": "@raineworks/ui",
+	"private": true,
+	"type": "module",
+	"exports": {
+		"./globals.css": "./src/styles/globals.css",
+		"./app/*": "./src/app/*.tsx",
+		"./assets/*": "./src/assets/*",
+		"./blocks/*": "./src/blocks/*.tsx",
+		"./components/*": "./src/components/*.tsx",
+		"./hooks/*": "./src/hooks/*.ts",
+		"./lib/*": "./src/lib/*.ts"
+	},
+	"scripts": {
+		"test": "bun test",
+		"typecheck": "bun check"
+	},
+	"dependencies": {
+		"@fontsource-variable/geist": "catalog:",
+		"@fontsource-variable/geist-mono": "catalog:",
+		"@raineworks/api": "workspace:*",
+		"@raineworks/tools": "workspace:*",
+		"@tanstack/react-query": "catalog:",
+		"@tanstack/react-router": "catalog:",
+		"@ui-sdk/core": "catalog:",
+		"@ui-sdk/react": "catalog:",
+		"class-variance-authority": "catalog:",
+		"clsx": "catalog:",
+		"lucide-react": "catalog:",
+		"radix-ui": "catalog:",
+		"react": "catalog:",
+		"react-dom": "catalog:",
+		"sonner": "catalog:",
+		"tailwind-merge": "catalog:",
+		"tw-animate-css": "catalog:"
+	},
+	"devDependencies": {
+		"@raineworks/server": "workspace:*",
+		"@raineworks/tsconfig": "workspace:*",
+		"@types/bun": "catalog:dev",
+		"@types/react": "catalog:dev",
+		"@types/react-dom": "catalog:dev",
+		"tailwindcss": "catalog:dev"
+	}
+}

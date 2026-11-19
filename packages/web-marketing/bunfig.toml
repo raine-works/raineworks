@@ -1,0 +1,3 @@
+# `bun test` in this package. Coverage stays off until the pages have render tests.
+[test]
+coverage = false

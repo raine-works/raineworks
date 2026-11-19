@@ -1,0 +1,21 @@
+{
+	"name": "@raineworks/api",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"scripts": {
+		"test": "bun test",
+		"typecheck": "bun check"
+	},
+	"dependencies": {
+		"@raineworks/tools": "workspace:*",
+		"hono": "catalog:"
+	},
+	"devDependencies": {
+		"@raineworks/server": "workspace:*",
+		"@raineworks/tsconfig": "workspace:*",
+		"@types/bun": "catalog:dev"
+	}
+}

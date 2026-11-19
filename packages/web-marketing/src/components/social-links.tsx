@@ -1,0 +1,38 @@
+/**
+ * Icon buttons to GitHub, LinkedIn and email.
+ *
+ * @module components/social-links
+ */
+
+import { Button } from '@raineworks/ui/components/button';
+import { GitHubIcon, LinkedInIcon } from '@raineworks/web-marketing/components/brand-icons';
+import { profile } from '@raineworks/web-marketing/content/profile';
+import { MailIcon } from 'lucide-react';
+
+const LINKS = [
+	{ label: 'GitHub', href: profile.contact.github, Icon: GitHubIcon },
+	{ label: 'LinkedIn', href: profile.contact.linkedin, Icon: LinkedInIcon },
+	{ label: 'Email', href: `mailto:${profile.contact.email}`, Icon: MailIcon },
+] as const;
+
+/** Icon buttons to GitHub, LinkedIn and email. */
+export function SocialLinks() {
+	return (
+		<ul className="flex items-center gap-1">
+			{LINKS.map(({ label, href, Icon }) => (
+				<li key={label}>
+					<Button asChild variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+						<a
+							href={href}
+							aria-label={label}
+							target={href.startsWith('mailto:') ? undefined : '_blank'}
+							rel="noopener noreferrer"
+						>
+							<Icon className="size-4" />
+						</a>
+					</Button>
+				</li>
+			))}
+		</ul>
+	);
+}

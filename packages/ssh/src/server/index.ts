@@ -1,10 +1,19 @@
+/**
+ * The SSH server (`ssh2`): `none` auth only, one pty `shell` session per connection running the Ink app over the
+ * channel. Exec, subsystems, forwarding and shells without a pty are refused. `loadHostKey` reads the host key from
+ * `SSH_HOST_KEY` (PEM text, `\n` escapes allowed) or the file at `SSH_HOST_KEY_PATH`; never generated or baked in.
+ *
+ * @module server/index
+ */
+
 import { readFileSync } from 'node:fs';
+
+import { App } from '@raineworks/ssh/app';
+import { clampSize, ConnectionGuard, defaultLimits, type Limits } from '@raineworks/ssh/server/limits';
+import { TerminalInput, TerminalOutput } from '@raineworks/ssh/server/terminal';
 import { render } from 'ink';
 import { createElement } from 'react';
 import { Server, utils } from 'ssh2';
-import { App } from '@/App';
-import { ConnectionGuard, clampSize, defaultLimits, type Limits } from '@/server/limits';
-import { TerminalInput, TerminalOutput } from '@/server/terminal';
 
 export type ServerOptions = {
 	hostKey: string | Buffer;

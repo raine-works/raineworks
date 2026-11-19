@@ -1,23 +1,24 @@
 {
-	"name": "@app/ssh",
+	"name": "@raineworks/ssh",
 	"private": true,
 	"type": "module",
 	"scripts": {
 		"build": "bun scripts/build.ts",
 		"start": "bun src/main.ts",
-		"typecheck": "tsc --noEmit"
+		"test": "bun test",
+		"typecheck": "bun check"
 	},
 	"dependencies": {
-		"@app/web": "workspace:*",
-		"ink": "8.0.0",
+		"@raineworks/web-marketing": "workspace:*",
+		"ink": "catalog:",
 		"react": "catalog:",
-		"ssh2": "1.17.0"
+		"ssh2": "catalog:"
 	},
 	"devDependencies": {
-		"@types/bun": "catalog:",
-		"@types/react": "catalog:",
-		"@types/ssh2": "1.15.6",
-		"ink-testing-library": "4.0.0",
-		"typescript": "catalog:"
+		"@raineworks/tsconfig": "workspace:*",
+		"@types/bun": "catalog:dev",
+		"@types/react": "catalog:dev",
+		"@types/ssh2": "catalog:dev",
+		"ink-testing-library": "catalog:dev"
 	}
 }

@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test';
-import { ConnectionGuard, clampSize, defaultLimits } from '@/server/limits';
+
+import { clampSize, ConnectionGuard, defaultLimits } from '@raineworks/ssh/server/limits';
 
 const limits = { ...defaultLimits, maxConnections: 3, maxPerIp: 2, ratePerIp: 4, rateWindowMs: 1000 };
 

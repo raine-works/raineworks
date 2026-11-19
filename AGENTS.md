@@ -1,27 +1,143 @@
-# Project Guidelines & Rules
+# Agent guidance for raineworks
 
-## Import Aliases Rule
+Rules for anyone (human or agent) changing this repo. They take precedence over generic best practices.
+`CLAUDE.md` is a symlink to this file. Edit `AGENTS.md`, not the link.
 
-- **Always use import aliases** rather than relative imports (`./` or `../`) anywhere in this codebase:
-  - Within each package, use the `@/*` alias for internal file imports (e.g., `import { app } from '@/index'`).
-  - For cross-package references, use the `@app/<package>` workspace alias (e.g., `import { getAssetHeaders } from '@app/tools/http'`) or the shorthand alias (`@tools`, `@backend`, `@web`, `@ssh`).
-  - Never use relative imports like `import ... from '../../web/dist'` in source files, test files, or build scripts.
+This file holds **rules**. The reasoning, design and how-tos are in the docs below. Read the relevant one before you
+change that area.
 
-## Build Rule
+| Doc | Read it when |
+| --- | --- |
+| [README.md](README.md) | Getting oriented: the package map, setup, commands |
+| [STYLEGUIDE.md](STYLEGUIDE.md) | Writing any code: formatting, imports, naming, comments, errors, tests |
+| [docs/architecture.md](docs/architecture.md) | Adding a package, route or zone; how the server serves the zones |
+| [docs/development.md](docs/development.md) | Running, testing, releasing or deploying |
+| [docs/frontend.md](docs/frontend.md) | Touching `@raineworks/ui`, a web zone (`packages/web-*`), the design system or the About dialog |
+| `packages/*/README.md` | Working inside one package (every package has one) |
 
-- **No Vite, no dev server framework.** Each frontend package bundles with `Bun.build` via the shared `@app/tools/build` helper (`runFrontendBuildCli`). Dev mode is `--watch` (rebuild on save, no HMR).
-- **Micro-frontend hosting.** `@app/backend` is a Hono server that serves built frontend packages as micro-frontends (see `packages/backend/src/lib/mfe.ts`). To add a new frontend package: create `packages/<name>` with the same `index.html` + `scripts/build.ts` shape as `packages/web`, then register it in `packages/backend/scripts/build.ts`'s `microFrontends` list.
-- **Production runtime** is a single standalone binary (`bun build --compile --asset=mfes`) that embeds every registered frontend's build output, run from a distroless container (no shell, no Bun install) — see `packages/backend/Dockerfile`.
+---
 
-## SSH Terminal UI
+## Stack: don't reintroduce what was removed
 
-- `packages/ssh` (`@app/ssh`) is the `ssh raineworks.com` terminal UI, built with Ink (React for terminals). It is **not** a micro-frontend: it is not served by `@app/backend` and has no `index.html`.
-- Content comes from `@web/content/profile`, the same module the website uses. Add or edit content there, never in a TUI copy.
-- Screens live in `packages/ssh/src/screens` and render with plain Ink, so they are testable without SSH (`ink-testing-library`, see `src/App.test.tsx`).
-- All text from content must go through `sanitize()` (`src/sanitize.ts`) before rendering so it can't inject terminal escape sequences.
-- Keep the TUI read-only and the width responsive (`useWindowSize`); don't assume a fixed terminal size or color support.
-- **SSH server** (`src/server`, entry `src/main.ts`) uses `ssh2`. It accepts `none` auth only and serves a single pty `shell` session running the Ink app. Exec, subsystems, port forwarding, agent/X11 forwarding and shells without a pty are rejected; do not add handlers for them. Connection and rate limits live in `src/server/limits.ts` (unit-tested); pty sizes are clamped.
-- **Build** with `bun run --filter @app/ssh build` (`scripts/build.ts`) -> `dist/ssh-server`. Keep `target: 'bun'` and `keepNames: true`: without them the compiled binary crashes on disconnect because `ssh2` checks `channel.constructor.name === 'Session'`. `react-devtools-core` and `cpu-features` are stubbed out on purpose.
-- **Container** is `packages/ssh/Dockerfile` (distroless, non-root, no shell), published by CI as `ghcr.io/<repo>-ssh`. It listens on `SSH_PORT` (default `2222`); map host port 22 to it. The host key is **never** baked in or generated: provide an ed25519 private key via `SSH_HOST_KEY` (PEM text, `\n` escapes allowed) or a file at `SSH_HOST_KEY_PATH` (default `/run/secrets/ssh_host_key`), or clients get a host-key-changed warning on every deploy. The container runs as uid 65532, so the key file must be readable by it (`chown 65532`, or secret mode `0440` with group 65532). The server exits if the key is missing.
-- `ssh raineworks.com` needs the apex DNS record to point at a host that exposes port 22 to this container; move that host's own sshd to another port.
-- Limits are keyed on the TCP peer address (`info.ip`). Behind a proxy that hides client IPs they collapse into one bucket; tune `SSH_MAX_PER_IP`/`SSH_RATE_PER_IP`.
+Bun 1.4.4 (runtime, package manager, test runner, bundler, formatter, type checker) · Hono + Zod · React 19 + React
+Compiler · TanStack Router + Query · Tailwind v4 + shadcn/ui + ui-sdk · TypeScript strict, checked by `bun check` ·
+formatted by `bun fmt`.
+
+- **Do not** add Vite, a dev server framework, Babel, Biome, ESLint, Prettier or `tsc`: `bun fmt` formats (and sorts
+  imports and Tailwind classes), `bun check` type checks.
+- **Bun is pinned to 1.4.4**: `.bun-version`, `packageManager` and `engines` in `package.json`, `oven/bun:1.4.4` in
+  `packages/server/Dockerfile`, and CI (`bun-version-file`). Move them together.
+- Workspace scripts fan out with `bun run --filter`.
+- A new dependency is a release at least two weeks old, added to the root catalog (`workspaces.catalog`, or
+  `catalogs.dev` for build and type tools) and referenced as `catalog:` / `catalog:dev`. (ui-sdk is the exception
+  already made: a beta pinned exactly; read its changelog before moving it.)
+- Web zones are bundled only by `Bun.build` with its native React Compiler and Tailwind (`@raineworks/tools/build`,
+  `runFrontendBuildCli`). Dev mode is `--watch` (rebuild on save, no HMR).
+- Production is one standalone binary (`packages/server/scripts/build.ts`: `Bun.build` `compile` with every zone
+  embedded under `web/`), run from a distroless image: no shell, no Bun install.
+
+## Code rules
+
+Full detail in [STYLEGUIDE.md](STYLEGUIDE.md). The ones that break things if ignored:
+
+- **No relative imports.** Always `@raineworks/<package>/<path>`, including inside the same package. Each package maps
+  `@raineworks/<package>/*` → `./src/*` in its `tsconfig.json` and exposes the same paths through `package.json`
+  `exports`.
+- Every source file opens with a JSDoc block saying what the module is for, ending in `@module <path>` (shadcn's
+  generated `components/*` excepted). File names are kebab-case.
+- Run `bun run format` before you finish; `bun run lint`, `bun run typecheck` and `bun run test` are the checks.
+- **Use `@raineworks/tools` before writing your own helper or reaching for a raw built-in.** If a tool almost fits,
+  extend it (with a test) rather than working around it.
+  - Prototypes (`import '@raineworks/tools/prototypes'` in every module that uses them): `.tryCatch()` /
+    `tryCatch(() => …)` instead of `try/catch`, `.isEmpty()` instead of `length === 0` / `.size === 0` / `=== ''`,
+    `.unique()` instead of `[...new Set(…)]`.
+  - Env (`@raineworks/tools/env`): `baseEnvSchema`, `loadEnvFiles`, `parseEnv` for every package's `env` module.
+- Environment is read only through each package's Zod-validated `src/lib/env.ts` (build tools: `buildEnv()`), never
+  `process.env` ad hoc.
+
+## Server (`@raineworks/server`)
+
+- `src/main.ts` is the process entry (and the binary's), `src/app.ts` builds the Hono app (`createApp`, `AppType`),
+  `src/index.ts` is the public entry. Probes are `/healthz` and `/readyz`, outside `/api`.
+- Routers are `<name>Router` in `src/routers/`, chained so RPC types flow to `@raineworks/api`, and mounted on `api`
+  in `app.ts`, whose module comment lists every route. Validate every input with Zod at the boundary.
+- Errors are `{ error: { code, message } }`: a snake_case code and a user-facing sentence.
+- Zones are served by `lib/spa` from `@raineworks/tools/zones`; never hand-roll static file serving.
+- The server listens on `PORT` (3032, what production expects).
+
+## SSH (`@raineworks/ssh`)
+
+Detail: [packages/ssh/README.md](packages/ssh/README.md).
+
+- `ssh raineworks.com` is an Ink terminal UI, not a web zone: the server doesn't serve it. Its content is
+  `@raineworks/web-marketing/content/profile`, the module the site renders: edit content there, never in a TUI copy.
+- Every piece of content goes through `sanitize()` before it's rendered, so none can inject terminal escape sequences.
+  Keep the TUI read-only and its width responsive (`useWindowSize`).
+- The server accepts `none` auth and one pty `shell` session only. Exec, subsystems, forwarding and shells without a
+  pty are refused: don't add handlers for them. Limits live in `src/server/limits.ts` (tested); pty sizes are clamped.
+- The build keeps `target: 'bun'` and `minify.keepNames`: without names the binary crashes on disconnect (`ssh2`
+  checks `channel.constructor.name`).
+- The host key is never baked in or generated: `SSH_HOST_KEY` or `SSH_HOST_KEY_PATH`, the same across deploys.
+
+## Versions, releases and licences
+
+Detail: [docs/development.md](docs/development.md#releases), [docs/frontend.md](docs/frontend.md#about-whats-new-and-legal).
+
+- Versions are calendar versions, `YEAR.MONTH.N` (`2026.11.1`), tagged `v<version>`. A push to `master` that changes
+  an image is a release, minted by GitHub Actions (`ci.yml`: plan, checks, the images on GHCR, the tag and the GitHub
+  release, then Dokploy's deploy): never tag, bump, push an image or deploy by hand.
+- The images keep the names production pulls: `ghcr.io/raine-works/raineworks` (the server) and
+  `ghcr.io/raine-works/raineworks-ssh` (`imageSuffix`, `@raineworks/tools/images`). `bun run images plan` decides what changed; a file the
+  image is built from that it doesn't know about is a bug in `@raineworks/tools/images`.
+- Every `@raineworks/*` package a package imports is in its `package.json` (`images.test.ts`): that's how the image
+  knows what it's built from.
+- The workflows are the repository's own (`.github/workflows`); `.github/actions/setup` installs Bun and the packages
+  for every one of them.
+- A release people would notice has a note, `packages/ui/src/release-notes/<version>.md` (`bun run release` starts
+  the next one): frontmatter `title` and `date`, then `##` sections by area. What changed for the people who read the
+  site, not how. `bun run release check` fails a note that names a version already released.
+- The site is open source under the MIT License (`LICENSE`, © Raine Petersen). `@raineworks/ui/lib/brand` states the same
+  (`APP_LICENSE`, `COPYRIGHT_HOLDER`); a test holds the two together.
+- Only permissive licences (and the fonts' OFL-1.1) ship in a zone (`ALLOWED_LICENSES`, `@raineworks/tools/notices`):
+  a bundled package under any other, or one stating none, fails the build. Code copied into the repo goes in
+  `COPIED_NOTICES`; packages only CSS imports go in `STYLE_PACKAGES`.
+
+## Frontend
+
+Detail: [docs/frontend.md](docs/frontend.md).
+
+- One package per zone (`@raineworks/web-<zone>`), registered in `@raineworks/tools/zones` and served by
+  `@raineworks/server` from one origin. `marketing` is the root zone (`/`): every path no other zone claims is its.
+- A zone is `index.html` + `scripts/build.ts` + `src/main.tsx` (`mountZone(router)`) + `src/router.tsx` (code-based
+  routes; every route but the landing page loads lazily with `lazyRouteComponent`) + `src/routes/*.tsx`.
+- Shared UI lives in `@raineworks/ui`: shadcn primitives in `components/`, the site's compositions in `blocks/`. Zone-only
+  code stays in the zone. Zones `import type` from `@raineworks/server`, never values.
+- TanStack Router for routing, TanStack Query for server state (through `@raineworks/ui/lib/api`). Don't add another
+  router, data-fetching or form library.
+- Pages are a `Page` (`blocks/page`) of cards, blocks `gap-6` apart; card grids `grid items-start gap-4 lg:grid-cols-2`.
+  Use theme tokens, never raw colours; the brand (`--brand`) means "act here", never a status. Sentence case, typographic
+  apostrophes and quotes (’ “ ”).
+- Every zone is used on phones: check every page at 375px wide, nothing scrolls sideways.
+- The React Compiler compiles every first-party component and hook (`packages/tools/src/react-compiler.test.ts` fails
+  for any it skips). Follow the Rules of React in [STYLEGUIDE.md](STYLEGUIDE.md#rules-of-react-the-react-compiler-depends-on-them).
+- **Adding shadcn components:** `cd packages/ui && bunx --bun shadcn@4.23.0 add <component>`. Afterwards check `cn`
+  comes from `@raineworks/ui/lib/utils`, drop anything it added to `package.json` that we don't use, make focus rings
+  solid (`focus-visible:ring-2 focus-visible:ring-ring`), and run `bun run format`.
+- **Logo:** `@raineworks/ui/blocks/brand` (`AppLogo`, `AppMark`), drawn inline from the SVG source in Raine's Google
+  Drive ("raineworks logo") so it takes `currentColor`. Pass a heavier `strokeWidth` the smaller it's drawn.
+
+## ui-sdk
+
+- Before using ui-sdk, follow the ui-sdk skill if it's installed, and read `node_modules/@ui-sdk/react/docs/llms.txt`
+  (from `packages/ui`). To build a new component, also search `node_modules/@ui-sdk/react/docs/core.md` by heading, and
+  read `rendering.md` next to it.
+- ui-sdk parts are unstyled: style them with the same tokens and classes as the shadcn components (`theme-toggle`
+  mirrors shadcn's dropdown menu). `@ui-sdk/core/web.css` isn't imported, so give overlays their own layout (a backdrop
+  needs `fixed inset-0 m-0 size-auto border-0 p-0`). `globals.css` declares `@layer ui-sdk;` first so our styles win.
+
+## Development
+
+- `bun run dev` builds every zone in watch mode and runs the server (`NODE_ENV=development`, loopback, port 3032).
+  `bun run dev:kill` stops this repo's dev processes only (matched by working directory; another project on the
+  same port is reported, never killed); `--dry-run` lists them.
+- `.env.test` and `.env.example` are committed; `.env.local` never is.

@@ -1,14 +1,11 @@
 {
-	"extends": "../../tsconfig.json",
+	"extends": "@raineworks/tsconfig/base.json",
 	"compilerOptions": {
-		"types": ["bun"],
+		"rootDir": "./",
 		"paths": {
-			"@/*": ["./src/*"],
-			"@tools": ["./src/index.ts"],
-			"@tools/*": ["./src/*"],
-			"@app/tools": ["./src/index.ts"],
-			"@app/tools/*": ["./src/*"]
+			"@raineworks/tools": ["./src/index.ts"],
+			"@raineworks/tools/*": ["./src/*"]
 		}
 	},
-	"include": ["src/**/*"]
+	"include": ["src"]
 }

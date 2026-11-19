@@ -2,8 +2,9 @@ import { describe, expect, test } from 'bun:test';
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+
+import { loadHostKey } from '@raineworks/ssh/server';
 import { utils } from 'ssh2';
-import { loadHostKey } from '@/server';
 
 const { private: pem } = utils.generateKeyPairSync('ed25519');
 

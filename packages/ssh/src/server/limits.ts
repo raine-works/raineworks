@@ -1,3 +1,9 @@
+/**
+ * Connection limits: in total, per client IP, and new connections per IP per window; and pty sizes clamped.
+ *
+ * @module server/limits
+ */
+
 export type Limits = {
 	maxConnections: number;
 	maxPerIp: number;

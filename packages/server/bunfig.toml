@@ -1,0 +1,3 @@
+# `bun test` in this package: tests run under `NODE_ENV=test` (`.env.test`), so `lib/env` loads no developer settings.
+[test]
+coverage = false
