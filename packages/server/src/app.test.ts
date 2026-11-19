@@ -73,17 +73,35 @@ describe('the contact form', () => {
 		const missing = await post(JSON.stringify({ name: 'Ada', email: 'not-an-email', message: 'Hi' }));
 		expect(missing.status).toBe(400);
 		expect(await missing.json()).toEqual({
-			error: { code: 'invalid_request', message: 'Enter a valid email address.' },
+			error: {
+				code: 'invalid_request',
+				message: 'That doesn’t look like an email address.',
+				details: { email: ['That doesn’t look like an email address.'] },
+			},
 		});
 		const blank = await post(JSON.stringify({ name: '   ', email: 'ada@example.com', message: 'Hi' }));
 		expect(blank.status).toBe(400);
-		expect((await post('{not json')).status).toBe(400);
+		const malformed = await post('{not json');
+		expect(malformed.status).toBe(400);
+		expect(await malformed.json()).toMatchObject({ error: { code: 'invalid_request' } });
 	});
 
 	test('refuses a body over the limit before reading it', async () => {
 		const response = await post(JSON.stringify({ name: 'Ada', email: 'ada@example.com', message: 'x'.repeat(20_000) }));
 		expect(response.status).toBe(413);
 		expect(await response.json()).toMatchObject({ error: { code: 'payload_too_large' } });
+	});
+});
+
+describe('the API’s document', () => {
+	test('is served at /api/openapi.json, cached publicly', async () => {
+		const response = await get('/api/openapi.json');
+		expect(response.status).toBe(200);
+		expect(response.headers.get('cache-control')).toBe('public, max-age=3600');
+		const spec = (await response.json()) as { info: { version: string }; paths: Record<string, unknown> };
+		// The version of the build being served (here, the test's zone).
+		expect(spec.info.version).toBe('2026.11.1 (1234567)');
+		expect(Object.keys(spec.paths)).toContain('/api/contact');
 	});
 });
 

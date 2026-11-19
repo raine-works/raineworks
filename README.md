@@ -12,7 +12,7 @@ end built on shadcn/ui and ui-sdk.
 | [`@raineworks/api`](packages/api) | The typed `hc` client over the server's routes |
 | [`@raineworks/ui`](packages/ui) | The design system: tokens, shadcn components, blocks, the zone root, About (What's new and Legal) |
 | [`@raineworks/web-marketing`](packages/web-marketing) | The site itself, the `marketing` zone at `/`; its `content/profile` is what every page says |
-| [`@raineworks/ssh`](packages/ssh) | `ssh raineworks.com`: the site as an Ink terminal UI over an `ssh2` server, its own binary and image |
+| [`@raineworks/ssh`](packages/ssh) | `ssh raineworks.com`: the site as an OpenTUI terminal UI over an `ssh2` server, its own image |
 | [`@raineworks/tools`](packages/tools) | The shared toolbox: zones, the frontend build, env, HTTP, versions, releases, licence notices |
 | [`@raineworks/tsconfig`](packages/tsconfig) | The TypeScript configs every package extends |
 
@@ -22,7 +22,9 @@ Bun 1.4.4 (`.bun-version`), then:
 
 ```bash
 bun install
-bun run dev         # every zone in watch mode, and the server on http://127.0.0.1:3032
+bun run dev:init    # each package's .env.local and the SSH dev host key (safe to re-run)
+bun run dev         # every package's dev server at once: the zones in watch mode, the server on
+                    # http://127.0.0.1:3032, and `ssh -p 2222 localhost`
 ```
 
 | Command | What |

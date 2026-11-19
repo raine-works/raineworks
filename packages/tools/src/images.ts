@@ -23,8 +23,8 @@
 
 import '@raineworks/tools/prototypes';
 
-/** The root's files every image is built with. */
-const ROOT_INPUTS = ['.dockerignore', 'bun.lock', 'bunfig.toml', 'package.json', 'tsconfig.json'];
+/** The root's files every image is built with (`LICENSE`: the SSH image ships it with its licences). */
+const ROOT_INPUTS = ['.dockerignore', 'LICENSE', 'bun.lock', 'bunfig.toml', 'package.json', 'tsconfig.json'];
 
 /** The Markdown builds read: release notes (every zone). Add a zone's own here if its build reads Markdown. */
 const BUILT_MARKDOWN = [/^packages\/ui\/src\/release-notes\/[^/]+\.md$/];

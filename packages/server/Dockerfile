@@ -23,7 +23,7 @@ COPY --from=manifests /workspace/packages ./packages
 RUN --mount=type=cache,target=/root/.bun/install/cache bun install --frozen-lockfile
 
 FROM deps AS builder
-COPY tsconfig.json ./
+COPY tsconfig.json LICENSE ./
 COPY packages ./packages
 # The version and commit every page (and About) shows (`@raineworks/tools/version`): there's no .git here. Set only
 # for the build, so they never bust the layers above.

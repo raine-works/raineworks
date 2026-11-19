@@ -1,7 +1,6 @@
 # syntax=docker/dockerfile:1
-# The `ssh raineworks.com` image: the Ink terminal UI and its ssh2 server, compiled into one standalone binary
-# (`scripts/build.ts`), run on distroless as non-root (no shell, no package manager, no Bun). Built from the
-# repository's root:
+# The `ssh raineworks.com` image: the OpenTUI terminal UI and its ssh2 server, bundled for Bun (`scripts/build.ts`)
+# and run on Bun's distroless image as non-root (no shell, no package manager). Built from the repository's root:
 #
 #   docker build --build-arg VERSION=$(bun run --silent release next) --build-arg GIT_SHA=$(git rev-parse HEAD) \
 #     -f packages/ssh/Dockerfile .
@@ -29,28 +28,36 @@ COPY --from=manifests /workspace/packages ./packages
 RUN --mount=type=cache,target=/root/.bun/install/cache bun install --frozen-lockfile
 
 FROM deps AS builder
-COPY tsconfig.json ./
+COPY tsconfig.json LICENSE ./
 COPY packages ./packages
+# The version every session's About and status bar show.
+ARG VERSION=""
 RUN bun run --filter @raineworks/ssh build
 
-# Pinned by digest so a rebuild never picks up a different image unseen.
-FROM gcr.io/distroless/base-debian13:nonroot@sha256:a08d9054afbaf1af9b90fd02cdc7b32236319b5376d374505a41548d42b0c5db AS runner
+# Bun's own distroless image (the app runs on Bun: OpenTUI's native library is a separate file, below), pinned by
+# digest so a rebuild never picks up a different image unseen.
+FROM oven/bun:1.4.4-distroless@sha256:153a951ae40106e125898103e6e990ee0f38e6aee7f561029e26cf9fbed23470 AS runner
 
 ARG VERSION
 ARG GIT_SHA=""
 ARG IMAGE_SOURCE=https://github.com/raine-works/raineworks
 
+# OTUI_ASSET_ROOT: where OpenTUI finds its native library, /app/opentui/@opentui/core-<platform>/libopentui.so. It's
+# under the MIT License and, for the decode-only FFmpeg it statically links, the GNU LGPL 2.1 or later: a separate
+# file anyone may replace (point OTUI_ASSET_ROOT at another), with its licence texts beside it and in /app/licenses,
+# with every other package's.
 ENV VERSION=${VERSION} \
 	GIT_SHA=${GIT_SHA} \
 	NODE_ENV=production \
 	TZ=UTC \
 	SSH_PORT=2222 \
-	SSH_HOST_KEY_PATH=/run/secrets/ssh_host_key
+	OTUI_ASSET_ROOT=/app/opentui
 
 WORKDIR /app
-COPY --chown=65532:65532 --from=builder /workspace/packages/ssh/dist/ssh-server ./ssh-server
+COPY --chown=65532:65532 --from=builder /workspace/packages/ssh/dist/ ./
+USER 65532:65532
 EXPOSE 2222
-CMD ["./ssh-server"]
+CMD ["/app/main.js"]
 
 # Links the image to the repository on GitHub's registry (it takes the repository's visibility and access).
 LABEL org.opencontainers.image.source=${IMAGE_SOURCE} \
@@ -59,6 +66,6 @@ LABEL org.opencontainers.image.source=${IMAGE_SOURCE} \
 	org.opencontainers.image.title=raineworks-ssh \
 	org.opencontainers.image.description="ssh raineworks.com: the site as a terminal UI" \
 	org.opencontainers.image.vendor="raineworks" \
-	org.opencontainers.image.licenses="MIT" \
+	org.opencontainers.image.licenses="MIT AND LGPL-2.1-or-later" \
 	org.opencontainers.image.version=${VERSION} \
 	org.opencontainers.image.revision=${GIT_SHA}

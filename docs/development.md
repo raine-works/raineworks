@@ -10,6 +10,7 @@ Bun 1.4.4 (`.bun-version`; `bun upgrade --version 1.4.4` or your version manager
 
 ```bash
 bun install
+bun run dev:init
 bun run dev
 ```
 
@@ -19,7 +20,8 @@ Run at the root.
 
 | Command | What it does |
 | --- | --- |
-| `bun run dev` | Every zone's `Bun.build --watch` (rebuilding on a change in the zone or `@raineworks/ui`) and the server on `http://127.0.0.1:3032`. Reload the page after a rebuild. |
+| `bun run dev` | Every package's `dev` script, in parallel: each zone's `Bun.build --watch` (rebuilding on a change in the zone or `@raineworks/ui`), the server on `http://127.0.0.1:3032` and the SSH app on port 2222 (`ssh -p 2222 localhost`), all restarting on save. Reload the page after a rebuild. |
+| `bun run dev:init` | Sets a clone up for development (`scripts/init.sh`): each package's `.env.local` from its `.env.example` (`scripts/secrets.sh`; values already set are kept, keys only there too), and the SSH app's dev host key. Safe to run again. |
 | `bun run dev:kill` | Stops this repo's dev processes (matched by working directory; another project's server on the port is reported, never killed). `--dry-run` lists them. |
 | `bun run build:web` | Builds every zone into `packages/web-*/dist` (minified, precompressed, stamped) |
 | `bun run build` | `build:web`, then the standalone server binary, `packages/server/dist/server` |
@@ -28,6 +30,7 @@ Run at the root.
 | `bun run typecheck` | `bun check -b`: every package, through the root `tsconfig.json`'s references |
 | `bun run test` | Every package's `bun test`, one after another |
 | `bun run release` | Starts the next release's note; see [Releases](#releases) |
+| `bun run openapi` | Prints the API's OpenAPI 3.1 document (`--out api.json` writes it); the same one `GET /api/openapi.json` serves |
 | `bun run clean` | Removes every `node_modules` and `dist` |
 
 The server reads `packages/server/.env.local` if present (`.env.example` lists the settings: `PORT`, `HOST`,

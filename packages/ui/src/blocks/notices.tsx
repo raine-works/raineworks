@@ -19,6 +19,7 @@ import { QueryState } from '@raineworks/ui/blocks/query-state';
 import { Input } from '@raineworks/ui/components/input';
 import { apiFetch, unwrap } from '@raineworks/ui/lib/api';
 import { APP_LICENSE, APP_NAME, COPYRIGHT_HOLDER, SOURCE_URL } from '@raineworks/ui/lib/brand';
+import { cn } from '@raineworks/ui/lib/utils';
 import { APP_COMMIT } from '@raineworks/ui/lib/version';
 import { queryOptions, useQuery } from '@tanstack/react-query';
 import { ChevronRightIcon } from 'lucide-react';
@@ -44,13 +45,13 @@ const matches = (notice: Notice, search: string) =>
 	`${notice.name} ${notice.license}`.toLowerCase().includes(search.trim().toLowerCase());
 
 /** Packages under one licence with one text: a project's packages share theirs, so they're shown once, together. */
-interface NoticeGroup {
+export interface NoticeGroup {
 	license: string;
 	text: string | null;
 	packages: Notice[];
 }
 
-function grouped(notices: Notice[]): NoticeGroup[] {
+export function grouped(notices: Notice[]): NoticeGroup[] {
 	const groups = new Map<string, NoticeGroup>();
 	for (const notice of notices) {
 		const key = `${notice.license}\n${notice.text}`;
@@ -63,34 +64,78 @@ function grouped(notices: Notice[]): NoticeGroup[] {
 
 /**
  * What a group is called: its one package, the scope its packages share (`@tanstack`), or the first of them (or its
- * scope) and how many others there are outside it (`@radix-ui and 1 other`, `react and 3 others`).
+ * scope) and how many others there are outside it (`@radix-ui and 1 other`, `react and 3 others`). `byPackage` names it
+ * by its first package instead of its scope (`@tanstack/store and 1 other`), for groups whose scope another group
+ * shares too.
  */
-function groupName({ packages }: NoticeGroup): string {
+function groupName({ packages }: NoticeGroup, byPackage = false): string {
 	const [first, ...rest] = packages.map((notice) => notice.name) as [string, ...string[]];
 	if (rest.isEmpty()) return first;
+	if (byPackage) return `${first} and ${plural(rest.length, 'other')}`;
 	const scope = first.startsWith('@') ? first.slice(0, first.indexOf('/')) : null;
 	const others = scope ? rest.filter((name) => !name.startsWith(`${scope}/`)).length : rest.length;
 	const lead = scope ?? first;
 	return others === 0 ? lead : `${lead} and ${plural(others, 'other')}`;
 }
 
+/**
+ * The groups with their names, each told apart from the others: a scope's packages under two licence texts (two
+ * copyright lines, say) would both be `@tanstack`, so those are named by their first package instead.
+ */
+export function namedGroups(groups: NoticeGroup[]): Array<{ group: NoticeGroup; name: string }> {
+	const names = groups.map((group) => groupName(group));
+	return groups.map((group, index) => {
+		const name = names[index] ?? '';
+		const shared = names.filter((each) => each === name).length > 1;
+		return { group, name: shared ? groupName(group, true) : name };
+	});
+}
+
 /** A line that starts an item of a list (`1.`, `(a)`, `*`, `-`), which begins a paragraph of its own. */
 const LIST_ITEM = /^([-*•]|\d+\.|\([a-z0-9]+\))\s/i;
+/** A line drawn across the text to set a title apart (`-----`, `=====`): it ends a paragraph and isn't shown. */
+const RULE = /^[-=_*~#]{3,}$/;
+/** A font file naming its own copyright mid-line (`… Geist-Italic[wght].ttf: Copyright …`): a paragraph of its own. */
+const FILE_COPYRIGHT = /\s(?=\S+\.(?:ttf|otf|woff2?):\s+Copyright\b)/g;
+
+/** A licence's paragraph, and whether it's a heading (a line in capitals of its own: `PREAMBLE`, `DEFINITIONS`). */
+export interface Paragraph {
+	text: string;
+	heading: boolean;
+}
+
+/** A line in capitals, short enough to be a heading (`PREAMBLE`, `TERMINATION`), never a shouted sentence. */
+const isHeading = (line: string) =>
+	line.length <= 60 && /[A-Z]{3}/.test(line) && line === line.toUpperCase() && !/[.:;,]$/.test(line);
 
 /**
  * A licence's text as paragraphs. The files are wrapped by hand at 70-odd characters and indented with spaces, which
- * a narrower column wraps again mid-line: each paragraph (up to a blank line, or the next list item) is joined into
- * one, for the page to wrap. Only white space changes, never a word.
+ * a narrower column wraps again mid-line: each paragraph (up to a blank line, the next list item, a heading or a rule)
+ * is joined into one, for the page to wrap. Headings stand alone, rules are dropped, and a second copyright on a line
+ * starts a line of its own. Only white space changes, and the rules go; never a word.
  */
-export function paragraphs(text: string): string[] {
-	const result: string[] = [];
+export function paragraphs(text: string): Paragraph[] {
+	const result: Paragraph[] = [];
 	let current: string[] = [];
 	const end = () => {
-		if (!current.isEmpty()) result.push(current.join(' '));
+		if (!current.isEmpty()) result.push({ text: current.join(' '), heading: false });
 		current = [];
 	};
-	for (const line of text.split('\n').map((each) => each.trim().replace(/\s+/g, ' '))) {
-		if (line.isEmpty() || LIST_ITEM.test(line)) end();
+	const lines = text
+		.replace(FILE_COPYRIGHT, '\n\n')
+		.split('\n')
+		.map((each) => each.trim().replace(/\s+/g, ' '));
+	for (const line of lines) {
+		if (RULE.test(line)) {
+			end();
+			continue;
+		}
+		if (isHeading(line)) {
+			end();
+			result.push({ text: line, heading: true });
+			continue;
+		}
+		if (line.isEmpty() || LIST_ITEM.test(line) || /^Copyright\b/.test(line)) end();
 		if (!line.isEmpty()) current.push(line);
 	}
 	end();
@@ -154,8 +199,12 @@ function Notices() {
 							<p className="text-sm text-muted-foreground">No package matches “{search.trim()}”.</p>
 						) : (
 							<ul className="grid divide-y rounded-md border">
-								{grouped(found).map((group) => (
-									<GroupRow key={`${group.packages[0]?.name}@${group.packages[0]?.version}`} group={group} />
+								{namedGroups(grouped(found)).map(({ group, name }) => (
+									<GroupRow
+										key={`${group.packages[0]?.name}@${group.packages[0]?.version}`}
+										group={group}
+										name={name}
+									/>
 								))}
 							</ul>
 						)}
@@ -166,14 +215,14 @@ function Notices() {
 	);
 }
 
-function GroupRow({ group }: { group: NoticeGroup }) {
+function GroupRow({ group, name }: { group: NoticeGroup; name: string }) {
 	const [only, ...others] = group.packages;
 	return (
 		<li>
 			<details className="group/notice">
 				<summary className="flex min-h-11 cursor-pointer flex-wrap items-baseline gap-x-2 gap-y-0.5 px-3 py-2 text-sm hover:bg-muted/50">
 					<ChevronRightIcon className="size-4 shrink-0 self-center text-muted-foreground transition-transform group-open/notice:rotate-90" />
-					<span className="min-w-0 font-medium wrap-break-word">{groupName(group)}</span>
+					<span className="min-w-0 font-medium wrap-break-word">{name}</span>
 					<span className="text-xs text-muted-foreground">
 						{others.isEmpty() ? only?.version : plural(group.packages.length, 'package')}
 					</span>
@@ -193,8 +242,8 @@ function GroupRow({ group }: { group: NoticeGroup }) {
 					{group.text ? (
 						paragraphs(group.text).map((paragraph, index) => (
 							// The text never changes: its paragraphs keep their places.
-							<p key={index} className="wrap-break-word">
-								{paragraph}
+							<p key={index} className={cn('wrap-break-word', paragraph.heading && 'pt-1 font-medium text-foreground')}>
+								{paragraph.text}
 							</p>
 						))
 					) : (

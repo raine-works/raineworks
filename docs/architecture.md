@@ -15,7 +15,7 @@ A Bun workspace (`packages/*`), every package `@raineworks/<name>`, every depend
 | `@raineworks/api` | The typed `hc` client over the server's `AppType` | `tools`, (types of) `server` |
 | `@raineworks/ui` | The design system: tokens, shadcn components, blocks, the zone root (`mountZone`), About | `api`, `tools` |
 | `@raineworks/web-marketing` | The `marketing` zone: the site itself, served at `/`; exports `content/profile`, what every page (and the SSH app) says | `ui`, `tools` |
-| `@raineworks/ssh` | `ssh raineworks.com`: the site as an Ink terminal UI over an `ssh2` server, its own binary and image ([README](../packages/ssh/README.md)) | `web-marketing` |
+| `@raineworks/ssh` | `ssh raineworks.com`: the site as an OpenTUI terminal UI over an `ssh2` server, its own image ([README](../packages/ssh/README.md)) | `web-marketing` |
 | `@raineworks/tools` | The shared toolbox: zones, the frontend build, env, HTTP, versions, releases, notices, prototypes | — |
 | `@raineworks/tsconfig` | The TypeScript configs every package extends | — |
 
@@ -53,14 +53,18 @@ Every zone shares the origin, so they share cookies and `localStorage` (the them
 /healthz, /readyz            probes (outside /api)
 /api/build                   the build a zone is serving, for its update check
 /api/contact                 the contact form (POST; validated and acknowledged with a 202, not yet stored or delivered)
+/api/openapi.json            the OpenAPI 3.1 document of every /api route, generated from the routes (lib/openapi)
 /api/*                       anything else: a JSON 404
 /*                           the zones (lib/spa)
 ```
 
 - `src/main.ts` starts `Bun.serve` (loopback in development, every interface otherwise) and stops gracefully on
   SIGTERM: `/readyz` fails for `SHUTDOWN_DRAIN_MS`, then the server stops taking connections and lets requests finish.
-- `src/app.ts` builds the app (`createApp`): secure headers on everything, the API, then `lib/spa`. `AppType` (the
-  `/api` tree) types `@raineworks/api`.
+- `src/app.ts` builds the app (`createApp`): secure headers on everything, the API, then `lib/spa`, and one error
+  handler so every refusal is `{ error: { code, message } }`. `AppType` (the `/api` tree) types `@raineworks/api`.
+- The API documents itself: `hono-openapi` builds the OpenAPI document from the routes, their requests from their
+  validators (`lib/validate`, the Zod schemas that check them) and their responses from `describeRoute`
+  (`lib/openapi`). The docs can't drift from what the routes accept.
 - `lib/env` parses the environment with Zod. `NODE_ENV` unset is production (fail closed).
 
 ### Serving the zones (`lib/spa`)
@@ -77,8 +81,9 @@ Every zone shares the origin, so they share cookies and `localStorage` (the them
 
 ## Production
 
-Two services, each a standalone binary in its own distroless image: the server (`packages/server/Dockerfile`, the
-site) and the SSH app (`packages/ssh/Dockerfile`). [development.md](development.md#deployment) has where they run.
+Two services, each in its own distroless image: the server (`packages/server/Dockerfile`, the site), a standalone
+binary; and the SSH app (`packages/ssh/Dockerfile`), a bundle run on Bun's distroless image with OpenTUI's native
+library beside it ([its README](../packages/ssh/README.md#the-build-and-its-licences)). [development.md](development.md#deployment) has where they run.
 
 `bun run build` builds every zone (minified, precompressed, with `build.json` and `notices.json`), copies each
 `dist/` to `packages/server/dist/web/<zone>`, and compiles `src/main.ts` into `packages/server/dist/server` with `web/`

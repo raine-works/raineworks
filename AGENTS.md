@@ -29,7 +29,8 @@ formatted by `bun fmt`.
   `packages/server/Dockerfile`, and CI (`bun-version-file`). Move them together.
 - Workspace scripts fan out with `bun run --filter`.
 - A new dependency is a release at least two weeks old, added to the root catalog (`workspaces.catalog`, or
-  `catalogs.dev` for build and type tools) and referenced as `catalog:` / `catalog:dev`. (ui-sdk is the exception
+  `catalogs.dev` for build and type tools) and referenced as `catalog:` / `catalog:dev`. Never `bun add` a version into a package's own
+  `package.json`: add it to the catalog first (`packages/tools/src/catalog.test.ts` fails on any that isn't). (ui-sdk is the exception
   already made: a beta pinned exactly; read its changelog before moving it.)
 - Web zones are bundled only by `Bun.build` with its native React Compiler and Tailwind (`@raineworks/tools/build`,
   `runFrontendBuildCli`). Dev mode is `--watch` (rebuild on save, no HMR).
@@ -45,7 +46,8 @@ Full detail in [STYLEGUIDE.md](STYLEGUIDE.md). The ones that break things if ign
   `exports`.
 - Every source file opens with a JSDoc block saying what the module is for, ending in `@module <path>` (shadcn's
   generated `components/*` excepted). File names are kebab-case.
-- Run `bun run format` before you finish; `bun run lint`, `bun run typecheck` and `bun run test` are the checks.
+- Run `bun run format` before you finish; `bun run lint`, `bun run typecheck` and `bun run test` are the checks, and
+  `shellcheck scripts/*.sh` for the shell scripts (CI runs it too).
 - **Use `@raineworks/tools` before writing your own helper or reaching for a raw built-in.** If a tool almost fits,
   extend it (with a test) rather than working around it.
   - Prototypes (`import '@raineworks/tools/prototypes'` in every module that uses them): `.tryCatch()` /
@@ -60,7 +62,14 @@ Full detail in [STYLEGUIDE.md](STYLEGUIDE.md). The ones that break things if ign
 - `src/main.ts` is the process entry (and the binary's), `src/app.ts` builds the Hono app (`createApp`, `AppType`),
   `src/index.ts` is the public entry. Probes are `/healthz` and `/readyz`, outside `/api`.
 - Routers are `<name>Router` in `src/routers/`, chained so RPC types flow to `@raineworks/api`, and mounted on `api`
-  in `app.ts`, whose module comment lists every route. Validate every input with Zod at the boundary.
+  in `app.ts`, whose module comment lists every route.
+- **Every input is validated with `validate(target, schema)`** (`lib/validate`): Zod at the boundary, a 400
+  `invalid_request` naming the problem, and the request documented from the same schema. Give each field a
+  `.meta({ description, examples })`.
+- **Every route is documented** (`GET /api/openapi.json`, `bun run openapi`): a `describeRoute` with an
+  `operationId`, a `summary`, a `description`, and **every response it can give**, each with its body's schema
+  (`jsonResponse`, `errorResponse` with its exact codes, `invalidRequest`; `lib/openapi`). A response a route can send
+  that its `describeRoute` doesn't list is a bug (`lib/openapi.test.ts` checks every one has a body).
 - Errors are `{ error: { code, message } }`: a snake_case code and a user-facing sentence.
 - Zones are served by `lib/spa` from `@raineworks/tools/zones`; never hand-roll static file serving.
 - The server listens on `PORT` (3032, what production expects).
@@ -69,14 +78,18 @@ Full detail in [STYLEGUIDE.md](STYLEGUIDE.md). The ones that break things if ign
 
 Detail: [packages/ssh/README.md](packages/ssh/README.md).
 
-- `ssh raineworks.com` is an Ink terminal UI, not a web zone: the server doesn't serve it. Its content is
+- `ssh raineworks.com` is an OpenTUI (`@opentui/react`) terminal UI, not a web zone: the server doesn't serve it. Its content is
   `@raineworks/web-marketing/content/profile`, the module the site renders: edit content there, never in a TUI copy.
 - Every piece of content goes through `sanitize()` before it's rendered, so none can inject terminal escape sequences.
-  Keep the TUI read-only and its width responsive (`useWindowSize`).
+  Keep the TUI read-only and responsive (`useTerminalDimensions`): it draws at every size from 60×20 up.
+- A message sent from the TUI goes through the site's own `POST /api/contact` (`src/server/messages.ts`), never
+  straight to email, with the same rules (`@raineworks/tools/contact`).
 - The server accepts `none` auth and one pty `shell` session only. Exec, subsystems, forwarding and shells without a
   pty are refused: don't add handlers for them. Limits live in `src/server/limits.ts` (tested); pty sizes are clamped.
-- The build keeps `target: 'bun'` and `minify.keepNames`: without names the binary crashes on disconnect (`ssh2`
-  checks `channel.constructor.name`).
+- The SSH image runs on Bun, not a compiled binary: `scripts/build.ts` bundles for `target: 'bun'` with
+  `minify.keepNames` (without names it crashes on disconnect: `ssh2` checks `channel.constructor.name`), and OpenTUI's
+  native library stays a separate file (`OTUI_ASSET_ROOT`). Don't compile it into the bundle: see the licence rule
+  below.
 - The host key is never baked in or generated: `SSH_HOST_KEY` or `SSH_HOST_KEY_PATH`, the same across deploys.
 
 ## Versions, releases and licences
@@ -98,6 +111,10 @@ Detail: [docs/development.md](docs/development.md#releases), [docs/frontend.md](
   site, not how. `bun run release check` fails a note that names a version already released.
 - The site is open source under the MIT License (`LICENSE`, © Raine Petersen). `@raineworks/ui/lib/brand` states the same
   (`APP_LICENSE`, `COPYRIGHT_HOLDER`); a test holds the two together.
+- **The one LGPL exception is the SSH image:** OpenTUI's native library statically links a decode-only FFmpeg
+  (LGPL-2.1-or-later). It ships only there, as a separate, replaceable file with its licence texts and
+  `FFMPEG-SOURCE.md` beside it and every shipped package's licence in `/app/licenses` (`scripts/build.ts`). Nothing
+  under the LGPL goes in a web zone or the server.
 - Only permissive licences (and the fonts' OFL-1.1) ship in a zone (`ALLOWED_LICENSES`, `@raineworks/tools/notices`):
   a bundled package under any other, or one stating none, fails the build. Code copied into the repo goes in
   `COPIED_NOTICES`; packages only CSS imports go in `STYLE_PACKAGES`.
@@ -137,7 +154,13 @@ Detail: [docs/frontend.md](docs/frontend.md).
 
 ## Development
 
-- `bun run dev` builds every zone in watch mode and runs the server (`NODE_ENV=development`, loopback, port 3032).
+- `bun run dev:init` sets a clone up (`scripts/init.sh`): each package's `.env.local` from its `.env.example`, keeping
+  what's set, and the SSH dev host key. A setting a package reads goes in its `.env.example` (commented when it has a
+  default), never only in someone's `.env.local`. Local services, once there are any, start there too
+  (`.docker/compose.yaml`).
+- `bun run dev` runs every package's `dev` script at once (`--filter '*'`): every zone's watch build, the server
+  (`NODE_ENV=development`, loopback, port 3032) and the SSH server (port 2222, with a development host key it makes
+  in `packages/ssh/.dev`, git-ignored; never production's). A new package with a `dev` script joins it.
   `bun run dev:kill` stops this repo's dev processes only (matched by working directory; another project on the
   same port is reported, never killed); `--dry-run` lists them.
 - `.env.test` and `.env.example` are committed; `.env.local` never is.

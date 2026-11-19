@@ -5,6 +5,7 @@
  * /healthz, /readyz            probes
  * /api/build                   the build a zone is serving, for its update check (lib/spa)
  * /api/contact                 the contact form (POST; acknowledged, not yet stored or delivered)
+ * /api/openapi.json            OpenAPI 3.1 document of every /api route (lib/openapi; cached publicly an hour)
  * /api/*                       anything else under /api: a JSON 404
  * /*                           the web zones (lib/spa), one per entry in @raineworks/tools/zones; `/` is `marketing`
  * ```
@@ -14,11 +15,13 @@
  * @module app
  */
 
+import { specFor } from '@raineworks/server/lib/openapi';
 import { serveSpa } from '@raineworks/server/lib/spa';
 import { buildRouter } from '@raineworks/server/routers/build';
 import { contactRouter } from '@raineworks/server/routers/contact';
 import { healthRouter } from '@raineworks/server/routers/health';
-import { Hono } from 'hono';
+import { type Context, Hono } from 'hono';
+import { HTTPException } from 'hono/http-exception';
 import { secureHeaders } from 'hono/secure-headers';
 
 /** Every `/api` route. Chained so an RPC client can infer request/response types. */
@@ -63,10 +66,30 @@ export function createApp() {
 		}),
 	);
 
+	// Generated from the routes once per process; the same for everyone, so cached publicly.
+	app.get('/api/openapi.json', async (c) => {
+		c.header('Cache-Control', 'public, max-age=3600');
+		return c.json(await specFor(typedApp as never));
+	});
 	app.route('/api', api);
 	app.all('/api/*', (c) => c.json({ error: { code: 'not_found', message: 'Not found.' } }, 404));
 
 	app.get('*', async (c) => (await serveSpa(c.req.raw)) ?? c.text('Not Found', 404));
 
+	app.onError(renderError);
+
 	return app;
+}
+
+/**
+ * `app.onError`: anything a route throws as `{ error: { code, message } }`, like every other refusal. Hono's own (a
+ * malformed JSON body is a 400) keep their status; anything else is a 500 whose cause is logged, never told.
+ */
+export function renderError(error: Error, c: Context): Response {
+	if (error instanceof HTTPException && error.status < 500) {
+		const code = error.status === 413 ? 'payload_too_large' : 'invalid_request';
+		return c.json({ error: { code, message: 'That request couldn’t be read.' } }, error.status);
+	}
+	console.error('Unhandled error', error);
+	return c.json({ error: { code: 'internal_error', message: 'Something went wrong.' } }, 500);
 }
