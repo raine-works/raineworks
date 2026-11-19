@@ -30,7 +30,8 @@ describe('loadHostKey', () => {
 	});
 
 	test('fails with a clear message when nothing is configured', () => {
-		expect(() => loadHostKey({})).toThrow(/no host key/);
+		// Neither set: the default mount, which isn't there in a test.
+		expect(() => loadHostKey({})).toThrow(/no host key: .*\/run\/secrets\/ssh_host_key: ENOENT/);
 	});
 
 	test('fails clearly when the file is missing', () => {

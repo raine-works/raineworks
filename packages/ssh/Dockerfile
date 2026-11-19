@@ -44,8 +44,7 @@ ENV VERSION=${VERSION} \
 	GIT_SHA=${GIT_SHA} \
 	NODE_ENV=production \
 	TZ=UTC \
-	SSH_PORT=2222 \
-	SSH_HOST_KEY_PATH=/run/secrets/ssh_host_key
+	SSH_PORT=2222
 
 WORKDIR /app
 COPY --chown=65532:65532 --from=builder /workspace/packages/ssh/dist/ssh-server ./ssh-server
