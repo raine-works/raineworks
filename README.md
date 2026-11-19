@@ -85,7 +85,8 @@ What's new.
   `ghcr.io/raine-works/raineworks` (the site) and `ghcr.io/raine-works/raineworks-ssh`, tagged with the version and
   `latest`. Its GitHub release is written from its note in `packages/ui/src/release-notes/`, and production (Dokploy)
   is told to deploy.
-- **Release notes.** A release cut without a note gets one: Claude writes it and opens it as a pull request.
+- **Release notes.** When a release goes out without a note, Claude writes the next one, covering everything since the
+  last note, and opens it as a pull request; merging it is that release.
 - **Code review.** Claude reviews every pull request against [AGENTS.md](AGENTS.md), and follows up on its findings
   until they're fixed.
 - **Docs sync.** After `master`'s CI passes, Claude fixes any doc the new commits made wrong, in a pull request.
