@@ -43,7 +43,8 @@ Every zone shares the origin, so they share cookies and `localStorage` (the them
 
 1. Add it to `ZONES` in `packages/tools/src/zones.ts` (basepath, package, title).
 2. Copy `packages/web-marketing`'s `package.json`, `tsconfig.json`, `bunfig.toml`, `index.html`, `scripts/build.ts`,
-   `src/main.tsx`, `src/styles.css` and `src/router.tsx`, renaming `web-marketing` / `marketing` in each.
+   `src/main.tsx`, `src/prerender.tsx`, `src/styles.css` and `src/router.tsx`, renaming `web-marketing` / `marketing`
+   in each.
 3. Add it to the root `tsconfig.json`'s references and `bun install`. `bun run dev` and `bun run build:web` pick it up
    through the `@raineworks/web-*` filter, and the server build embeds it. Write its `README.md`.
 
@@ -53,6 +54,7 @@ Every zone shares the origin, so they share cookies and `localStorage` (the them
 /healthz, /readyz            probes (outside /api)
 /api/build                   the build a zone is serving, for its update check
 /api/contact                 the contact form (POST; validated and acknowledged with a 202, not yet stored or delivered)
+/api/projects/stars          star counts of Raine's repositories on GitHub, for the project cards (lib/github; cached)
 /api/openapi.json            the OpenAPI 3.1 document of every /api route, generated from the routes (lib/openapi)
 /api/*                       anything else: a JSON 404
 /*                           the zones (lib/spa)
@@ -71,13 +73,16 @@ Every zone shares the origin, so they share cookies and `localStorage` (the them
 
 - **Where from:** a compiled binary reads `Bun.embeddedFiles` (`web/<zone>/…`); otherwise `WEB_DIST/<zone>` when set,
   else each zone's `packages/web-<name>/dist`. Paths outside the zone's directory are refused.
-- **Deep links:** an unknown path without an extension gets the zone's `index.html`; with one, a 404.
+- **Pages:** a path without an extension gets the zone's prerendered page for it (`<path>/index.html`), else its
+  `404.html` with a 404 status, else (a zone that doesn't prerender) its `index.html`; a path with one that isn't a
+  file, a 404. Pages are served at their paths, never by their file names.
 - **Compression:** the build writes `.br` / `.gz` siblings of every text asset; the server picks by `Accept-Encoding`.
-  `index.html` is compressed per request.
-- **Caching:** content-hashed files (`chunk-x.js`) for a year, immutable; `index.html` revalidated on every load
-  against a strong ETag (304 when it matches). Development never caches HTML.
-- **Build stamp:** each `index.html` gets `<meta name="raineworks-build">` (its ETag). Pages compare it with
-  `GET /api/build` to notice a new release under them ([frontend.md](frontend.md#versions-and-updates)).
+  Pages are compressed per request.
+- **Caching:** content-hashed files (`chunk-x.js`) for a year, immutable; pages revalidated on every load against a
+  strong ETag (304 when it matches). Development never caches HTML.
+- **Build stamp:** each page gets `<meta name="raineworks-build">` (the hash of its zone's `index.html`, which changes
+  whenever any of the zone's files does). Pages compare it with `GET /api/build` to notice a new release under them
+  ([frontend.md](frontend.md#versions-and-updates)).
 
 ## Production
 
