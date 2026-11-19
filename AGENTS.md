@@ -109,7 +109,7 @@ Detail: [docs/development.md](docs/development.md#releases), [docs/frontend.md](
 - A release people would notice has a note, `packages/ui/src/release-notes/<version>.md` (`bun run release` starts
   the next one): frontmatter `title` and `date`, then `##` sections by area. What changed for the people who read the
   site, not how. `bun run release check` fails a note that names a version already released.
-- The site is open source under the MIT License (`LICENSE`, © Raine Petersen). `@raineworks/ui/lib/brand` states the same
+- The site is open source under the MIT License (`LICENSE`, © raineworks LLC, Raine's company). `@raineworks/ui/lib/brand` states the same
   (`APP_LICENSE`, `COPYRIGHT_HOLDER`); a test holds the two together.
 - **The one LGPL exception is the SSH image:** OpenTUI's native library statically links a decode-only FFmpeg
   (LGPL-2.1-or-later). It ships only there, as a separate, replaceable file with its licence texts and

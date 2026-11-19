@@ -9,8 +9,8 @@
 /** The site's name as people read it. */
 export const APP_NAME = 'raineworks';
 
-/** Who holds the copyright, as the root `LICENSE`'s copyright line names them. */
-export const COPYRIGHT_HOLDER = 'Raine Petersen';
+/** Who holds the copyright (Raine's company), as the root `LICENSE`'s copyright line names it. */
+export const COPYRIGHT_HOLDER = 'raineworks LLC';
 
 /** The site's own licence, by its SPDX identifier and as people read it. */
 export const APP_LICENSE = { spdx: 'MIT', name: 'MIT License' } as const;
