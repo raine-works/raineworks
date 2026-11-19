@@ -164,3 +164,23 @@ Detail: [docs/frontend.md](docs/frontend.md).
   `bun run dev:kill` stops this repo's dev processes only (matched by working directory; another project on the
   same port is reported, never killed); `--dry-run` lists them.
 - `.env.test` and `.env.example` are committed; `.env.local` never is.
+
+## Pull requests and code review
+
+Every change reaches `master` through a pull request. A pull request isn't done when it's opened.
+
+1. Open it with a description of what changed, why, and how it was tested (the real results).
+2. **Wait for every check and the code review to finish** (`gh pr checks <number> --watch`): CI's checks and images
+   (`ci.yml`) and Claude's code review (`code-review.yml`, the check `Code review / review`). Don't report the pull
+   request ready, and don't stop, while any is running. If none start, find out why (a merge conflict stops them).
+3. **Handle everything they raise.** Fix each failing check. For each review finding, fix it in a new commit, or, when
+   it's wrong, reply in its thread saying why. Never leave a finding unanswered or resolve it without a reply: the
+   review resolves its own threads once it sees them fixed.
+4. Push the fixes and wait again. Repeat until every check passes and the review has nothing open.
+5. Only then say it's ready, with what the checks and the review found and what you did about each.
+
+- If `master` moves, bring it into the branch and resolve the conflicts; if it already contains the change, say so
+  instead of merging a duplicate.
+- Never merge your own pull request, and never skip, disable or weaken a check or a review to get one through.
+- A pull request that changes `code-review.yml` can't be reviewed by Claude (it runs only `master`'s copy): its review
+  fails on purpose, and a person reviews it. Change the review workflow in a pull request of its own.

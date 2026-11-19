@@ -114,6 +114,16 @@ makes the change and opens a pull request for it (`.github/workflows/claude.yml`
 start it. It signs in to Anthropic the same way as the release note (workload identity federation, no stored key), and
 can run the checks (`bun run lint`, `typecheck`, `test`) but nothing else.
 
+**Code review** (`.github/workflows/code-review.yml`, the check `Code review / review`): on every pull request (not
+drafts or forks), Claude reviews the change against `AGENTS.md` and the docs it lists, inline, with one summary comment
+ending `Reviewed up to <sha>`. On each push it follows up on its own findings (resolving what's fixed) and reviews
+what's new; a reply to one of its inline comments is answered in that thread (one mentioning `@claude` is
+`claude.yml`'s instead). It reviews the docs-sync app's pull requests too. It fails when it couldn't finish, so a review
+that didn't happen never passes quietly, and on a pull request that changes `code-review.yml` itself (Claude runs only
+`master`'s copy), so a person reviews that one. It posts as `claude[bot]`: the [Claude GitHub
+App](https://github.com/apps/claude) must be installed on the repository. How a pull request handles the review:
+[AGENTS.md](../AGENTS.md#pull-requests-and-code-review).
+
 ## Deployment
 
 Every release is two images on GitHub's registry, each tagged `<version>`, `latest` and `sha-<commit>` (public, like
