@@ -33,7 +33,8 @@ built on shadcn/ui and ui-sdk.
   loads. Lighthouse scores 100 in every category, on mobile and desktop.
 - **Shares well.** Each page has its own title, description, canonical link and an Open Graph / X card with the site's
   share image. There's a `sitemap.xml`, a `robots.txt`, and schema.org data about Raine.
-- **Live.** Each project card shows its GitHub stars, which the server asks GitHub for every ten minutes.
+- **Live.** The projects are the repositories tagged `raineworks` on GitHub, with their stars, which the server asks
+  GitHub for every ten minutes.
 - **In a terminal too.** `ssh raineworks.com` is the same content as an [OpenTUI](https://github.com/sst/opentui) app,
   with its own image.
 
