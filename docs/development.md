@@ -129,7 +129,9 @@ App](https://github.com/apps/claude) must be installed on the repository. How a 
 **Docs sync** (`.github/workflows/docs-sync.yml`): once `master`'s CI passes, Claude checks whether what's new since its
 last run made any doc wrong (`AGENTS.md`, `STYLEGUIDE.md`, `README.md`, `docs/*.md`, the packages' READMEs) and, if so,
 opens (or updates) the `claude/docs-sync` pull request fixing them. It edits only those docs, never code or release
-notes, and skips its own merges and release notes'. It can also be run by hand: **Actions → Docs sync → Run workflow**.
+notes, and skips its own merges and release notes'. Each run builds on the open docs-sync pull request's fixes rather
+than replacing them (if master has since changed the same lines, it drops them and looks again since that pull request
+began). It can also be run by hand: **Actions → Docs sync → Run workflow**.
 
 **The docs-sync GitHub App** opens Docs sync's and the release note's pull requests: one opened with a workflow's own
 token would start no checks. Each run makes a token only after Claude's step, so Claude never has it. Set it up once:
