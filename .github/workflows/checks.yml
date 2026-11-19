@@ -15,7 +15,7 @@ permissions:
   contents: read
 
 jobs:
-  # `bun fmt --check`: formatting, import order and Tailwind class order (bunfig.toml).
+  # `bun fmt --check`: formatting, import order and Tailwind class order (bunfig.toml); ShellCheck for the shell scripts.
   lint:
     name: Lint
     runs-on: ubuntu-26.04
@@ -27,6 +27,8 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/setup
       - run: bun run lint
+      # The repository's shell scripts (`bun fmt` doesn't read them); ShellCheck is on GitHub's runners.
+      - run: shellcheck scripts/*.sh
 
   # `bun check -b`: every package's types, and what's unused (noUnusedLocals / noUnusedParameters).
   typecheck:

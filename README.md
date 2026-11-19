@@ -22,6 +22,7 @@ Bun 1.4.4 (`.bun-version`), then:
 
 ```bash
 bun install
+bun run dev:init    # each package's .env.local and the SSH dev host key (safe to re-run)
 bun run dev         # every package's dev server at once: the zones in watch mode, the server on
                     # http://127.0.0.1:3032, and `ssh -p 2222 localhost`
 ```
