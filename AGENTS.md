@@ -45,7 +45,8 @@ Full detail in [STYLEGUIDE.md](STYLEGUIDE.md). The ones that break things if ign
   `exports`.
 - Every source file opens with a JSDoc block saying what the module is for, ending in `@module <path>` (shadcn's
   generated `components/*` excepted). File names are kebab-case.
-- Run `bun run format` before you finish; `bun run lint`, `bun run typecheck` and `bun run test` are the checks.
+- Run `bun run format` before you finish; `bun run lint`, `bun run typecheck` and `bun run test` are the checks, and
+  `shellcheck scripts/*.sh` for the shell scripts (CI runs it too).
 - **Use `@raineworks/tools` before writing your own helper or reaching for a raw built-in.** If a tool almost fits,
   extend it (with a test) rather than working around it.
   - Prototypes (`import '@raineworks/tools/prototypes'` in every module that uses them): `.tryCatch()` /
@@ -144,7 +145,13 @@ Detail: [docs/frontend.md](docs/frontend.md).
 
 ## Development
 
-- `bun run dev` builds every zone in watch mode and runs the server (`NODE_ENV=development`, loopback, port 3032).
+- `bun run dev:init` sets a clone up (`scripts/init.sh`): each package's `.env.local` from its `.env.example`, keeping
+  what's set, and the SSH dev host key. A setting a package reads goes in its `.env.example` (commented when it has a
+  default), never only in someone's `.env.local`. Local services, once there are any, start there too
+  (`.docker/compose.yaml`).
+- `bun run dev` runs every package's `dev` script at once (`--filter '*'`): every zone's watch build, the server
+  (`NODE_ENV=development`, loopback, port 3032) and the SSH server (port 2222, with a development host key it makes
+  in `packages/ssh/.dev`, git-ignored; never production's). A new package with a `dev` script joins it.
   `bun run dev:kill` stops this repo's dev processes only (matched by working directory; another project on the
   same port is reported, never killed); `--dry-run` lists them.
 - `.env.test` and `.env.example` are committed; `.env.local` never is.

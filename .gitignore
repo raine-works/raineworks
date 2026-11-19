@@ -27,3 +27,6 @@ logs
 *.bun-build
 
 .DS_Store
+
+# Development-only keys (`@raineworks/ssh`'s dev host key), made by `bun run dev`
+.dev
