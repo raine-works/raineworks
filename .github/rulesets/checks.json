@@ -1,0 +1,23 @@
+{
+	"name": "raineworks checks",
+	"target": "branch",
+	"enforcement": "active",
+	"conditions": { "ref_name": { "include": ["~DEFAULT_BRANCH"], "exclude": [] } },
+	"rules": [
+		{
+			"type": "required_status_checks",
+			"parameters": {
+				"strict_required_status_checks_policy": true,
+				"do_not_enforce_on_create": false,
+				"required_status_checks": [
+					{ "context": "plan / plan", "integration_id": 15368 },
+					{ "context": "checks / Lint", "integration_id": 15368 },
+					{ "context": "checks / Typecheck", "integration_id": 15368 },
+					{ "context": "checks / Test", "integration_id": 15368 },
+					{ "context": "Code review / review", "integration_id": 15368 }
+				]
+			}
+		}
+	],
+	"bypass_actors": [{ "actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "pull_request" }]
+}
