@@ -137,7 +137,9 @@ Detail: [docs/frontend.md](docs/frontend.md).
 
 ## Development
 
-- `bun run dev` builds every zone in watch mode and runs the server (`NODE_ENV=development`, loopback, port 3032).
+- `bun run dev` runs every package's `dev` script at once (`--filter '*'`): every zone's watch build, the server
+  (`NODE_ENV=development`, loopback, port 3032) and the SSH server (port 2222, with a development host key it makes
+  in `packages/ssh/.dev`, git-ignored; never production's). A new package with a `dev` script joins it.
   `bun run dev:kill` stops this repo's dev processes only (matched by working directory; another project on the
   same port is reported, never killed); `--dry-run` lists them.
 - `.env.test` and `.env.example` are committed; `.env.local` never is.

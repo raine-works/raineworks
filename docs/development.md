@@ -19,7 +19,7 @@ Run at the root.
 
 | Command | What it does |
 | --- | --- |
-| `bun run dev` | Every zone's `Bun.build --watch` (rebuilding on a change in the zone or `@raineworks/ui`) and the server on `http://127.0.0.1:3032`. Reload the page after a rebuild. |
+| `bun run dev` | Every package's `dev` script, in parallel: each zone's `Bun.build --watch` (rebuilding on a change in the zone or `@raineworks/ui`), the server on `http://127.0.0.1:3032` and the SSH app on port 2222 (`ssh -p 2222 localhost`), all restarting on save. Reload the page after a rebuild. |
 | `bun run dev:kill` | Stops this repo's dev processes (matched by working directory; another project's server on the port is reported, never killed). `--dry-run` lists them. |
 | `bun run build:web` | Builds every zone into `packages/web-*/dist` (minified, precompressed, stamped) |
 | `bun run build` | `build:web`, then the standalone server binary, `packages/server/dist/server` |

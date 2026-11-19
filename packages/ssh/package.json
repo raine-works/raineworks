@@ -4,6 +4,7 @@
 	"type": "module",
 	"scripts": {
 		"build": "bun scripts/build.ts",
+		"dev": "bun scripts/dev-host-key.ts && SSH_HOST_KEY_PATH=.dev/host_key NODE_ENV=development bun --watch src/main.ts",
 		"start": "bun src/main.ts",
 		"test": "bun test",
 		"typecheck": "bun check"

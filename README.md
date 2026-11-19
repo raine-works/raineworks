@@ -22,7 +22,8 @@ Bun 1.4.4 (`.bun-version`), then:
 
 ```bash
 bun install
-bun run dev         # every zone in watch mode, and the server on http://127.0.0.1:3032
+bun run dev         # every package's dev server at once: the zones in watch mode, the server on
+                    # http://127.0.0.1:3032, and `ssh -p 2222 localhost`
 ```
 
 | Command | What |

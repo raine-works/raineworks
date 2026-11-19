@@ -7,7 +7,7 @@
 		"build": "bun run --filter @raineworks/server --filter @raineworks/ssh build",
 		"build:web": "bun run --parallel --filter '@raineworks/web-*' build",
 		"clean": "find . -name node_modules -type d -prune -exec rm -rf {} + && find packages -name dist -type d -prune -exec rm -rf {} +",
-		"dev": "bun run --parallel --filter '@raineworks/web-*' --filter @raineworks/server dev",
+		"dev": "bun run --parallel --filter '*' dev",
 		"dev:kill": "bun scripts/kill-ports.ts",
 		"format": "bun fmt",
 		"images": "bun packages/tools/src/images-cli.ts",

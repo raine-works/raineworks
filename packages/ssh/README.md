@@ -48,7 +48,9 @@ docker run -p 22:2222 -v "$PWD/host_key:/run/secrets/ssh_host_key:ro" --read-onl
 ssh localhost
 ```
 
-Without Docker: `SSH_HOST_KEY_PATH=./host_key bun run --filter @raineworks/ssh start`.
+In development, `bun run dev` (at the root, or here) serves it on port 2222 with a development key it makes the first
+time (`.dev/host_key`, git-ignored; ed25519 through `ssh-keygen`, else RSA): `ssh -p 2222 localhost`. Without the
+watcher: `SSH_HOST_KEY_PATH=./host_key bun run --filter @raineworks/ssh start`.
 
 ## Deploying
 
