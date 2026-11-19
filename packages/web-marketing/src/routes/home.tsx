@@ -1,6 +1,6 @@
 /**
  * The `/` page: who Raine is (the hero), what Raine is building now (bndl, Lux Financial), and the featured
- * projects (`featured` in `content/profile`).
+ * projects (the repositories tagged `raineworks-featured` on GitHub).
  *
  * @module routes/home
  */
@@ -10,16 +10,15 @@ import { useDocumentTitle } from '@raineworks/ui/blocks/page';
 import { Badge } from '@raineworks/ui/components/badge';
 import { Button } from '@raineworks/ui/components/button';
 import { Card, CardDescription, CardHeader, CardTitle } from '@raineworks/ui/components/card';
-import { ProjectCard } from '@raineworks/web-marketing/components/project-card';
+import { ProjectCards } from '@raineworks/web-marketing/components/project-card';
 import { SectionHeading } from '@raineworks/web-marketing/components/section-heading';
 import { SocialLinks } from '@raineworks/web-marketing/components/social-links';
-import { isWritten, profile, projects, work } from '@raineworks/web-marketing/content/profile';
+import { isWritten, profile, work } from '@raineworks/web-marketing/content/profile';
 import { Link } from '@tanstack/react-router';
 import { ArrowRightIcon, ArrowUpRightIcon, MapPinIcon } from 'lucide-react';
 
 export function HomePage() {
 	useDocumentTitle(profile.name);
-	const featured = projects.filter((project) => project.featured);
 	return (
 		<div className="flex flex-col gap-20 md:gap-28">
 			<section className="relative isolate">
@@ -95,9 +94,7 @@ export function HomePage() {
 					more={{ to: '/projects', label: 'All projects' }}
 				/>
 				<div className="grid items-stretch gap-4 md:grid-cols-2 lg:grid-cols-3">
-					{featured.map((project) => (
-						<ProjectCard key={project.name} project={project} />
-					))}
+					<ProjectCards featured placeholders={3} />
 				</div>
 			</section>
 		</div>

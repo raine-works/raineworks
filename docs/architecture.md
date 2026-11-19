@@ -14,7 +14,7 @@ A Bun workspace (`packages/*`), every package `@raineworks/<name>`, every depend
 | `@raineworks/server` | The Hono server: probes, `/api`, and every web zone, compiled into one standalone binary | `tools` |
 | `@raineworks/api` | The typed `hc` client over the server's `AppType` | `tools`, (types of) `server` |
 | `@raineworks/ui` | The design system: tokens, shadcn components, blocks, the zone root (`mountZone`), About | `api`, `tools` |
-| `@raineworks/web-marketing` | The `marketing` zone: the site itself, served at `/`; exports `content/profile`, what every page (and the SSH app) says | `ui`, `tools` |
+| `@raineworks/web-marketing` | The `marketing` zone: the site itself, served at `/`; exports `content/profile`, what every page (and the SSH app) says | `api`, `ui`, `tools` |
 | `@raineworks/ssh` | `ssh raineworks.com`: the site as an OpenTUI terminal UI over an `ssh2` server, its own image ([README](../packages/ssh/README.md)) | `web-marketing` |
 | `@raineworks/tools` | The shared toolbox: zones, the frontend build, env, HTTP, versions, releases, notices, prototypes | — |
 | `@raineworks/tsconfig` | The TypeScript configs every package extends | — |
@@ -54,7 +54,7 @@ Every zone shares the origin, so they share cookies and `localStorage` (the them
 /healthz, /readyz            probes (outside /api)
 /api/build                   the build a zone is serving, for its update check
 /api/contact                 the contact form (POST; validated and acknowledged with a 202, not yet stored or delivered)
-/api/projects/stars          star counts of Raine's repositories on GitHub, for the project cards (lib/github; cached)
+/api/projects                Raine's projects: repositories tagged `raineworks` on GitHub, with stars (lib/github; cached)
 /api/openapi.json            the OpenAPI 3.1 document of every /api route, generated from the routes (lib/openapi)
 /api/*                       anything else: a JSON 404
 /*                           the zones (lib/spa)

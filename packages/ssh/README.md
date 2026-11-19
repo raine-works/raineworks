@@ -17,7 +17,8 @@ zone: the server doesn't serve it and it has no `index.html`.
 | `Dockerfile` | Bun's distroless image, non-root (uid 65532), no shell |
 
 Content comes from `@raineworks/web-marketing/content/profile`, the module the website renders: edit it there, never
-in a copy here. Keep the TUI read-only and responsive (`useTerminalDimensions`): it draws at any size from 60×20 up
+in a copy here. The projects come from the site's `GET /api/projects` (`src/server/projects.ts`), the repositories
+tagged `raineworks` on GitHub, one list shared by every session. Keep the TUI read-only and responsive (`useTerminalDimensions`): it draws at any size from 60×20 up
 (smaller says so), the title takes the biggest font that fits, and below 96 columns the sidebar becomes tabs.
 
 Tests (`bun test`) render the app with OpenTUI's `testRender` and drive it with keys: every screen at two sizes, the

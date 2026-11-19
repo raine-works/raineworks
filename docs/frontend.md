@@ -45,8 +45,8 @@ previews (Slack, iMessage, X, LinkedIn) see each page for what it is.
   that was rendered.
 - **What the server and the browser render must match.** Read browser state in effects or through
   `useSyncExternalStore` with a server snapshot (`useTheme`); something that can't match (the footer's year) takes
-  `suppressHydrationWarning`. Live data (the projects' GitHub stars, `GET /api/projects/stars`) loads in the browser,
-  in a slot that's the same size with or without it, so nothing moves when it arrives.
+  `suppressHydrationWarning`. Live data (the projects, `GET /api/projects`) loads in the browser, in place of
+  placeholders the same size, so nothing moves when it arrives.
 
 Check it with Lighthouse against a production build (`bun run build:web`, then the server with
 `NODE_ENV=production`): every page scores 100 in every category, on mobile and desktop.

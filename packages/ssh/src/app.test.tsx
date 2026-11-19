@@ -1,9 +1,29 @@
 import { afterEach, describe, expect, mock, test } from 'bun:test';
 
 import { testRender } from '@opentui/react/test-utils';
-import { App, type SendMessage } from '@raineworks/ssh/app';
+import type { Project } from '@raineworks/api';
+import { App, type LoadProjects, type SendMessage } from '@raineworks/ssh/app';
 import { titleFont } from '@raineworks/ssh/screens/home';
-import { profile, projects } from '@raineworks/web-marketing/content/profile';
+import { profile } from '@raineworks/web-marketing/content/profile';
+
+const projects: Project[] = [
+	{
+		name: 'ha-grok',
+		description: 'Grok for Home Assistant.',
+		href: 'https://github.com/raine-works/ha-grok',
+		stack: ['Python', 'home-assistant'],
+		stars: 12,
+		featured: true,
+	},
+	{
+		name: 'raineworks',
+		description: '',
+		href: 'https://github.com/raine-works/raineworks',
+		stack: ['TypeScript'],
+		stars: 3,
+		featured: false,
+	},
+];
 
 // The clock and the rain update state on timers, outside `act`: what's tested is each frame as drawn.
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = false;
@@ -19,9 +39,15 @@ async function open({
 	width = 120,
 	height = 36,
 	send = async () => ({ ok: true }) as const,
-}: { width?: number; height?: number; send?: SendMessage } = {}) {
+	loadProjects = async () => projects,
+}: { width?: number; height?: number; send?: SendMessage; loadProjects?: LoadProjects } = {}) {
 	const onQuit = mock(() => {});
-	current = await testRender(<App version="2026.11.1" rain={false} send={send} onQuit={onQuit} />, { width, height });
+	current = await testRender(
+		<App version="2026.11.1" rain={false} send={send} loadProjects={loadProjects} onQuit={onQuit} />,
+		{ width, height },
+	);
+	// The projects load in an effect: let it settle before the first frame.
+	await Bun.sleep(0);
 	await current.renderOnce();
 	const setup = current;
 	/** Presses keys in turn (a name from OpenTUI's `KeyCodes`, a character, or `ctrl+x`), drawing after each. */
@@ -68,10 +94,20 @@ describe('the SSH app', () => {
 
 	test('Projects: ↑/↓ choose a project and show it in full', async () => {
 		const { press, frame } = await open();
+		await press('3');
+		expect(frame()).toContain('Grok for Home Assistant.');
+		expect(frame()).toContain('home-assistant');
+		await press('j');
+		expect(frame()).toContain('2 of 2');
+		expect(frame()).toContain('github.com/raine-works/raineworks');
+		expect(frame()).toContain('you’re looking at it');
+	});
+
+	test('Projects: says so when they couldn’t be loaded, and points to GitHub', async () => {
+		const { press, frame } = await open({ loadProjects: async () => null });
 		await press('3', 'j');
-		const second = projects[1];
-		expect(frame()).toContain(`${projects.indexOf(second ?? projects[0]!) + 1} of ${projects.length}`);
-		expect(frame()).toContain(second?.href?.replace('https://', '') ?? '');
+		expect(frame()).toContain('The projects couldn’t be loaded from GitHub just now.');
+		expect(frame()).toContain('github.com/raine-works');
 	});
 
 	test('Contact: sending an empty form says what’s missing, under each field', async () => {

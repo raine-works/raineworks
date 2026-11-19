@@ -12,7 +12,7 @@ import { readFileSync } from 'node:fs';
 
 import { type CliRenderer, createCliRenderer } from '@opentui/core';
 import { createRoot } from '@opentui/react';
-import { App, type SendMessage } from '@raineworks/ssh/app';
+import { App, type LoadProjects, type SendMessage } from '@raineworks/ssh/app';
 import { clampSize, ConnectionGuard, defaultLimits, type Limits } from '@raineworks/ssh/server/limits';
 import { TerminalInput, TerminalOutput } from '@raineworks/ssh/server/terminal';
 import { createElement } from 'react';
@@ -27,6 +27,8 @@ export type ServerOptions = {
 	version: string;
 	/** A message sender for each new session (`server/messages`). */
 	sender: () => SendMessage;
+	/** The projects, shared by every session (`server/projects`). */
+	loadProjects: LoadProjects;
 };
 
 /** Frames a second a session draws at most: smooth rain, without one visitor costing the server much. */
@@ -151,7 +153,12 @@ export function createServer(options: ServerOptions) {
 					}
 					renderer = created;
 					createRoot(renderer).render(
-						createElement(App, { version: options.version, send: options.sender(), onQuit: () => void quit() }),
+						createElement(App, {
+							version: options.version,
+							send: options.sender(),
+							loadProjects: options.loadProjects,
+							onQuit: () => void quit(),
+						}),
 					);
 				});
 			});

@@ -80,6 +80,7 @@ Detail: [packages/ssh/README.md](packages/ssh/README.md).
 
 - `ssh raineworks.com` is an OpenTUI (`@opentui/react`) terminal UI, not a web zone: the server doesn't serve it. Its content is
   `@raineworks/web-marketing/content/profile`, the module the site renders: edit content there, never in a TUI copy.
+  The projects are the site's too, from `GET /api/projects` (`src/server/projects.ts`).
 - Every piece of content goes through `sanitize()` before it's rendered, so none can inject terminal escape sequences.
   Keep the TUI read-only and responsive (`useTerminalDimensions`): it draws at every size from 60×20 up.
 - A message sent from the TUI goes through the site's own `POST /api/contact` (`src/server/messages.ts`), never
