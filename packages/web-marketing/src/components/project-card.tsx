@@ -1,7 +1,8 @@
 /**
- * A project as a card: its name (the whole card opens the repository), its stars on GitHub, what it is, and what it's
- * built with. The stars are live (`GET /api/projects/stars`), shown once they're in: never prerendered, so never stale,
- * in a slot of their own so nothing moves when they arrive.
+ * A project as a card: its name (the whole card opens the repository), what it is, what it's built with, and its stars
+ * on GitHub. The stars are live (`GET /api/projects/stars`), shown once they're in: never prerendered, so never stale,
+ * in a slot of their own beside what it's built with (the name keeps the header's width), so nothing moves when they
+ * arrive.
  *
  * @module components/project-card
  */
@@ -33,7 +34,7 @@ const compactCount = new Intl.NumberFormat('en', { notation: 'compact' });
 function StarCount({ repo }: { repo: string }) {
 	const count = useQuery(starsQuery()).data?.[repo];
 	return (
-		<span className="ml-auto inline-flex w-12 shrink-0 items-center justify-end gap-1 font-sans text-xs font-normal text-muted-foreground tabular-nums">
+		<span className="inline-flex h-5 w-12 shrink-0 items-center justify-end gap-1 text-xs text-muted-foreground tabular-nums">
 			{count !== undefined && (
 				<>
 					<StarIcon aria-hidden="true" className="size-3.5" />
@@ -63,8 +64,7 @@ export function ProjectCard({ project }: { project: ProjectEntry }) {
 							>
 								{project.name}
 							</a>
-							<StarCount repo={project.name} />
-							<ArrowUpRightIcon className="size-4 text-muted-foreground transition-transform group-has-[a:hover]:translate-x-0.5 group-has-[a:hover]:-translate-y-0.5 group-has-[a:hover]:text-foreground" />
+							<ArrowUpRightIcon className="ml-auto size-4 shrink-0 text-muted-foreground transition-transform group-has-[a:hover]:translate-x-0.5 group-has-[a:hover]:-translate-y-0.5 group-has-[a:hover]:text-foreground" />
 						</>
 					) : (
 						<>
@@ -76,8 +76,8 @@ export function ProjectCard({ project }: { project: ProjectEntry }) {
 				</CardTitle>
 				<CardDescription className="leading-relaxed">{project.description}</CardDescription>
 			</CardHeader>
-			<CardContent className="mt-auto">
-				<ul className="flex flex-wrap gap-1.5" aria-label="Built with">
+			<CardContent className="mt-auto flex items-end gap-3">
+				<ul className="flex flex-1 flex-wrap gap-1.5" aria-label="Built with">
 					{project.stack.map((tech) => (
 						<li key={tech}>
 							<Badge variant="outline" className="font-mono text-[11px] font-normal text-muted-foreground">
@@ -86,6 +86,7 @@ export function ProjectCard({ project }: { project: ProjectEntry }) {
 						</li>
 					))}
 				</ul>
+				{project.href && <StarCount repo={project.name} />}
 			</CardContent>
 		</Card>
 	);
