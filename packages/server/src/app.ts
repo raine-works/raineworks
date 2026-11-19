@@ -5,6 +5,7 @@
  * /healthz, /readyz            probes
  * /api/build                   the build a zone is serving, for its update check (lib/spa)
  * /api/contact                 the contact form (POST; acknowledged, not yet stored or delivered)
+ * /api/projects/stars          star counts of Raine's repositories on GitHub (lib/github; cached ten minutes)
  * /api/openapi.json            OpenAPI 3.1 document of every /api route (lib/openapi; cached publicly an hour)
  * /api/*                       anything else under /api: a JSON 404
  * /*                           the web zones (lib/spa), one per entry in @raineworks/tools/zones; `/` is `marketing`
@@ -20,12 +21,16 @@ import { serveSpa } from '@raineworks/server/lib/spa';
 import { buildRouter } from '@raineworks/server/routers/build';
 import { contactRouter } from '@raineworks/server/routers/contact';
 import { healthRouter } from '@raineworks/server/routers/health';
+import { projectsRouter } from '@raineworks/server/routers/projects';
 import { type Context, Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { secureHeaders } from 'hono/secure-headers';
 
 /** Every `/api` route. Chained so an RPC client can infer request/response types. */
-export const api = new Hono().route('/build', buildRouter).route('/contact', contactRouter);
+export const api = new Hono()
+	.route('/build', buildRouter)
+	.route('/contact', contactRouter)
+	.route('/projects', projectsRouter);
 
 /** Browser features no zone uses, denied outright. Turn one on here when a zone needs it. */
 const PERMISSIONS_POLICY = {

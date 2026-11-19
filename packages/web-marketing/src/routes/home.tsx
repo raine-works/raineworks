@@ -18,7 +18,7 @@ import { Link } from '@tanstack/react-router';
 import { ArrowRightIcon, ArrowUpRightIcon, MapPinIcon } from 'lucide-react';
 
 export function HomePage() {
-	useDocumentTitle();
+	useDocumentTitle(profile.name);
 	const featured = projects.filter((project) => project.featured);
 	return (
 		<div className="flex flex-col gap-20 md:gap-28">

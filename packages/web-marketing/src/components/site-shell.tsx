@@ -55,7 +55,8 @@ export function SiteShell({ children }: { children: ReactNode }) {
 				<div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-10 md:flex-row md:items-center md:justify-between md:px-8">
 					<div className="flex flex-col gap-2">
 						<AppLogo className="h-5 self-start text-muted-foreground" />
-						<p className="text-sm text-muted-foreground">
+						{/* Prerendered with the year it was built in: the year it's read in wins, without a warning. */}
+						<p suppressHydrationWarning className="text-sm text-muted-foreground">
 							© {new Date().getFullYear()} {COPYRIGHT_HOLDER}. Open source under the MIT License.
 						</p>
 						<VersionLabel className="-mx-1" />

@@ -70,13 +70,15 @@ wiring `release-plan.yml`, `checks.yml`, `release-images.yml` and `release-publi
 A push that changes nothing the image is built from (docs, workflows, tests) is checked, not released. Master's runs
 take turns (the `release` concurrency group), so versions are cut one at a time, in order.
 
-To have Claude write a release's note, run **Actions → Release note → Run workflow** (`release.yml`): it writes the next
-version's note from what changed since the last one and opens it as the pull request `Release note <version>`; merging
-it is the release. Claude signs in with workload identity federation: the job's GitHub OIDC token is exchanged
+**A release cut without a note gets one written.** Once CI has finished on `master` and released a commit that has no
+`<version>.md`, the Release note workflow (`release.yml`) runs on its own: Claude writes the next version's note from
+what changed since the last one and opens it as the pull request `Release note <version>`. Merging it is the release
+that puts it on the site (that release has its note, so it starts no other). It can also be run by hand: **Actions →
+Release note → Run workflow**. Writing the note in the pull request that makes the change (`bun run release`) is still
+best: the release then ships with it. Claude signs in with workload identity federation: the job's GitHub OIDC token is exchanged
 for a short-lived Anthropic one (the federation rule's identifiers are in `release-note.yml`; no API key is stored).
-**Actions → anthropic-wif-test** checks that exchange on its own. The pull request needs one repository secret,
-`RELEASE_NOTE_TOKEN` (a fine-grained token for this repository with contents and pull requests write; a pull request
-opened with the workflow's own token would start no checks).
+**Actions → anthropic-wif-test** checks that exchange on its own. The pull request is opened as the docs-sync GitHub
+App (see [Claude in GitHub](#claude-in-github)).
 
 A release people would notice has a note. To write one:
 
@@ -113,6 +115,23 @@ Mention `@claude` in an issue, a comment or a pull request review and Claude ans
 makes the change and opens a pull request for it (`.github/workflows/claude.yml`). Only people with write access can
 start it. It signs in to Anthropic the same way as the release note (workload identity federation, no stored key), and
 can run the checks (`bun run lint`, `typecheck`, `test`) but nothing else.
+
+**Docs sync** (`.github/workflows/docs-sync.yml`): once `master`'s CI passes, Claude checks whether what's new since its
+last run made any doc wrong (`AGENTS.md`, `STYLEGUIDE.md`, `README.md`, `docs/*.md`, the packages' READMEs) and, if so,
+opens (or updates) the `claude/docs-sync` pull request fixing them. It edits only those docs, never code or release
+notes, and skips its own merges and release notes'. It can also be run by hand: **Actions → Docs sync → Run workflow**.
+
+**The docs-sync GitHub App** opens Docs sync's and the release note's pull requests: one opened with a workflow's own
+token would start no checks. Each run makes a token only after Claude's step, so Claude never has it. Set it up once:
+
+1. Create a GitHub App owned by `raine-works` (Settings → Developer settings → GitHub Apps → New), its webhook off, with
+   **Contents** and **Pull requests** read and write, installable only on this account.
+2. Install it on `raine-works/raineworks` alone.
+3. Give the repository its client ID as the `DOCS_SYNC_APP_CLIENT_ID` variable and a private key (generated on the
+   App's page) as the `DOCS_SYNC_APP_PRIVATE_KEY` secret:
+   `gh variable set DOCS_SYNC_APP_CLIENT_ID --body <client id>`, `gh secret set DOCS_SYNC_APP_PRIVATE_KEY < key.pem`.
+
+Without it, both workflows stop at their first step, saying what's missing.
 
 ## Deployment
 

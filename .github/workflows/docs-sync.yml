@@ -1,0 +1,139 @@
+# After master's CI passes, Claude checks whether what's new on master made any of the repository's docs wrong (the
+# ones AGENTS.md lists and the packages' READMEs) and, if so, opens (or updates) one pull request fixing them. It never
+# pushes to master itself.
+#
+# It follows CI (workflow_run), not the push: Claude's action doesn't take push events. What's new is everything since
+# the last commit it ran for: its previous successful run's. It skips its own merged pull requests and release notes'.
+#
+# It signs in to Anthropic with the job's OIDC token (workload identity federation: no API key is stored), and opens
+# its pull request as the docs-sync GitHub App (the DOCS_SYNC_APP_CLIENT_ID variable and DOCS_SYNC_APP_PRIVATE_KEY
+# secret, docs/development.md), as the Release note workflow does: one opened with the workflow's own token would start
+# no checks.
+name: Docs sync
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    name: Docs sync
+    concurrency:
+      group: docs-sync
+      cancel-in-progress: false
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+      actions: read
+    # Only for a push to master whose checks passed, and not for its own merged pull requests or release notes.
+    if: >-
+      github.event_name == 'workflow_dispatch' || (
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.conclusion == 'success' &&
+        !startsWith(github.event.workflow_run.head_commit.message, 'Sync docs') &&
+        !startsWith(github.event.workflow_run.head_commit.message, 'Release note')
+      )
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    steps:
+      # Without the app there's nothing this run could finish: say so now, before Claude spends any time.
+      - name: Check the docs-sync app is set up
+        env:
+          CLIENT_ID: ${{ vars.DOCS_SYNC_APP_CLIENT_ID }}
+          HAS_KEY: ${{ secrets.DOCS_SYNC_APP_PRIVATE_KEY != '' }}
+        run: |
+          if [ -z "$CLIENT_ID" ] || [ "$HAS_KEY" != true ]; then
+            echo "::error::The docs-sync GitHub App isn't set up: set the DOCS_SYNC_APP_CLIENT_ID variable and the DOCS_SYNC_APP_PRIVATE_KEY secret, and install the app on this repository (docs/development.md, Releases)."
+            exit 1
+          fi
+      # And installed on this repository: a token that can only read its metadata, to find out now rather than after
+      # Claude's step. The token the pull request is opened with is made only after it.
+      - name: Check the docs-sync app is installed
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.DOCS_SYNC_APP_CLIENT_ID }}
+          private-key: ${{ secrets.DOCS_SYNC_APP_PRIVATE_KEY }}
+          permission-metadata: read
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 0
+          # The pull request is opened (and pushed) with its own token, in its own step: the checkout's token isn't
+          # left in .git/config while Claude runs.
+          persist-credentials: false
+      - name: What's new
+        id: range
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          # The commit this workflow last ran for (its previous successful run), else just the latest commit.
+          since="$(gh run list --workflow docs-sync.yml --branch master --status success --limit 1 --json headSha --jq '.[0].headSha // empty')"
+          if [ -z "$since" ] || ! git merge-base --is-ancestor "$since" "$HEAD_SHA"; then since="$HEAD_SHA~1"; fi
+          echo "range=$since..$HEAD_SHA" >> "$GITHUB_OUTPUT"
+      - uses: anthropics/claude-code-action@4fa93a88de49bbef68b10eb15aabedf28ca0e1ed # v1.0.271
+        with:
+          # Workload identity federation: the job's GitHub OIDC token (id-token: write) is exchanged for a
+          # short-lived Anthropic one, so no API key is stored. These are identifiers, not secrets.
+          anthropic_federation_rule_id: fdrl_015cLigViCEJyWAtahH5ytSC
+          anthropic_organization_id: 34318a61-fac0-4077-a795-808d80efef19
+          anthropic_service_account_id: svac_015F3BEwDj2EJr7bHDgKmFkL
+          anthropic_workspace_id: wrkspc_01G5WKL4tLYspnSa4BYdzUCS
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          prompt: |
+            These commits are new on master: `git log ${{ steps.range.outputs.range }}`.
+            Read their diffs (`git show`).
+
+            Check whether they made anything in the repository's docs wrong or incomplete: AGENTS.md (the rules;
+            CLAUDE.md is a link to it), STYLEGUIDE.md, README.md, docs/*.md and packages/*/README.md. AGENTS.md says
+            which doc covers what. Where a README disagrees with the code, the code is right.
+
+            If something is now wrong or missing, fix it in place, in the voice of the doc around it. Each fact
+            belongs in one doc: link rather than repeat. Don't restructure, reword what's still right, or write
+            about what didn't change. Don't touch release notes or code.
+
+            If nothing needs changing, change nothing.
+          # Claude edits only Markdown at the root, in docs/, and the READMEs below it (a leading / is the repository
+          # root), never .git, code or release notes. No `Bash(git …:*)` rules: a rule matches by prefix whatever
+          # options follow (`git diff --output=<file>` writes anywhere), and without one Claude Code's own read-only
+          # check runs git log, show and diff and refuses those options.
+          claude_args: |
+            --model claude-opus-5-5
+            --max-turns 80
+            --allowedTools "Read,Glob,Grep,Edit(/*.md),Write(/*.md),Edit(/docs/**),Write(/docs/**),Edit(/**/README.md),Write(/**/README.md)"
+            --disallowedTools "Edit(/CLAUDE.md),Write(/CLAUDE.md),Edit(/packages/ui/src/release-notes/**),Write(/packages/ui/src/release-notes/**)"
+      # The pull request is opened (or pushed to) as the docs-sync GitHub App, its token made only now, so Claude's
+      # step never had it.
+      - name: Use the docs-sync app
+        id: app
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.DOCS_SYNC_APP_CLIENT_ID }}
+          private-key: ${{ secrets.DOCS_SYNC_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+      - name: Open the pull request
+        uses: peter-evans/create-pull-request@3ffccacd46053766916f087ce41d627c0b8cf2d1 # v8.1.3
+        with:
+          token: ${{ steps.app.outputs.token }}
+          branch: claude/docs-sync
+          # Checked out on the commit CI passed, not a branch: the pull request is against master.
+          base: master
+          delete-branch: true
+          commit-message: Sync docs with master
+          title: Sync docs with master
+          body: |
+            Claude found docs that `${{ steps.range.outputs.range }}` made wrong or incomplete, and fixed them.
+
+            🤖 Generated with [Claude Code](https://claude.com/claude-code)
+          add-paths: |
+            *.md
+            docs/**
+            **/README.md

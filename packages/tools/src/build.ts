@@ -4,11 +4,16 @@
  * it bundled (`notices.json`, `@raineworks/tools/notices`), and `.br` / `.gz` siblings for the server to send as they
  * are. The only bundler: no zone builds any other way.
  *
+ * Fonts are files of their own (`fontFilesPlugin`), never inlined into the stylesheet. A zone that prerenders
+ * (`prerender`) gets a page per route, rendered at build time into a copy of its `index.html` with its own head
+ * (`<path>/index.html`, `404.html`), and a `sitemap.xml` (and, at the root, a `robots.txt`) listing them.
+ *
  * @module build
  */
 
-import { existsSync, rmSync, watch } from 'node:fs';
-import { basename, join } from 'node:path';
+import { existsSync, mkdtempSync, readFileSync, rmSync, watch } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { basename, dirname, isAbsolute, join } from 'node:path';
 
 import { buildEnv } from '@raineworks/tools/build-env';
 import { compressBytes, CONTENT_ENCODINGS, ENCODING_SUFFIX, isCompressible } from '@raineworks/tools/http';
@@ -43,6 +48,133 @@ export interface FrontendBuildOptions {
 	isProduction?: boolean;
 	/** Bundler plugins besides Tailwind, e.g. one that loads Markdown. */
 	plugins?: BunPlugin[];
+	/**
+	 * Files served as they are under a content-hashed name, such as a page's share image. {@link PrerenderContext}
+	 * `assets` maps each one's file name to its public path.
+	 */
+	publicFiles?: string[];
+	/** Renders the zone's pages at build time, so they show (and unfurl) before any script runs. */
+	prerender?: PrerenderOptions;
+}
+
+/** How a zone prerenders its pages. */
+export interface PrerenderOptions {
+	/** The module that renders them, exporting `prerender` ({@link PrerenderModule}), bundled for Bun. */
+	entry: string;
+	/** Where the site is public (`https://raineworks.com`), for `sitemap.xml` and `robots.txt`. */
+	siteUrl: string;
+}
+
+/** What a zone's prerender module is given. */
+export interface PrerenderContext {
+	/** The public path of each of `publicFiles`, by its file name (`og-image.png` → `/og-image-x.png`). */
+	assets: Record<string, string>;
+}
+
+/** One page, rendered. */
+export interface PrerenderedPage {
+	/** Its path inside the zone (`/work`); the page for paths nothing matches has status 404. */
+	path: string;
+	status: 200 | 404;
+	/** Its `<head>` tags: they replace the template's `<title>`. */
+	head: string;
+	/** The zone's markup for it, rendered into `#root` for the client to hydrate. */
+	markup: string;
+}
+
+/** A zone's prerender module (`PrerenderOptions.entry`). */
+export interface PrerenderModule {
+	prerender(context: PrerenderContext): Promise<PrerenderedPage[]>;
+}
+
+/** Where a page's markup goes in the zone's `index.html`. */
+const ROOT_ELEMENT = '<div id="root"></div>';
+const TITLE_ELEMENT = /<title>[^<]*<\/title>/;
+
+/** The letters of a content hash, as `isContentHashed` (`@raineworks/tools/http`) knows them. */
+const HASH_ALPHABET = '0123456789abcdefghjkmnpqrstvwxyz';
+
+/** `name` with eight letters of `bytes`' hash before its extension (`og-image-k3v9x0ab.png`), cached for a year. */
+export function contentHashedName(name: string, bytes: Uint8Array): string {
+	let hash = BigInt(Bun.hash.wyhash(bytes));
+	let suffix = '';
+	for (let index = 0; index < 8; index++) {
+		suffix += HASH_ALPHABET[Number(hash & 31n)];
+		hash >>= 5n;
+	}
+	const dot = name.lastIndexOf('.');
+	return dot === -1 ? `${name}-${suffix}` : `${name.slice(0, dot)}-${suffix}${name.slice(dot)}`;
+}
+
+/**
+ * Keeps the fonts a stylesheet references out of it. Bun inlines every CSS `url()` asset as base64, so each subset of
+ * each font (Cyrillic, Greek, Vietnamese…) would be in the render-blocking stylesheet; as files of their own, under a
+ * content-hashed name, a browser fetches only the subsets a page uses (`unicode-range`). `emitted` collects them, by
+ * public name, for the build to copy.
+ */
+export function fontFilesPlugin(publicPath: string, emitted: Map<string, string>): BunPlugin {
+	return {
+		name: 'raineworks:font-files',
+		setup(build) {
+			build.onResolve({ filter: /\.woff2?$/ }, (args) => {
+				const source = isAbsolute(args.path) ? args.path : join(dirname(args.importer), args.path);
+				const name = contentHashedName(basename(source), readFileSync(source));
+				emitted.set(name, source);
+				return { path: `${publicPath}${name}`, external: true };
+			});
+		},
+	};
+}
+
+/** A page's file in the zone's output: `index.html` at its root, `<path>/index.html` below it, `404.html`. */
+export function pageFile(page: Pick<PrerenderedPage, 'path' | 'status'>): string {
+	if (page.status === 404) return '404.html';
+	const path = page.path.replace(/^\/+|\/+$/g, '');
+	return path ? join(path, 'index.html') : 'index.html';
+}
+
+/** The zone's `index.html` with `page` in it: its head in place of the `<title>`, its markup in `#root`. */
+export function renderPage(template: string, page: PrerenderedPage): string {
+	if (!TITLE_ELEMENT.test(template) || !template.includes(ROOT_ELEMENT))
+		throw new Error(`The page template needs a <title> and an empty ${ROOT_ELEMENT} to prerender into.`);
+	return template
+		.replace(TITLE_ELEMENT, () => page.head)
+		.replace(ROOT_ELEMENT, () => `<div id="root">${page.markup}</div>`);
+}
+
+/**
+ * A prerendered page's scripts, loaded once the page has: it's all in its HTML (links work without them), so they only
+ * hydrate it, and mustn't compete with the stylesheet and fonts for the first paint. The module script and its
+ * `modulepreload`s become an inline script that, once the page's content has painted (its `first-contentful-paint`;
+ * `load` where Paint Timing isn't supported), adds the preloads and imports the entry.
+ */
+export function hydrateAfterLoad(html: string): string {
+	const entries: string[] = [];
+	const preloads: string[] = [];
+	const stripped = html
+		.replace(/<script\b[^>]*\btype="module"[^>]*\bsrc="([^"]+)"[^>]*><\/script>/g, (_, src: string) => {
+			entries.push(src);
+			return '';
+		})
+		.replace(/<link\b[^>]*\brel="modulepreload"[^>]*\bhref="([^"]+)"[^>]*>/g, (_, href: string) => {
+			preloads.push(href);
+			return '';
+		});
+	if (entries.isEmpty()) return html;
+	const load = `for(const h of ${JSON.stringify(preloads)}){const l=document.createElement("link");l.rel="modulepreload";l.href=h;document.head.append(l)}${entries.map((src) => `import(${JSON.stringify(src)})`).join(';')}`;
+	const script = `<script>(()=>{let d=0;const go=()=>{if(d++)return;${load}};if(PerformanceObserver.supportedEntryTypes?.includes("paint"))new PerformanceObserver((l,o)=>{if(l.getEntriesByName("first-contentful-paint").length){o.disconnect();setTimeout(go)}}).observe({type:"paint",buffered:true});else addEventListener("load",go,{once:true})})()</script>`;
+	return stripped.replace('</head>', () => `${script}</head>`);
+}
+
+const escapeXml = (text: string) => text.replace(/[<>&'"]/g, (char) => `&#${char.charCodeAt(0)};`);
+
+/** Every page found (not the 404) as a `sitemap.xml`, at `siteUrl` under the zone's `publicPath`. */
+export function sitemapXml(pages: PrerenderedPage[], siteUrl: string, publicPath: string): string {
+	const urls = pages
+		.filter((page) => page.status === 200)
+		.map((page) => new URL(`${publicPath}${page.path.replace(/^\/+/, '')}`, siteUrl).href)
+		.map((url) => `<url><loc>${escapeXml(url)}</loc></url>`);
+	return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.join('')}</urlset>\n`;
 }
 
 /** Plugins every zone's build has: its release notes (`raineworks:release-notes`, `@raineworks/tools/markdown`). */
@@ -67,21 +199,23 @@ export async function buildFrontend(options: FrontendBuildOptions) {
 	}
 
 	const info = buildInfo();
+	const define = {
+		// What every page shows, and what the update toast compares (`@raineworks/ui/lib/version`).
+		__RAINEWORKS_VERSION__: JSON.stringify(info.version),
+		__RAINEWORKS_COMMIT__: JSON.stringify(info.commit),
+		'Bun.env.NODE_ENV': JSON.stringify(isProduction ? 'production' : 'development'),
+		'process.env.NODE_ENV': JSON.stringify(isProduction ? 'production' : 'development'),
+	};
+	const fonts = new Map<string, string>();
 	const buildResult = await Bun.build({
 		entrypoints: [entrypoint],
 		outdir,
 		publicPath: options.publicPath,
-		plugins: [tailwind, ...frontendPlugins(), ...(options.plugins ?? [])],
+		plugins: [fontFilesPlugin(options.publicPath, fonts), tailwind, ...frontendPlugins(), ...(options.plugins ?? [])],
 		reactCompiler: true,
 		target: 'browser',
 		minify: isProduction,
-		define: {
-			// What every page shows, and what the update toast compares (`@raineworks/ui/lib/version`).
-			__RAINEWORKS_VERSION__: JSON.stringify(info.version),
-			__RAINEWORKS_COMMIT__: JSON.stringify(info.commit),
-			'Bun.env.NODE_ENV': JSON.stringify(isProduction ? 'production' : 'development'),
-			'process.env.NODE_ENV': JSON.stringify(isProduction ? 'production' : 'development'),
-		},
+		define,
 		splitting: true,
 		sourcemap: isWatch ? 'linked' : 'none',
 		metafile: true,
@@ -117,17 +251,41 @@ export async function buildFrontend(options: FrontendBuildOptions) {
 
 	// Beside the zone's files: which version and commit they are, for `GET /api/build` (`@raineworks/server/lib/spa`).
 	await Bun.write(join(outdir, 'build.json'), JSON.stringify(info));
+	for (const [name, source] of fonts) await Bun.write(join(outdir, name), Bun.file(source));
+	const assets: Record<string, string> = {};
+	for (const source of options.publicFiles ?? []) {
+		const name = contentHashedName(basename(source), await Bun.file(source).bytes());
+		await Bun.write(join(outdir, name), Bun.file(source));
+		assets[basename(source)] = `${options.publicPath}${name}`;
+	}
+
 	const html = buildResult.outputs.find((output) => output.kind === 'entry-point' && output.path.endsWith('.html'));
 	if (html && buildResult.metafile) {
 		const preloads = entryStaticImports(buildResult.metafile, options.publicPath);
 		if (!preloads.isEmpty())
 			await Bun.write(html.path, injectModulePreloads(await Bun.file(html.path).text(), preloads));
 	}
-	// The server renders the HTML entry per request (it carries a CSP nonce), so only the other outputs are
-	// precompressed. Watch builds skip it: development serves identity.
+
+	const written: string[] = [];
+	const prerender = options.prerender;
+	if (html && prerender) {
+		const { data: files, error } = await tryCatch(() =>
+			prerenderPages({ ...prerender, outdir, publicPath: options.publicPath, template: html.path, define, assets }),
+		);
+		if (error) {
+			console.error(`❌ [${options.name}] Prerendering failed: ${error.message}`);
+			if (!isWatch) process.exit(1);
+			return buildResult;
+		}
+		written.push(...files);
+	}
+
+	// The server sends HTML compressed on the fly (it stamps each with the zone's build), so only the other outputs
+	// are precompressed. Watch builds skip it: development serves identity.
 	if (!isWatch) {
 		await precompress([
 			...buildResult.outputs.map((output) => output.path).filter((path) => path !== html?.path),
+			...written.filter((path) => !path.endsWith('.html')),
 			noticesPath,
 		]);
 	}
@@ -138,6 +296,55 @@ export async function buildFrontend(options: FrontendBuildOptions) {
 	}
 
 	return buildResult;
+}
+
+/**
+ * Bundles the zone's prerender module for Bun, renders every page into a copy of `template` (`renderPage`) and writes
+ * them, with `sitemap.xml` and, for the root zone, `robots.txt`. Returns the paths written.
+ */
+async function prerenderPages(
+	options: PrerenderOptions & {
+		outdir: string;
+		publicPath: string;
+		template: string;
+		define: Record<string, string>;
+		assets: Record<string, string>;
+	},
+): Promise<string[]> {
+	const ssrDir = mkdtempSync(join(tmpdir(), 'raineworks-prerender-'));
+	try {
+		const result = await Bun.build({
+			entrypoints: [options.entry],
+			outdir: ssrDir,
+			target: 'bun',
+			plugins: frontendPlugins(),
+			reactCompiler: true,
+			define: options.define,
+			throw: false,
+		});
+		const entry = result.outputs.find((output) => output.kind === 'entry-point');
+		if (!result.success || !entry) throw new Error(result.logs.map(String).join('\n') || 'no module was built');
+		const { prerender } = (await import(entry.path)) as PrerenderModule;
+		const pages = await prerender({ assets: options.assets });
+		const template = hydrateAfterLoad(await Bun.file(options.template).text());
+		const written: string[] = [];
+		for (const page of pages) {
+			const path = join(options.outdir, pageFile(page));
+			await Bun.write(path, renderPage(template, page));
+			written.push(path);
+		}
+		const sitemap = join(options.outdir, 'sitemap.xml');
+		await Bun.write(sitemap, sitemapXml(pages, options.siteUrl, options.publicPath));
+		written.push(sitemap);
+		if (options.publicPath === '/') {
+			const robots = join(options.outdir, 'robots.txt');
+			await Bun.write(robots, `User-agent: *\nAllow: /\n\nSitemap: ${new URL('/sitemap.xml', options.siteUrl).href}\n`);
+			written.push(robots);
+		}
+		return written;
+	} finally {
+		rmSync(ssrDir, { recursive: true, force: true });
+	}
 }
 
 /**

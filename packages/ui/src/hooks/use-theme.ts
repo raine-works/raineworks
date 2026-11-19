@@ -36,6 +36,12 @@ export function applyTheme(): void {
 	document.documentElement.classList.toggle('dark', resolve(readTheme()) === 'dark');
 }
 
+/**
+ * {@link applyTheme} as an inline script for a prerendered page's `<head>` (`app/prerender`): it runs before the first
+ * paint, so a dark page never flashes light while the zone's script loads.
+ */
+export const THEME_SCRIPT = `(()=>{let t;try{t=localStorage.getItem(${JSON.stringify(STORAGE_KEY)})}catch{}if(t!=="light"&&t!=="dark")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.classList.toggle("dark",t==="dark")})()`;
+
 /** Stores `theme` (for every zone; for this page alone where storage is refused), applies it and tells every `useTheme` caller. */
 export function setTheme(theme: Theme): void {
 	writeStored(STORAGE_KEY, theme);

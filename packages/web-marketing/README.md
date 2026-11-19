@@ -15,9 +15,11 @@ What the pages say lives in `src/content/profile.ts`; the projects mirror the pi
 github.com/raine-works, alphabetically, three of them `featured`. Copy still marked `TODO(raine)` is kept off the pages.
 
 The layout (`src/components/site-shell.tsx`) is the header (logo, pages, theme, phone menu) and footer (version
-opening About, social links, coffee). Every page but Home loads lazily.
+opening About, social links, coffee). Every page but Home loads lazily. Every page is prerendered (`src/prerender.tsx`)
+with the head its route declares (`staticData.head` in `src/router.tsx`: title, description, share card; Home adds
+Raine as schema.org JSON-LD). The project cards show each repository's GitHub stars, live (`GET /api/projects/stars`).
 
 ```bash
 bun run dev     # Bun.build --watch: rebuilds on a change here or in @raineworks/ui
-bun run build   # → dist/ (minified, precompressed, build.json, notices.json)
+bun run build   # → dist/ (minified, precompressed, every page prerendered, sitemap.xml, robots.txt, build.json, notices.json)
 ```
