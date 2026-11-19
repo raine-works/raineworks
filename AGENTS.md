@@ -109,7 +109,7 @@ Detail: [docs/development.md](docs/development.md#releases), [docs/frontend.md](
 - A release people would notice has a note, `packages/ui/src/release-notes/<version>.md` (`bun run release` starts
   the next one): frontmatter `title` and `date`, then `##` sections by area. What changed for the people who read the
   site, not how. `bun run release check` fails a note that names a version already released.
-- The site is open source under the MIT License (`LICENSE`, © raineworks LLC, Raine's company). `@raineworks/ui/lib/brand` states the same
+- The site is open source under the MIT License (`LICENSE`, © Raineworks LLC, Raine's company). `@raineworks/ui/lib/brand` states the same
   (`APP_LICENSE`, `COPYRIGHT_HOLDER`); a test holds the two together.
 - **The one LGPL exception is the SSH image:** OpenTUI's native library statically links a decode-only FFmpeg
   (LGPL-2.1-or-later). It ships only there, as a separate, replaceable file with its licence texts and
@@ -125,8 +125,14 @@ Detail: [docs/frontend.md](docs/frontend.md).
 
 - One package per zone (`@raineworks/web-<zone>`), registered in `@raineworks/tools/zones` and served by
   `@raineworks/server` from one origin. `marketing` is the root zone (`/`): every path no other zone claims is its.
-- A zone is `index.html` + `scripts/build.ts` + `src/main.tsx` (`mountZone(router)`) + `src/router.tsx` (code-based
-  routes; every route but the landing page loads lazily with `lazyRouteComponent`) + `src/routes/*.tsx`.
+- A zone is `index.html` + `scripts/build.ts` + `src/main.tsx` (`await mountZone(router)`) + `src/prerender.tsx`
+  (`prerenderZone(router)`) + `src/router.tsx` (code-based routes; every route but the landing page loads lazily with
+  `lazyRouteComponent`) + `src/routes/*.tsx`.
+- **Every page is prerendered and hydrated.** Every route declares `staticData: { head }` (`@raineworks/ui/lib/head`):
+  its title and the description search results and link previews show (the build fails a route without one). Render
+  the same thing on the server and in the browser: browser state (storage, `window`, the time) is read in effects or
+  through `useSyncExternalStore` with a server snapshot, never during render. Data that changes (GitHub stars) is
+  fetched by the browser, never prerendered.
 - Shared UI lives in `@raineworks/ui`: shadcn primitives in `components/`, the site's compositions in `blocks/`. Zone-only
   code stays in the zone. Zones `import type` from `@raineworks/server`, never values.
 - TanStack Router for routing, TanStack Query for server state (through `@raineworks/ui/lib/api`). Don't add another

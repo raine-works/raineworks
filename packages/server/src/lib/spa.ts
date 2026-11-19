@@ -6,15 +6,16 @@
  *   (names `web/<zone>/<file>`).
  * - Otherwise: `WEB_DIST/<zone>/` when set, else each zone's `packages/web-<name>/dist`.
  *
- * Unknown paths without a file extension fall back to the zone's `index.html` so client-side routes deep-link.
- * Assets:
+ * A path without a file extension is a page: the zone's prerendered one for it (`<path>/index.html`,
+ * `@raineworks/tools/build`) when there is one, else its `404.html` with a 404 status, else (a zone that doesn't
+ * prerender) its `index.html`, so client-side routes deep-link. Assets:
  *
  * - Sent precompressed when the client accepts it: the build writes `.br` / `.gz` siblings
  *   (`@raineworks/tools/build`), picked by `Accept-Encoding`.
  * - Content-hashed files (`chunk-x.js`, `favicon-x.svg`) are cached for a year, immutably.
- * - `index.html` is compressed on the fly and revalidated on every load against a strong ETag of the file, which
- *   also names the build (`<meta name="raineworks-build">`, `zoneBuild`) so an open page can tell when it's been
- *   replaced. Development reads the file each time and never caches it.
+ * - Pages are compressed on the fly and revalidated on every load against a strong ETag of what's sent. Each is
+ *   stamped with the zone's build (`<meta name="raineworks-build">`, `zoneBuild`: its `index.html`'s hash) so an
+ *   open page can tell when it's been replaced. Development reads them each time and never caches them.
  *
  * @module lib/spa
  */
@@ -86,29 +87,41 @@ export function spaResolver(zone: ZoneId): Resolver | null {
 	return resolver;
 }
 
-/** A zone's `index.html` and its ETag, read once outside development. */
-interface IndexTemplate {
+/** A page as it's sent, and its ETag; read once outside development. */
+interface PageTemplate {
 	html: string;
 	etag: string | null;
 }
 
-/** By the build each is of. */
-const templates = new WeakMap<Resolver, Promise<IndexTemplate | null>>();
+const hash = (text: string) => new Bun.CryptoHasher('sha256').update(text).digest('base64url').slice(0, 27);
 
-async function readTemplate(resolve: Resolver, withEtag: boolean): Promise<IndexTemplate | null> {
-	const file = resolve('index.html');
-	if (!file) return null;
-	const html = await file.text();
-	const etag = withEtag ? new Bun.CryptoHasher('sha256').update(html).digest('base64url').slice(0, 27) : null;
-	return { html, etag };
+/** The build a zone's files are: its `index.html`'s hash, which changes whenever any of them does. */
+async function buildOf(resolve: Resolver): Promise<string | null> {
+	const index = resolve('index.html');
+	return index ? hash(await index.text()) : null;
 }
 
-function indexTemplate(resolve: Resolver): Promise<IndexTemplate | null> {
-	if (env.NODE_ENV === 'development') return readTemplate(resolve, false);
-	let template = templates.get(resolve);
+/** By the build each is of, then by file. */
+const templates = new WeakMap<Resolver, Map<string, Promise<PageTemplate | null>>>();
+
+async function readTemplate(resolve: Resolver, file: string, withEtag: boolean): Promise<PageTemplate | null> {
+	const page = resolve(file);
+	if (!page) return null;
+	const raw = await page.text();
+	if (!withEtag) return { html: raw, etag: null };
+	const build = await buildOf(resolve);
+	const html = build ? raw.replace('</head>', `<meta name="raineworks-build" content="${build}" />\n</head>`) : raw;
+	return { html, etag: hash(html) };
+}
+
+function pageTemplate(resolve: Resolver, file: string): Promise<PageTemplate | null> {
+	if (env.NODE_ENV === 'development') return readTemplate(resolve, file, false);
+	const byFile = templates.get(resolve) ?? new Map<string, Promise<PageTemplate | null>>();
+	templates.set(resolve, byFile);
+	let template = byFile.get(file);
 	if (!template) {
-		template = readTemplate(resolve, true);
-		templates.set(resolve, template);
+		template = readTemplate(resolve, file, true);
+		byFile.set(file, template);
 	}
 	return template;
 }
@@ -124,12 +137,11 @@ export async function zoneBuild(
 ): Promise<{ build: string | null; version: string | null; commit: string | null }> {
 	const resolve = env.NODE_ENV === 'development' ? null : spaResolver(zone);
 	if (!resolve) return { build: null, version: null, commit: null };
-	const template = await indexTemplate(resolve);
 	// Its version and commit, as its build wrote them (`@raineworks/tools/build`).
 	const { data: info } = await tryCatch(
 		async () => (await resolve('build.json')?.json()) as { version?: string; commit?: string } | undefined,
 	);
-	return { build: template?.etag ?? null, version: info?.version ?? null, commit: info?.commit ?? null };
+	return { build: await buildOf(resolve), version: info?.version ?? null, commit: info?.commit ?? null };
 }
 
 /** Whether `If-None-Match` names `etag` (weak comparison, as RFC 9110 has it for this header). */
@@ -139,25 +151,35 @@ function matchesEtag(ifNoneMatch: string | null, etag: string): boolean {
 	return ifNoneMatch.split(',').some((tag) => tag.trim().replace(/^W\//, '') === etag);
 }
 
-async function serveIndex(resolve: Resolver, request: Request): Promise<Response | null> {
-	const template = await indexTemplate(resolve);
+/** The page file for `path` inside a zone, and its status. */
+function pageFor(resolve: Resolver, path: string): { file: string; status: 200 | 404 } {
+	const route = path.replace(/^\/+|\/+$/g, '');
+	const prerendered = route ? `${route}/index.html` : 'index.html';
+	if (resolve(prerendered)) return { file: prerendered, status: 200 };
+	if (resolve('404.html')) return { file: '404.html', status: 404 };
+	return { file: 'index.html', status: 200 };
+}
+
+async function servePage(resolve: Resolver, path: string, request: Request): Promise<Response | null> {
+	const { file, status } = pageFor(resolve, path);
+	const template = await pageTemplate(resolve, file);
 	if (!template) return null;
 	const encoding = negotiateEncoding(request.headers.get('accept-encoding'));
 	const headers: Record<string, string> = {
 		...getAssetHeaders('index.html', env.NODE_ENV === 'development'),
 		Vary: 'Accept-Encoding',
 	};
-	if (template.etag) {
+	if (template.etag && status === 200) {
 		// One tag per representation: the encodings differ byte for byte.
 		const etag = `"${template.etag}${encoding ? `-${encoding}` : ''}"`;
 		headers.ETag = etag;
 		if (matchesEtag(request.headers.get('if-none-match'), etag)) return new Response(null, { status: 304, headers });
 	}
-	const html = template.etag
-		? template.html.replace('</head>', `<meta name="raineworks-build" content="${template.etag}" />\n</head>`)
-		: template.html;
-	if (!encoding) return new Response(html, { headers });
-	return new Response(compressBytes(html, encoding), { headers: { ...headers, 'Content-Encoding': encoding } });
+	if (!encoding) return new Response(template.html, { status, headers });
+	return new Response(compressBytes(template.html, encoding), {
+		status,
+		headers: { ...headers, 'Content-Encoding': encoding },
+	});
 }
 
 function serveAsset(resolve: Resolver, path: string, asset: Blob, request: Request): Response {
@@ -179,8 +201,10 @@ export async function serveSpa(request: Request): Promise<Response | null> {
 	const { data: path, error } = tryCatch(() => decodeURIComponent(encoded));
 	if (error) return new Response('Bad Request', { status: 400 }); // malformed percent-encoding
 
-	const asset = path && path !== 'index.html' ? resolve(path) : null;
+	// Pages are served at their paths, never by their file names.
+	const isPage = (name: string) => name.endsWith('.html');
+	const asset = path && !isPage(path) ? resolve(path) : null;
 	if (asset) return serveAsset(resolve, path, asset, request);
-	if (/\.[a-z0-9]+$/i.test(path) && path !== 'index.html') return new Response('Not Found', { status: 404 });
-	return serveIndex(resolve, request);
+	if (/\.[a-z0-9]+$/i.test(path) && !isPage(path)) return new Response('Not Found', { status: 404 });
+	return servePage(resolve, path === 'index.html' ? '' : path, request);
 }

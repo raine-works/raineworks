@@ -56,5 +56,5 @@ What's new.
 
 ## License
 
-[MIT](LICENSE) © raineworks LLC. The open-source packages the site is built with, and their licences, are listed under
+[MIT](LICENSE) © Raineworks LLC. The open-source packages the site is built with, and their licences, are listed under
 About → Legal on every page.

@@ -54,7 +54,7 @@ describe('asset naming', () => {
 	});
 
 	test('compresses text outputs only', () => {
-		for (const name of ['a.js', 'a.mjs', 'a.css', 'a.html', 'a.svg', 'a.json', 'a.txt']) {
+		for (const name of ['a.js', 'a.mjs', 'a.css', 'a.html', 'a.svg', 'a.json', 'a.txt', 'a.xml']) {
 			expect(isCompressible(name)).toBe(true);
 		}
 		for (const name of ['a.png', 'a.woff2', 'a.js.br', 'a.css.gz']) expect(isCompressible(name)).toBe(false);

@@ -5,14 +5,14 @@
  * @module blocks/page
  */
 
-import { APP_NAME } from '@raineworks/ui/lib/brand';
+import { documentTitle } from '@raineworks/ui/lib/head';
 import { cn } from '@raineworks/ui/lib/utils';
 import { type ReactNode, useEffect } from 'react';
 
 /** Sets the tab's title while the page is shown. */
 export function useDocumentTitle(title?: string) {
 	useEffect(() => {
-		document.title = title ? `${title} · ${APP_NAME}` : APP_NAME;
+		document.title = documentTitle(title);
 	}, [title]);
 }
 

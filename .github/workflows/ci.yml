@@ -15,6 +15,9 @@
 # The plan, the images and the release are the release workflows beside this file (release-plan.yml,
 # release-images.yml, release-publish.yml): this file wires them together with checks.yml.
 #
+# A release cut without a note gets one: once a run here finishes, the Release note workflow (release.yml) writes the
+# next version's and opens it as a pull request.
+#
 # A push that changes no image (docs, workflows, tests) is checked but not released. Master's runs, and the Release
 # note workflow (release.yml), take turns (the `release` group), so versions are cut one at a time, in order; a run
 # waiting behind another is replaced by a newer one, which releases both pushes. A release that fails part way is
