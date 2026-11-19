@@ -1,4 +1,12 @@
-import { createServer, loadHostKey } from '@/server';
+/**
+ * Process entrypoint of `ssh raineworks.com`: loads the host key, reads the limits from the environment
+ * (`SSH_PORT`, `SSH_MAX_CONNECTIONS`, `SSH_MAX_PER_IP`, `SSH_RATE_PER_IP`), and starts the SSH server. Exits when the
+ * host key is missing or a limit isn't a positive integer.
+ *
+ * @module main
+ */
+
+import { createServer, loadHostKey } from '@raineworks/ssh/server';
 
 let hostKey: Buffer;
 try {

@@ -1,0 +1,11 @@
+{
+	"extends": "@raineworks/tsconfig/base.json",
+	"compilerOptions": {
+		"rootDir": "./",
+		"paths": {
+			"@raineworks/server": ["./src/index.ts"],
+			"@raineworks/server/*": ["./src/*"]
+		}
+	},
+	"include": ["src", "scripts"]
+}

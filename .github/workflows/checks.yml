@@ -1,0 +1,55 @@
+# Lint, typecheck and test: the gate every pull request, master and every release goes through.
+# Each is its own job (and its own required check), so a failure says which.
+# Called by ci.yml.
+name: Checks
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        description: The commit to check (defaults to the triggering one).
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  # `bun fmt --check`: formatting, import order and Tailwind class order (bunfig.toml).
+  lint:
+    name: Lint
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - run: bun run lint
+
+  # `bun check -b`: every package's types, and what's unused (noUnusedLocals / noUnusedParameters).
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - run: bun run typecheck
+
+  test:
+    name: Test
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      # Each package's tests in turn.
+      - run: bun run test

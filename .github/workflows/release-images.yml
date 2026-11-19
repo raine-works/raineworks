@@ -1,0 +1,118 @@
+# The second of the three release workflows (see release-plan.yml). It builds the images the plan says
+# aren't in the registry yet: those whose inputs no image was built from. On a pull request it only builds (to catch
+# a broken image before it merges), on master it pushes to the GitHub Container Registry, linked to the calling
+# repository by the Dockerfiles' org.opencontainers.image.source label (so they're private with it):
+#
+#   ghcr.io/<owner>/<image-prefix>-<service>
+#
+# Each is built from its plan's Dockerfile and context. One with a smoke test (a script in the repository, run with
+# the image's local tag) is built into Docker and tested first, and goes no further if it fails. Each is tagged
+# `inputs-<hash>` (what it's built from, so it's never built again, unless `rebuild` asks) and `sha-<commit>`. The
+# version and `latest` are the release's (release-publish.yml), once the checks pass too. Layers are cached in the
+# registry (`:buildcache`, every layer, written by master and read by pull requests too), so an unchanged install is
+# never run again.
+name: Release images
+
+on:
+  workflow_call:
+    inputs:
+      images:
+        description: >-
+          The images to build, as JSON, as release-plan.yml's `build` output gives them:
+          [{ "service": "server", "inputs": "<hash>", "context": ".", "file": "packages/server/Dockerfile", "smokeTest": null }, …]
+        type: string
+        required: true
+      version:
+        description: The version stamped into each build (the release it's for).
+        type: string
+        required: true
+      push:
+        description: Whether to push them (master) or only build them (a pull request).
+        type: boolean
+        default: false
+      rebuild:
+        description: Build from scratch, every layer run again with no cache (a scheduled rebuild of a base image).
+        type: boolean
+        default: false
+      image-prefix:
+        description: What every image's name starts with (<image-prefix>-<service>). Without it, the repository's name.
+        type: string
+        default: ''
+
+# No permissions of its own: it has its caller's, read-only for a pull request (it can't push, whatever it runs) and
+# `packages: write` for master's.
+
+jobs:
+  build:
+    name: ${{ matrix.service }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(inputs.images) }}
+    env:
+      # The image's name, as the plan worked it out (`imageSuffix`, @raineworks/tools/images).
+      NAME: ${{ matrix.name }}
+      IMAGE: ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The build reads the checked-out files (a path context), never the remote.
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # An image with a smoke test is built into Docker first and tested there, so one that fails never reaches the
+      # registry. The build below then takes every layer from this one's (the same builder), so it's built once.
+      - name: Build for the smoke test
+        if: matrix.smokeTest
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
+          load: true
+          tags: ${{ env.NAME }}:smoke-test
+          build-args: |
+            VERSION=${{ inputs.version }}
+            GIT_SHA=${{ github.sha }}
+            IMAGE_SOURCE=${{ github.server_url }}/${{ github.repository }}
+          no-cache: ${{ inputs.rebuild }}
+          cache-from: ${{ !inputs.rebuild && format('type=registry,ref={0}:buildcache', env.IMAGE) || '' }}
+      - name: Smoke test
+        if: matrix.smokeTest
+        env:
+          SMOKE_TEST: ${{ matrix.smokeTest }}
+        run: bash "$SMOKE_TEST" "$NAME:smoke-test"
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        id: build
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
+          push: ${{ inputs.push }}
+          tags: |
+            ${{ env.IMAGE }}:inputs-${{ matrix.inputs }}
+            ${{ env.IMAGE }}:sha-${{ github.sha }}
+          # Labels come from the Dockerfiles (source, title, description, version, commit), linking each image to
+          # the calling repository. The version and commit are build arguments: the context has no .git.
+          build-args: |
+            VERSION=${{ inputs.version }}
+            GIT_SHA=${{ github.sha }}
+            IMAGE_SOURCE=${{ github.server_url }}/${{ github.repository }}
+          # A rebuild runs every layer again (the smoke test's build already did, and this one reuses it), so what
+          # the base image's distribution has updated since gets in.
+          no-cache: ${{ inputs.rebuild && !matrix.smokeTest }}
+          cache-from: ${{ !inputs.rebuild && format('type=registry,ref={0}:buildcache', env.IMAGE) || '' }}
+          # Only master writes the cache, so a pull request never replaces it with its own layers.
+          cache-to: ${{ inputs.push && format('type=registry,ref={0}:buildcache,mode=max,image-manifest=true,oci-mediatypes=true', env.IMAGE) || '' }}
+      # The digest to pin it by: a release's version tag is a copy of this image.
+      - name: Summary
+        if: inputs.push
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+          INPUTS: ${{ matrix.inputs }}
+        run: |
+          echo "\`$IMAGE:inputs-$INPUTS\` is \`$DIGEST\`." >> "$GITHUB_STEP_SUMMARY"

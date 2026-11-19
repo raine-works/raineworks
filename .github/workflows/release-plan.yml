@@ -1,0 +1,161 @@
+# The first of the three release workflows (release-plan.yml, release-images.yml, release-publish.yml),
+# which ci.yml wires together with checks.yml:
+#
+#   plan ──┬── the repository's own checks ──┬── publish (master, when the plan says it's a release)
+#          └── images (built; pushed on master) ─┘
+#
+# It plans a run, for a pull request and for master alike:
+#
+#   1. the version the next release takes (input `version-command`), and that no release note names a version
+#      already released (`notes-check-command`): on a pull request that fails the run, on master it only warns;
+#   2. each image's inputs, and which changed since the last release (`plan-command`, the repository's own, which
+#      prints JSON: { "services": [{ "service", "inputs", "changed", … }], "changed": ["<service>", …], … });
+#   3. which of them aren't in the registry yet (ghcr.io/<owner>/<image-prefix>-<service>:inputs-<inputs>): only
+#      those are built, since an image is never built twice from the same inputs;
+#   4. whether this run is a release: a push to master for which `release-if` holds (by default, an image changed).
+#
+# Its caller grants it contents: read and packages: read. If the repository has a .github/actions/setup action (its
+# toolchain and dependencies), it's run before its commands.
+name: Release plan
+
+on:
+  workflow_call:
+    inputs:
+      image-prefix:
+        description: What every image's name starts with (<image-prefix>-<service>). Without it, the repository's name.
+        type: string
+        default: ''
+      version-command:
+        description: The command that prints the version the next release takes.
+        type: string
+        default: bun packages/tools/src/release-cli.ts next
+      notes-check-command:
+        description: A command that fails when a release note names a version already released. Empty for none.
+        type: string
+        default: bun packages/tools/src/release-cli.ts check
+      plan-command:
+        description: >-
+          The command that prints the images' plan as JSON. It's run with `--since <tag>` after it when there's a
+          release before this one.
+        type: string
+        default: bun packages/tools/src/images-cli.ts plan
+      release-if:
+        description: A jq filter over the plan that's true when a push to master is a release.
+        type: string
+        default: (.changed | length) > 0
+    outputs:
+      version:
+        description: The version the next release takes.
+        value: ${{ jobs.plan.outputs.version }}
+      services:
+        description: 'Every image, as JSON: [{ "service", "inputs" }, …].'
+        value: ${{ jobs.plan.outputs.services }}
+      build:
+        description: >-
+          The images to build, as release-images.yml takes them:
+          [{ "service", "inputs", "context", "file", "smokeTest" }, …].
+        value: ${{ jobs.plan.outputs.build }}
+      changed:
+        description: 'The services whose image changed since the last release, as JSON: ["server", …].'
+        value: ${{ jobs.plan.outputs.changed }}
+      release:
+        description: Whether this run is a release (`true` or `false`).
+        value: ${{ jobs.plan.outputs.release }}
+      plan:
+        description: The whole plan, as the plan command printed it, for whatever else the repository put in it.
+        value: ${{ jobs.plan.outputs.plan }}
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    name: plan
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      packages: read
+    outputs:
+      version: ${{ steps.plan.outputs.version }}
+      services: ${{ steps.plan.outputs.services }}
+      build: ${{ steps.plan.outputs.build }}
+      changed: ${{ steps.plan.outputs.changed }}
+      release: ${{ steps.plan.outputs.release }}
+      plan: ${{ steps.plan.outputs.plan }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Every tag and commit (trees only, files as needed), to compare with the last release.
+          fetch-depth: 0
+          filter: blob:none
+          # Its credentials stay (read-only: this job's token can't push): "files as needed" are fetched from the
+          # private repository when the plan reads them (`git show <last release>:…/package.json`).
+      # The calling repository's own action, if it has one (a local path is read from the checkout):
+      - uses: ./.github/actions/setup
+        if: hashFiles('.github/actions/setup/action.yml', '.github/actions/setup/action.yaml') != ''
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Plan
+        id: plan
+        env:
+          OWNER: ${{ github.repository_owner }}
+          PREFIX: ${{ inputs.image-prefix || github.event.repository.name }}
+          RELEASING: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/master' }}
+          VERSION_COMMAND: ${{ inputs.version-command }}
+          NOTES_CHECK_COMMAND: ${{ inputs.notes-check-command }}
+          PLAN_COMMAND: ${{ inputs.plan-command }}
+          RELEASE_IF: ${{ inputs.release-if }}
+        run: |
+          # The commands are the caller's own, from its workflow file.
+          previous="$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || true)"
+          version="$(bash -c "$VERSION_COMMAND")"
+          # It's put in tags, file names and commands: only what a version is made of.
+          if ! printf '%s' "$version" | grep -qE '^[A-Za-z0-9][A-Za-z0-9._+-]*$'; then
+            echo "::error::The version command printed something that isn't a version."
+            exit 1
+          fi
+          # A note added since the last release must name a version still to come.
+          if [ -n "$NOTES_CHECK_COMMAND" ] && ! bash -c "$NOTES_CHECK_COMMAND"; then
+            if [ "$RELEASING" = true ]; then echo "::warning::A release note names a version already released."; else exit 1; fi
+          fi
+          bash -c "$PLAN_COMMAND${previous:+ --since $(printf '%q' "$previous")}" > "$RUNNER_TEMP/plan.json"
+
+          # An image whose inputs are already in the registry is never built again. Anything but a clear answer
+          # (the registry down, say) builds it: building one too many is safe, skipping one isn't. Where the plan
+          # doesn't say what an image is built from, it's packages/<service>/Dockerfile, from the repository's root.
+          build='[]'
+          while read -r row; do
+            inputs="$(jq -r .inputs <<<"$row")"
+            name="$PREFIX$(jq -r '.suffix // "-\(.service)"' <<<"$row")"
+            if docker buildx imagetools inspect "ghcr.io/$OWNER/$name:inputs-$inputs" >/dev/null 2>&1; then
+              echo "$name: built from these inputs already (inputs-$inputs)."
+            else
+              echo "$name: to build (inputs-$inputs)."
+              build="$(jq -c --argjson row "$row" --arg name "$name" '. + [$row | {service, inputs, name: $name, context: (.context // "."), file: (.file // "packages/\(.service)/Dockerfile"), smokeTest: (.smokeTest // null)}]' <<<"$build")"
+            fi
+          done < <(jq -c '.services[]' "$RUNNER_TEMP/plan.json")
+
+          changed="$(jq -c .changed "$RUNNER_TEMP/plan.json")"
+          release=false
+          if [ "$RELEASING" = true ] && jq -e "$RELEASE_IF" "$RUNNER_TEMP/plan.json" >/dev/null; then release=true; fi
+          {
+            echo "version=$version"
+            echo "services=$(jq -c --arg prefix "$PREFIX" '[.services[] | {service, inputs, name: ($prefix + (.suffix // "-\(.service)"))}]' "$RUNNER_TEMP/plan.json")"
+            echo "build=$build"
+            echo "changed=$changed"
+            echo "release=$release"
+            echo "plan=$(jq -c . "$RUNNER_TEMP/plan.json")"
+          } >> "$GITHUB_OUTPUT"
+          {
+            echo "### Plan"
+            echo
+            echo "Since: ${previous:-the first release}. Releasing: $release (version $version)."
+            echo
+            echo "| Image | Inputs | Changed | Built |"
+            echo "| --- | --- | --- | --- |"
+            jq -r --arg prefix "$PREFIX" --argjson build "$build" '.services[] | .service as $s | "| \($prefix)\(.suffix // "-\($s)") | `\(.inputs)` | \(if .changed then "yes" else "no" end) | \(if ([$build[].service] | index($s)) then "now" else "before" end) |"' "$RUNNER_TEMP/plan.json"
+          } >> "$GITHUB_STEP_SUMMARY"

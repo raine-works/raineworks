@@ -1,15 +1,10 @@
 {
-	"extends": "../../tsconfig.json",
+	"extends": "@raineworks/tsconfig/react-library.json",
 	"compilerOptions": {
-		"jsx": "react-jsx",
-		"types": ["bun", "react"],
+		"rootDir": "../",
 		"paths": {
-			"@/*": ["./src/*"],
-			"@ssh/*": ["./src/*"],
-			"@app/ssh/*": ["./src/*"],
-			"@web/*": ["../web/src/*"],
-			"@app/web/*": ["../web/src/*"]
+			"@raineworks/ssh/*": ["./src/*"]
 		}
 	},
-	"include": ["src/**/*"]
+	"include": ["src", "scripts"]
 }

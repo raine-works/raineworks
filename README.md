@@ -1,72 +1,58 @@
 # raineworks
 
-Personal site for Raine Petersen, themed as a terminal. A Bun workspace monorepo: a Hono backend serves a React 19 front end and compiles to a single standalone binary.
+Raine Petersen's site, [raineworks.com](https://raineworks.com) (and `ssh raineworks.com`): who Raine is, what Raine is building, and the projects
+behind it. A Bun workspace whose Hono server compiles to a single binary with the site embedded, serving a React 19 front
+end built on shadcn/ui and ui-sdk.
 
-## Layout
+## Packages
 
-| Package | Purpose |
-|---------|---------|
-| `packages/web` | React 19 + TanStack Router + Tailwind v4 front end, bundled with `Bun.build` |
-| `packages/backend` | Hono server: serves the built front ends and exposes `/api/*` |
-| `packages/ssh` | `ssh raineworks.com` terminal UI: Ink screens plus an `ssh2` server, compiled to its own binary |
-| `packages/tools` | Shared build and HTTP helpers |
+| Package | What |
+| --- | --- |
+| [`@raineworks/server`](packages/server) | The Hono server: probes, `/api`, every web zone; compiled into one standalone binary |
+| [`@raineworks/api`](packages/api) | The typed `hc` client over the server's routes |
+| [`@raineworks/ui`](packages/ui) | The design system: tokens, shadcn components, blocks, the zone root, About (What's new and Legal) |
+| [`@raineworks/web-marketing`](packages/web-marketing) | The site itself, the `marketing` zone at `/`; its `content/profile` is what every page says |
+| [`@raineworks/ssh`](packages/ssh) | `ssh raineworks.com`: the site as an Ink terminal UI over an `ssh2` server, its own binary and image |
+| [`@raineworks/tools`](packages/tools) | The shared toolbox: zones, the frontend build, env, HTTP, versions, releases, licence notices |
+| [`@raineworks/tsconfig`](packages/tsconfig) | The TypeScript configs every package extends |
 
-Content (bio, work, projects, hobbies) lives in `packages/web/src/content/profile.ts`.
+## Getting started
 
-## Requirements
+Bun 1.4.4 (`.bun-version`), then:
 
-- [Bun](https://bun.sh) 1.4+
-
-## Development
-
-```sh
+```bash
 bun install
-bun run dev        # rebuild on save, no HMR
-bun run lint
-bun run typecheck
-bun run build
+bun run dev         # every zone in watch mode, and the server on http://127.0.0.1:3032
 ```
 
-The backend listens on `PORT` (default `3032`).
+| Command | What |
+| --- | --- |
+| `bun run dev` / `dev:kill` | Develop / stop this repo's dev processes |
+| `bun run build` | Every zone, the server binary (`packages/server/dist/server`) and the SSH one (`packages/ssh/dist/ssh-server`) |
+| `bun run format` / `lint` / `typecheck` / `test` | `bun fmt`, `bun fmt --check`, `bun check -b`, every package's tests |
+| `bun run release` | Start the next release's note |
 
-## API
+More in [docs/development.md](docs/development.md).
 
-| Route | Description |
-|-------|-------------|
-| `GET /api/health` | Liveness check |
-| `POST /api/contact` | Contact form intake. Validates and acknowledges with `202`; submissions are currently discarded, not stored or delivered |
+## Docs
 
-## Production
+| Doc | What |
+| --- | --- |
+| [AGENTS.md](AGENTS.md) | The rules for changing this repo (`CLAUDE.md` links to it) |
+| [STYLEGUIDE.md](STYLEGUIDE.md) | How the code reads |
+| [docs/architecture.md](docs/architecture.md) | Packages, zones, the server, production |
+| [docs/development.md](docs/development.md) | Running, testing, releasing, deploying |
+| [docs/frontend.md](docs/frontend.md) | Zones, the design system, About, versions and updates |
 
-`packages/backend/Dockerfile` builds a standalone binary with every front end embedded and runs it in a distroless image:
+## Releases
 
-```sh
-docker build -f packages/backend/Dockerfile -t raineworks .
-docker run -p 3032:3032 raineworks
-```
-
-CI (`.github/workflows/deploy.yml`) verifies and publishes the image on merges to `master`.
-
-### SSH terminal UI
-
-`packages/ssh/Dockerfile` builds the SSH server (read-only, no shell access; it only renders the site as a TUI). It needs a persistent ed25519 host key mounted into the container:
-
-```sh
-ssh-keygen -t ed25519 -N '' -f host_key
-sudo chown 65532:65532 host_key && chmod 400 host_key   # the container runs as uid 65532
-docker build -f packages/ssh/Dockerfile -t raineworks-ssh .
-docker run -p 22:2222 -v "$PWD/host_key:/run/secrets/ssh_host_key:ro" --read-only --cap-drop ALL raineworks-ssh
-ssh localhost
-```
-
-Configuration: `SSH_PORT` (default `2222`), the host key (below), and optional limit overrides `SSH_MAX_CONNECTIONS` (200), `SSH_MAX_PER_IP` (5) and `SSH_RATE_PER_IP` (10 new connections/minute).
-
-Host key: set **either** `SSH_HOST_KEY` (the private key's PEM text; a single line with literal `\n` escapes also works, which is what `.env`-style stores such as Dokploy's environment tab need since values can't span lines; produce it with `awk '{printf "%s\\n", $0}' host_key`) **or** `SSH_HOST_KEY_PATH` (a mounted file, default `/run/secrets/ssh_host_key`). `SSH_HOST_KEY` wins if both are set. The key must stay the same across redeploys, and the server refuses to start without one. For Dokploy, publish TCP port 22 -> 2222 on the SSH service and move the host's own sshd off port 22 first.
-
-Limits are per client IP, so the server must see real client addresses: publish the port directly or use an L4 passthrough that preserves the source IP. Behind a proxy that rewrites it (or PROXY-protocol, which is not supported), every visitor shares one bucket and a few users will trip the limit; raise `SSH_MAX_PER_IP` and `SSH_RATE_PER_IP` in that case. For local development without Docker: `SSH_HOST_KEY_PATH=./host_key bun run --filter @app/ssh start`.
-
-See `AGENTS.md` for repository conventions (import aliases, build rules).
+Calendar versions, `YEAR.MONTH.N`, tagged `v<version>`. GitHub Actions mints them: when a push to `master` changes an
+image, it's released: `ghcr.io/raine-works/raineworks` (the site) and `ghcr.io/raine-works/raineworks-ssh` tagged with the
+version and `latest`, the GitHub release written from its note in `packages/ui/src/release-notes/` (Actions → Release
+note has Claude write one), and production (Dokploy) told to deploy. Every page shows its version in the footer; clicking it opens
+What's new.
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE) © Raine Petersen. The open-source packages the site is built with, and their licences, are listed under
+About → Legal on every page.

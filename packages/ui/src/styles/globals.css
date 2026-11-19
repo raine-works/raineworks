@@ -1,0 +1,267 @@
+/*
+ * raineworks design tokens (shadcn/ui, Tailwind v4). Every web zone imports this once:
+ *   @import "@raineworks/ui/globals.css";
+ *
+ * The brand is monochrome, like the raineworks logo (`blocks/brand`): shadcn's neutral palette, near-black actions in
+ * light mode and near-white in dark. To give it a colour, set --brand (and --brand-foreground, the text on it, and --brand-ink, the brand as text on
+ * the page) in :root and .dark below: buttons, focus rings, links and the active nav item follow. Check each pair
+ * against WCAG AA (4.5:1 for text, 3:1 for the focus ring) in both themes, and set each zone's `theme-color` in its
+ * `index.html` to match.
+ *
+ * The brand means "act here" (primary buttons, focus, the active nav item), never a status. Statuses use the tones:
+ * --success, --warning, --info and --destructive (with `StatusBadge`, `blocks/status-badge`), each readable as
+ * text on the page and on its own 10% tint (>= 4.5:1), with a foreground for text on the solid colour.
+ *
+ * Input borders are darker than shadcn's (>= 3:1 on the background, WCAG's minimum for a control's boundary).
+ */
+
+/* ui-sdk adds the little CSS its behaviours need in this layer; declared first so every style here wins over it. */
+@layer ui-sdk;
+
+@import 'tailwindcss' source(none);
+@import 'tw-animate-css';
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
+@import './prose.css';
+
+/* Classes used inside @raineworks/ui; each zone adds its own sources. */
+@source '../';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+	--radius: 0.625rem;
+	/* Your brand. */
+	--brand: oklch(0.205 0 0);
+	--brand-foreground: oklch(0.985 0 0);
+	--brand-ink: oklch(0.205 0 0);
+
+	--background: oklch(1 0 0);
+	--foreground: oklch(0.145 0 0);
+	--card: oklch(1 0 0);
+	--card-foreground: oklch(0.145 0 0);
+	--popover: oklch(1 0 0);
+	--popover-foreground: oklch(0.145 0 0);
+	--primary: var(--brand);
+	--primary-foreground: var(--brand-foreground);
+	--secondary: oklch(0.97 0 0);
+	--secondary-foreground: oklch(0.205 0 0);
+	--muted: oklch(0.97 0 0);
+	--muted-foreground: oklch(0.51 0 0);
+	--accent: oklch(0.97 0 0);
+	--accent-foreground: oklch(0.205 0 0);
+	--destructive: oklch(0.54 0.22 27.3);
+	--destructive-foreground: oklch(1 0 0);
+	--success: oklch(0.5 0.12 150);
+	--success-foreground: oklch(1 0 0);
+	--warning: oklch(0.53 0.13 55);
+	--warning-foreground: oklch(1 0 0);
+	--info: oklch(0.5 0.13 255);
+	--info-foreground: oklch(1 0 0);
+	--border: oklch(0.922 0 0);
+	--input: oklch(0.6 0 0);
+	--ring: var(--brand);
+
+	/*
+	 * Chart series, in this order (never cycled): blue, orange, aqua, yellow, magenta. Checked for colour-blind
+	 * separation against the card; aqua is under 3:1 on white, so every chart's legend carries its series' totals as
+	 * text (`blocks/charts`). The brand stays for actions.
+	 */
+	--chart-1: #2a78d6;
+	--chart-2: #eb6834;
+	--chart-3: #1baf7a;
+	--chart-4: #eda100;
+	--chart-5: #e87ba4;
+
+	--sidebar: oklch(0.985 0 0);
+	--sidebar-foreground: oklch(0.145 0 0);
+	--sidebar-primary: var(--brand);
+	--sidebar-primary-foreground: var(--brand-foreground);
+	--sidebar-accent: oklch(0.95 0 0);
+	--sidebar-accent-foreground: oklch(0.205 0 0);
+	--sidebar-border: oklch(0.922 0 0);
+	--sidebar-ring: var(--brand);
+}
+
+.dark {
+	/* Your brand, in dark mode. */
+	--brand: oklch(0.922 0 0);
+	--brand-foreground: oklch(0.205 0 0);
+	--brand-ink: oklch(0.922 0 0);
+
+	--background: oklch(0.145 0 0);
+	--foreground: oklch(0.985 0 0);
+	--card: oklch(0.205 0 0);
+	--card-foreground: oklch(0.985 0 0);
+	--popover: oklch(0.205 0 0);
+	--popover-foreground: oklch(0.985 0 0);
+	--primary: var(--brand);
+	--primary-foreground: var(--brand-foreground);
+	--secondary: oklch(0.269 0 0);
+	--secondary-foreground: oklch(0.985 0 0);
+	--muted: oklch(0.269 0 0);
+	--muted-foreground: oklch(0.708 0 0);
+	--accent: oklch(0.269 0 0);
+	--accent-foreground: oklch(0.985 0 0);
+	--destructive: oklch(0.704 0.191 22.216);
+	--destructive-foreground: oklch(0.145 0 0);
+	--success: oklch(0.78 0.14 152);
+	--success-foreground: oklch(0.145 0 0);
+	--warning: oklch(0.8 0.13 70);
+	--warning-foreground: oklch(0.145 0 0);
+	--info: oklch(0.76 0.11 250);
+	--info-foreground: oklch(0.145 0 0);
+	--border: oklch(1 0 0 / 10%);
+	--input: oklch(1 0 0 / 40%);
+	--ring: var(--brand);
+
+	--chart-1: #3987e5;
+	--chart-2: #d95926;
+	--chart-3: #199e70;
+	--chart-4: #c98500;
+	--chart-5: #d55181;
+
+	--sidebar: oklch(0.18 0 0);
+	--sidebar-foreground: oklch(0.985 0 0);
+	--sidebar-primary: var(--brand);
+	--sidebar-primary-foreground: var(--brand-foreground);
+	--sidebar-accent: oklch(0.269 0 0);
+	--sidebar-accent-foreground: oklch(0.985 0 0);
+	--sidebar-border: oklch(1 0 0 / 10%);
+	--sidebar-ring: var(--brand);
+}
+
+@theme inline {
+	--font-sans: "Geist Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+	--font-mono: "Geist Mono Variable", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+	--radius-sm: calc(var(--radius) - 4px);
+	--radius-md: calc(var(--radius) - 2px);
+	--radius-lg: var(--radius);
+	--radius-xl: calc(var(--radius) + 4px);
+
+	--color-brand: var(--brand);
+	--color-brand-foreground: var(--brand-foreground);
+	--color-brand-ink: var(--brand-ink);
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-popover: var(--popover);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-secondary: var(--secondary);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-destructive: var(--destructive);
+	--color-destructive-foreground: var(--destructive-foreground);
+	--color-success: var(--success);
+	--color-success-foreground: var(--success-foreground);
+	--color-warning: var(--warning);
+	--color-warning-foreground: var(--warning-foreground);
+	--color-info: var(--info);
+	--color-info-foreground: var(--info-foreground);
+	--color-border: var(--border);
+	--color-input: var(--input);
+	--color-ring: var(--ring);
+	--color-chart-1: var(--chart-1);
+	--color-chart-2: var(--chart-2);
+	--color-chart-3: var(--chart-3);
+	--color-chart-4: var(--chart-4);
+	--color-chart-5: var(--chart-5);
+	--color-sidebar: var(--sidebar);
+	--color-sidebar-foreground: var(--sidebar-foreground);
+	--color-sidebar-primary: var(--sidebar-primary);
+	--color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+	--color-sidebar-accent: var(--sidebar-accent);
+	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+	--color-sidebar-border: var(--sidebar-border);
+	--color-sidebar-ring: var(--sidebar-ring);
+}
+
+/*
+ * A link that names something (a row's or list item's title, a product type
+ * in a page's description): never underlined. It turns brand-ink on hover and
+ * when focused from the keyboard, with the focus ring; a table row's own
+ * hover tint shows the rest. The brand here means "open it", as it means "act here".
+ */
+@utility item-link {
+	@apply rounded-xs transition-colors outline-none hover:text-brand-ink focus-visible:text-brand-ink focus-visible:ring-[3px] focus-visible:ring-ring/50;
+}
+
+@layer base {
+	* {
+		@apply border-border outline-ring;
+		/* Scrollbars in every zone: thin, a quiet thumb on no track. */
+		scrollbar-width: thin;
+		scrollbar-color: color-mix(in oklch, var(--muted-foreground) 35%, transparent) transparent;
+	}
+	/* In-page links glide there, in every zone, unless the person prefers less motion. */
+	@media (prefers-reduced-motion: no-preference) {
+		html,
+		[data-slot='sidebar-inset'] {
+			scroll-behavior: smooth;
+		}
+	}
+	/* Browsers without `scrollbar-color` (older Safari): the same, drawn by hand. */
+	::-webkit-scrollbar {
+		width: 8px;
+		height: 8px;
+	}
+	::-webkit-scrollbar-track {
+		background: transparent;
+	}
+	::-webkit-scrollbar-thumb {
+		border: 2px solid transparent;
+		border-radius: 9999px;
+		background: color-mix(in oklch, var(--muted-foreground) 35%, transparent) padding-box;
+	}
+	::-webkit-scrollbar-thumb:hover {
+		background-color: color-mix(in oklch, var(--muted-foreground) 55%, transparent);
+	}
+	::-webkit-scrollbar-corner {
+		background: transparent;
+	}
+	/* Tailwind v4 leaves buttons on the default cursor. */
+	button:not(:disabled),
+	[role='button']:not(:disabled),
+	[role='option'],
+	[role='menuitem'],
+	[role='menuitemcheckbox'],
+	[role='menuitemradio'],
+	[role='tab'] {
+		cursor: pointer;
+	}
+	/*
+	 * 40px tap targets on phones (every zone but admin is used on them): buttons,
+	 * inputs and select triggers grow to at least 40px below md, whatever height
+	 * their classes give them. A min-height, so a smaller class still applies
+	 * from md up; `min-h-0` / `min-w-0` opt out.
+	 */
+	@media (width < 48rem) {
+		[data-slot='button']:not([data-size='xs'], [data-size='icon-xs']),
+		[data-slot='input'],
+		[data-slot='select-trigger'] {
+			min-height: 2.5rem;
+		}
+		[data-slot='button']:is([data-size='icon'], [data-size='icon-sm'], [data-size='icon-lg']) {
+			min-width: 2.5rem;
+		}
+	}
+	/* What overscrolling reveals: the app shell's colour, around its inset content. */
+	html {
+		@apply bg-sidebar;
+		color-scheme: light;
+	}
+	html.dark {
+		color-scheme: dark;
+	}
+	body {
+		@apply bg-background text-foreground antialiased;
+		font-family: var(--font-sans);
+	}
+}

@@ -1,0 +1,11 @@
+{
+	"extends": "@raineworks/tsconfig/react-library.json",
+	"compilerOptions": {
+		"rootDir": "../",
+		"paths": {
+			"@raineworks/api": ["./src/index.ts"],
+			"@raineworks/api/*": ["./src/*"]
+		}
+	},
+	"include": ["src"]
+}

@@ -1,0 +1,4 @@
+# `bun test` in this package: only what renders nothing yet (the brand's licence check). Coverage stays off until the
+# blocks have render tests.
+[test]
+coverage = false

@@ -1,0 +1,33 @@
+{
+	"name": "@raineworks/web-marketing",
+	"private": true,
+	"type": "module",
+	"exports": {
+		"./content/*": "./src/content/*.ts"
+	},
+	"scripts": {
+		"build": "bun scripts/build.ts",
+		"dev": "bun scripts/build.ts --watch",
+		"test": "bun test",
+		"typecheck": "bun check"
+	},
+	"dependencies": {
+		"@raineworks/tools": "workspace:*",
+		"@raineworks/ui": "workspace:*",
+		"@tanstack/react-query": "catalog:",
+		"@tanstack/react-router": "catalog:",
+		"@ui-sdk/react": "catalog:",
+		"lucide-react": "catalog:",
+		"react": "catalog:",
+		"react-dom": "catalog:",
+		"sonner": "catalog:"
+	},
+	"devDependencies": {
+		"@raineworks/tsconfig": "workspace:*",
+		"@types/bun": "catalog:dev",
+		"@types/react": "catalog:dev",
+		"@types/react-dom": "catalog:dev",
+		"bun-plugin-tailwind": "catalog:dev",
+		"tailwindcss": "catalog:dev"
+	}
+}

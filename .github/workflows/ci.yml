@@ -1,0 +1,106 @@
+# Every pull request (opened, pushed to, reopened) and every push to master is checked, and the images it changes
+# are built. A push to master that changes an image is released:
+#
+#   1. plan: the version it takes (`bun run release next`), each image's inputs (`bun run images plan`), which of
+#      them changed since the last release, and which aren't in the registry yet (built from those inputs before);
+#   2. checks (checks.yml) and those images, side by side: a pull request's built with a read-only token, master's
+#      pushed;
+#   3. release, once both pass: every image tagged with the version, `latest` and its commit (from the image built
+#      from its inputs, new or not: never rebuilt), then the repository tagged v<version> and its GitHub release
+#      published, from its note if one was written. The images are tagged first, so a version that's tagged in git
+#      always has its images.
+#   4. deploy, once released: the Dokploy webhook (DOKPLOY_WEBHOOK_URL) rolls `latest` out to production
+#      (ghcr.io/raine-works/raineworks and ghcr.io/raine-works/raineworks-ssh).
+#
+# The plan, the images and the release are the release workflows beside this file (release-plan.yml,
+# release-images.yml, release-publish.yml): this file wires them together with checks.yml.
+#
+# A push that changes no image (docs, workflows, tests) is checked but not released. Master's runs, and the Release
+# note workflow (release.yml), take turns (the `release` group), so versions are cut one at a time, in order; a run
+# waiting behind another is replaced by a newer one, which releases both pushes. A release that fails part way is
+# finished with "Re-run failed jobs": it keeps its plan, and each of its steps does nothing a second time.
+name: CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [master]
+
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('ci-{0}', github.event.pull_request.number) || 'release' }}
+  # A newer push to a pull request replaces its run; master's runs each finish.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    uses: ./.github/workflows/release-plan.yml
+    permissions:
+      contents: read
+      packages: read
+
+  checks:
+    uses: ./.github/workflows/checks.yml
+
+  # A pull request's images are only built, with a token that can't push: whatever its code or workflows do, nothing
+  # of it reaches the registry before it's merged.
+  images:
+    needs: plan
+    if: github.event_name == 'pull_request' && needs.plan.outputs.build != '[]'
+    uses: ./.github/workflows/release-images.yml
+    permissions:
+      contents: read
+      packages: read
+    with:
+      images: ${{ needs.plan.outputs.build }}
+      version: ${{ needs.plan.outputs.version }}
+      push: false
+
+  # Master's are pushed, for the release to tag.
+  publish:
+    needs: plan
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master' && needs.plan.outputs.build != '[]'
+    uses: ./.github/workflows/release-images.yml
+    permissions:
+      contents: read
+      packages: write
+    with:
+      images: ${{ needs.plan.outputs.build }}
+      version: ${{ needs.plan.outputs.version }}
+      push: true
+
+  release:
+    needs: [plan, checks, publish]
+    # Publish skipped means no image needed building: every one is in the registry already.
+    if: >-
+      always() && needs.plan.outputs.release == 'true' && needs.checks.result == 'success'
+      && (needs.publish.result == 'success' || needs.publish.result == 'skipped')
+    uses: ./.github/workflows/release-publish.yml
+    permissions:
+      contents: write
+      packages: write
+    with:
+      name: raineworks
+      version: ${{ needs.plan.outputs.version }}
+      services: ${{ needs.plan.outputs.services }}
+      changed: ${{ needs.plan.outputs.changed }}
+
+  # Production (Dokploy) pulls `latest`: once a release has tagged it, the deploy webhook rolls it out. A push that's
+  # no release changed no image, so there's nothing to roll out.
+  deploy:
+    needs: release
+    if: always() && needs.release.result == 'success'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Trigger the Dokploy deploy
+        env:
+          DOKPLOY_WEBHOOK_URL: ${{ secrets.DOKPLOY_WEBHOOK_URL }}
+        run: |
+          test -n "$DOKPLOY_WEBHOOK_URL" || { echo "::error::The DOKPLOY_WEBHOOK_URL secret isn't set."; exit 1; }
+          curl --fail --silent --show-error --retry 3 --retry-delay 5 --max-time 30 -X POST "$DOKPLOY_WEBHOOK_URL" >/dev/null
+          echo "Deploy triggered." >> "$GITHUB_STEP_SUMMARY"

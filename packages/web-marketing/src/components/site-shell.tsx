@@ -1,0 +1,71 @@
+/**
+ * The marketing zone's layout around every page: a sticky header (the logo, the pages, the theme and, on phones, the
+ * menu), the page, and a footer (the logo, the version opening About, the social links and the coffee button).
+ *
+ * @module components/site-shell
+ */
+
+import { AppLogo } from '@raineworks/ui/blocks/brand';
+import { VersionLabel } from '@raineworks/ui/blocks/release-notes';
+import { ThemeToggle } from '@raineworks/ui/blocks/theme-toggle';
+import { CoffeeButton } from '@raineworks/web-marketing/components/coffee-button';
+import { MobileNav } from '@raineworks/web-marketing/components/mobile-nav';
+import { NAV_LINKS } from '@raineworks/web-marketing/components/nav';
+import { SocialLinks } from '@raineworks/web-marketing/components/social-links';
+import { profile } from '@raineworks/web-marketing/content/profile';
+import { Link } from '@tanstack/react-router';
+import type { ReactNode } from 'react';
+
+/** The header, `children` (the page), and the footer. */
+export function SiteShell({ children }: { children: ReactNode }) {
+	return (
+		<div className="relative flex min-h-screen flex-col">
+			<header className="sticky top-0 z-40 border-b border-border/60 bg-background/75 backdrop-blur-md">
+				<div className="mx-auto flex h-16 w-full max-w-5xl items-center gap-4 px-4 md:px-8">
+					<Link
+						to="/"
+						aria-label="raineworks, home"
+						className="-mx-1 rounded-md px-1 py-1 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+					>
+						<AppLogo className="h-6" />
+					</Link>
+					<nav aria-label="Main" className="ml-auto hidden items-center gap-0.5 md:flex">
+						{NAV_LINKS.filter((link) => link.to !== '/').map((link) => (
+							<Link
+								key={link.to}
+								to={link.to}
+								activeProps={{ className: 'text-foreground bg-accent' }}
+								inactiveProps={{ className: 'text-muted-foreground' }}
+								className="rounded-md px-3 py-1.5 text-sm font-medium transition-colors outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+							>
+								{link.label}
+							</Link>
+						))}
+					</nav>
+					<div className="ml-auto flex items-center gap-1 md:ml-2">
+						<ThemeToggle />
+						<MobileNav />
+					</div>
+				</div>
+			</header>
+
+			<main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 md:px-8 md:py-12">{children}</main>
+
+			<footer className="border-t border-border/60">
+				<div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-10 md:flex-row md:items-center md:justify-between md:px-8">
+					<div className="flex flex-col gap-2">
+						<AppLogo className="h-5 self-start text-muted-foreground" />
+						<p className="text-sm text-muted-foreground">
+							© {new Date().getFullYear()} {profile.name}. Open source under the MIT License.
+						</p>
+						<VersionLabel className="-mx-1" />
+					</div>
+					<div className="flex flex-wrap items-center gap-3">
+						<SocialLinks />
+						<CoffeeButton />
+					</div>
+				</div>
+			</footer>
+		</div>
+	);
+}

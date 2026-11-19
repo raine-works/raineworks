@@ -1,3 +1,9 @@
+/**
+ * TTY-like streams for Ink over an SSH channel: output with a size that resizes, input that reads keys.
+ *
+ * @module server/terminal
+ */
+
 import { EventEmitter } from 'node:events';
 import { Readable, Writable } from 'node:stream';
 

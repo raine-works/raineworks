@@ -1,0 +1,31 @@
+# Writes the next release's note, by hand (Actions → Release note → Run workflow), when a release has something
+# worth telling the people who use the app: Claude writes it (packages/ui/src/release-notes/<version>.md) from what
+# changed since the last note, scoped to the zones each change is for, and it's opened as the pull request
+# `Release note <version>`. Merging it is the release (ci.yml): its server image is built with the note, and the
+# GitHub release is published from it. Releases themselves are ci.yml's: every push to master that changes an image.
+#
+# The workflow is release-note.yml beside this file: this file only gives it its inputs.
+# Claude signs in with the job's OIDC token (workload identity federation); the pull request needs the
+# RELEASE_NOTE_TOKEN secret (release-note.yml says what it is).
+name: Release note
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  release-note:
+    name: Release note
+    uses: ./.github/workflows/release-note.yml
+    secrets: inherit
+    with:
+      name: raineworks
+      guide: >-
+        The notes' format is in docs/development.md ("Releases"): frontmatter with a `title` (what the release is
+        about, in a few words) and a `date`, then `##` headings by area with short bullets. The readers are people
+        visiting Raine Petersen's personal site, raineworks.com. There's one zone, `marketing` (`ZONES` in
+        packages/tools/src/zones.ts), so no `::: for` blocks are needed.

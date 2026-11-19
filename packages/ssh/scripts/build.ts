@@ -1,7 +1,9 @@
 import { join } from 'node:path';
 
 /**
- * Compiles the SSH server into a standalone binary (`dist/ssh-server`).
+ * Compiles the SSH server into a standalone binary (`dist/ssh-server`), stamped `production`. Keep `target: 'bun'`
+ * and `keepNames: true`: without them the binary crashes on disconnect, since `ssh2` checks
+ * `channel.constructor.name === 'Session'`.
  *
  * Two optional dependencies are stubbed out because they cannot (and should
  * not) be bundled: `react-devtools-core` (Ink's opt-in devtools) and
@@ -13,7 +15,8 @@ const result = await Bun.build({
 	entrypoints: [join(packageDir, 'src/main.ts')],
 	target: 'bun',
 	compile: { outfile: join(packageDir, 'dist/ssh-server') },
-	minify: true,
+	// Minified, but with names kept: ssh2 tells its channels apart by `constructor.name`.
+	minify: { whitespace: true, syntax: true, identifiers: true, keepNames: true },
 	define: { 'process.env.NODE_ENV': '"production"' },
 	plugins: [
 		{

@@ -1,7 +1,29 @@
-node_modules/
-dist/
-dist-bin/
+# dependencies
+node_modules
+
+# output
+dist
+dist-bin
+tmp
+.types
+*.tgz
+
+# code coverage
+coverage
+*.lcov
+
+# logs
+logs
 *.log
+
+# dotenv environment variable files (actual secrets — not committed)
+.env*
+# allow example files to be committed
+!**/.env.example
+# Non-secret test configuration is committed so fresh clones can run tests.
+!**/.env.test
+
+# Left behind by `bun build --compile` when interrupted.
+*.bun-build
+
 .DS_Store
-.env
-.env.local

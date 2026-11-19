@@ -1,0 +1,183 @@
+/*
+ * Rendered Markdown (`@raineworks/tools/markdown`): every zone's release notes, and any guides a zone renders. Wrap it in
+ * `.guide`. Code is coloured by highlight.js's classes (`@raineworks/tools/highlight`).
+ */
+.guide {
+	@apply grid max-w-3xl min-w-0 grid-cols-[minmax(0,1fr)] gap-4 text-[15px] leading-7;
+}
+.guide a {
+	@apply font-medium text-brand underline decoration-brand/40 underline-offset-4 hover:decoration-brand;
+}
+.guide h2 {
+	@apply mt-10 scroll-mt-6 border-b pb-2 text-xl font-semibold tracking-tight first:mt-0;
+}
+.guide h3 {
+	@apply mt-6 scroll-mt-6 text-base font-semibold;
+}
+.guide h4 {
+	@apply mt-2 text-sm font-semibold;
+}
+/*
+ * Each heading links to itself: a `#` shows after it on hover. After, not hanging to its left, so it never sits on
+ * the edge of whatever holds the text (a dialog, a card, a phone's screen).
+ */
+.guide :is(h2, h3) > a {
+	@apply text-foreground no-underline hover:no-underline;
+}
+.guide :is(h2, h3) > a::after {
+	@apply ml-2 font-normal text-muted-foreground opacity-0 transition-opacity content-['#'];
+}
+.guide :is(h2, h3):hover > a::after,
+.guide :is(h2, h3) > a:focus-visible::after {
+	@apply opacity-100;
+}
+.guide strong {
+	@apply font-semibold text-foreground;
+}
+.guide ul {
+	@apply grid list-disc gap-1.5 pl-6 marker:text-muted-foreground;
+}
+/* Numbered lists are procedures: each step a numbered badge. */
+.guide ol {
+	@apply grid gap-3 pl-0;
+	counter-reset: step;
+}
+.guide ol > li {
+	@apply relative list-none pl-9;
+	counter-increment: step;
+}
+.guide ol > li::before {
+	@apply absolute top-0.5 left-0 flex size-6 items-center justify-center rounded-full border bg-muted text-xs font-medium text-muted-foreground;
+	content: counter(step);
+}
+.guide li > ul,
+.guide li > ol {
+	@apply mt-1.5;
+}
+.guide hr {
+	@apply my-4;
+}
+.guide :not(pre) > code {
+	@apply rounded border bg-muted/60 px-1.5 py-0.5 font-mono text-[0.85em];
+}
+/* A code block: its language and copy button in a bar above the code. */
+.guide .code-block {
+	@apply overflow-hidden rounded-lg border bg-muted/40;
+}
+.guide .code-label {
+	@apply flex h-9 items-center justify-between border-b px-4 text-xs font-medium text-muted-foreground;
+}
+.guide pre {
+	@apply overflow-x-auto p-4 font-mono text-[13px] leading-6;
+}
+.guide .copy-code {
+	@apply rounded-md px-2 py-1 font-sans text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground;
+}
+/* Callouts (`> [!NOTE]` and the rest): a tinted panel, its kind as its title. */
+.guide blockquote {
+	@apply border-l-2 pl-4 text-muted-foreground;
+}
+.guide .callout {
+	@apply grid gap-1 rounded-lg border border-l-4 px-4 py-3 text-sm;
+}
+.guide .callout p {
+	@apply text-foreground/90;
+}
+.guide .callout-title {
+	@apply text-xs font-semibold tracking-wide uppercase;
+}
+.guide .callout-note {
+	@apply border-l-info bg-info/5;
+}
+.guide .callout-note .callout-title {
+	@apply text-info;
+}
+.guide .callout-tip {
+	@apply border-l-success bg-success/5;
+}
+.guide .callout-tip .callout-title {
+	@apply text-success;
+}
+.guide .callout-important {
+	@apply border-l-brand bg-brand/5;
+}
+.guide .callout-important .callout-title {
+	@apply text-brand;
+}
+.guide .callout-warning {
+	@apply border-l-warning bg-warning/5;
+}
+.guide .callout-warning .callout-title {
+	@apply text-warning;
+}
+.guide .callout-caution {
+	@apply border-l-destructive bg-destructive/5;
+}
+.guide .callout-caution .callout-title {
+	@apply text-destructive;
+}
+.guide .table-scroll {
+	@apply overflow-x-auto rounded-lg border;
+}
+.guide table {
+	@apply w-full border-collapse text-sm;
+}
+.guide th {
+	@apply border-b bg-muted/50 px-3 py-2 text-left text-xs font-medium tracking-wide text-muted-foreground uppercase;
+}
+.guide td {
+	@apply border-b px-3 py-2.5 align-top;
+}
+.guide tbody tr:hover {
+	@apply bg-muted/30;
+}
+.guide tr:last-child td {
+	@apply border-b-0;
+}
+
+/* Code colours (highlight.js classes, `lib/highlight`): readable on `bg-muted` in both themes. */
+:root {
+	--code-keyword: oklch(0.5 0.17 300);
+	--code-string: oklch(0.5 0.13 150);
+	--code-number: oklch(0.55 0.15 50);
+	--code-comment: oklch(0.6 0.01 80);
+	--code-name: oklch(0.5 0.14 250);
+	--code-attr: oklch(0.52 0.12 200);
+}
+.dark {
+	--code-keyword: oklch(0.78 0.12 300);
+	--code-string: oklch(0.8 0.13 150);
+	--code-number: oklch(0.8 0.13 60);
+	--code-comment: oklch(0.6 0.01 80);
+	--code-name: oklch(0.78 0.11 250);
+	--code-attr: oklch(0.8 0.1 200);
+}
+.hljs-keyword,
+.hljs-built_in,
+.hljs-meta,
+.hljs-selector-tag {
+	color: var(--code-keyword);
+}
+.hljs-string,
+.hljs-regexp,
+.hljs-symbol {
+	color: var(--code-string);
+}
+.hljs-number,
+.hljs-literal {
+	color: var(--code-number);
+}
+.hljs-comment {
+	color: var(--code-comment);
+	font-style: italic;
+}
+.hljs-title,
+.hljs-title.function_,
+.hljs-variable,
+.hljs-params {
+	color: var(--code-name);
+}
+.hljs-attr,
+.hljs-property {
+	color: var(--code-attr);
+}

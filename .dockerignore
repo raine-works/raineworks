@@ -1,5 +1,44 @@
-node_modules
-dist
-dist-bin
+# Dependencies (installed in the image from the lockfile), at any depth: a package's own would overwrite them
+**/node_modules
+
+# Build outputs (regenerated in builder)
+**/dist
+**/generated
+**/.types
+**/*.tgz
+
+# Version control
 .git
-*.log
+.gitignore
+.github
+
+# Environment and secrets, in every package (never send to build context). Only the examples go in: no build reads
+# an env file, and .env.test is for tests, which don't run in an image.
+**/.env*
+!**/.env.example
+
+# Code coverage and logs, at any depth
+**/coverage
+**/*.lcov
+**/logs
+**/*.log
+**/report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Claude Code's local state (worktrees, settings), at any depth
+**/.claude
+
+# IDE and editor
+**/.vscode
+**/.zed
+**/*.swp
+**/*.swo
+**/*~
+
+# Docs and misc, at any depth (not needed for image build)
+**/*.md
+# …except the Markdown the zones are built from: release notes (every zone).
+!packages/ui/src/release-notes/*.md
+
+# The repository's own scripts (dev tools), not part of any image
+scripts
+.DS_Store

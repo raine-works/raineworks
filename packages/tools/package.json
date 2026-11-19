@@ -1,23 +1,22 @@
 {
-	"name": "@app/tools",
+	"name": "@raineworks/tools",
 	"private": true,
 	"type": "module",
-	"main": "./src/index.ts",
-	"types": "./src/index.ts",
 	"exports": {
 		".": "./src/index.ts",
-		"./build": "./src/build.ts",
-		"./http": "./src/http.ts",
-		"./cli": "./src/cli.ts",
-		"./*": "./src/*"
+		"./*": "./src/*.ts"
 	},
 	"scripts": {
-		"typecheck": "tsc --noEmit"
+		"test": "bun test",
+		"typecheck": "bun check"
+	},
+	"dependencies": {
+		"bun-plugin-tailwind": "catalog:dev",
+		"highlight.js": "catalog:",
+		"zod": "catalog:"
 	},
 	"devDependencies": {
-		"@types/bun": "catalog:",
-		"bun-plugin-tailwind": "catalog:",
-		"tailwindcss": "catalog:",
-		"typescript": "catalog:"
+		"@raineworks/tsconfig": "workspace:*",
+		"@types/bun": "catalog:dev"
 	}
 }
