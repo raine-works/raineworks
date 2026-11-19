@@ -24,6 +24,7 @@ import { RouteError } from '@raineworks/ui/blocks/route-error';
 import { queryClient } from '@raineworks/ui/lib/api';
 import { SITE_URL } from '@raineworks/ui/lib/brand';
 import type { PageHead } from '@raineworks/ui/lib/head';
+import { ensureArticlesOn } from '@raineworks/web-marketing/components/articles';
 import { SiteShell } from '@raineworks/web-marketing/components/site-shell';
 import { profile, work } from '@raineworks/web-marketing/content/profile';
 import { HomePage } from '@raineworks/web-marketing/routes/home';
@@ -130,6 +131,8 @@ const articlesRoute = createRoute({
 			unlisted: true,
 		},
 	},
+	// Prerendered as the page; in the browser, the 404 when they're off (the page the server sent then).
+	beforeLoad: ({ context }) => (typeof document === 'undefined' ? undefined : ensureArticlesOn(context.queryClient)),
 	component: lazyRouteComponent(() => import('@raineworks/web-marketing/routes/articles'), 'ArticlesPage'),
 });
 

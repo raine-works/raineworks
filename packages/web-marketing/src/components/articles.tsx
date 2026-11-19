@@ -9,7 +9,8 @@ import { Card, CardDescription, CardHeader, CardTitle } from '@raineworks/ui/com
 import { Skeleton } from '@raineworks/ui/components/skeleton';
 import { api, unwrap } from '@raineworks/ui/lib/api';
 import { profile } from '@raineworks/web-marketing/content/profile';
-import { queryOptions, useQuery } from '@tanstack/react-query';
+import { type QueryClient, queryOptions, useQuery } from '@tanstack/react-query';
+import { notFound } from '@tanstack/react-router';
 import { ArrowUpRightIcon } from 'lucide-react';
 import '@raineworks/tools/prototypes';
 
@@ -25,6 +26,32 @@ export const articlesQuery = () =>
 		staleTime: 60 * 60_000,
 		retry: false,
 	});
+
+/**
+ * Whether they're on, apart from the list: the `/articles` route asks before it renders, and filling
+ * {@link articlesQuery} then would render the list over the prerendered placeholders it hydrates.
+ */
+const articlesOnQuery = () =>
+	queryOptions({
+		queryKey: ['articles', 'on'],
+		queryFn: async () => {
+			const body = await unwrap(api.api.articles.$get());
+			// `unwrap` threw for the 503: what's left is the answer.
+			return 'enabled' in body && body.enabled;
+		},
+		staleTime: 60 * 60_000,
+		retry: false,
+	});
+
+/**
+ * The `/articles` route's check in the browser: when the server says they're off, it's the 404 (what the server sent
+ * for the page, so it hydrates as one, and the same on a visit from another page). When the server can't say, the
+ * page shows that instead.
+ */
+export async function ensureArticlesOn(queryClient: QueryClient): Promise<void> {
+	const { data: on } = await queryClient.fetchQuery(articlesOnQuery()).tryCatch();
+	if (on === false) throw notFound();
+}
 
 const published = new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeZone: 'UTC' });
 
