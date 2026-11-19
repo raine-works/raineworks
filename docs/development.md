@@ -112,7 +112,8 @@ there).
 ## Claude in GitHub
 
 Mention `@claude` in an issue, a comment or a pull request review and Claude answers there: it explains, reviews, or
-makes the change and opens a pull request for it (`.github/workflows/claude.yml`). Only people with write access can
+makes the change and opens a pull request for it (`.github/workflows/claude.yml`), as `claude[bot]` (the Claude GitHub
+App), so its branches run the checks. Only people with write access can
 start it. It signs in to Anthropic the same way as the release note (workload identity federation, no stored key), and
 can run the checks (`bun run lint`, `typecheck`, `test`) but nothing else.
 
