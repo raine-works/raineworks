@@ -102,6 +102,7 @@
     "packages/web-marketing": {
       "name": "@raineworks/web-marketing",
       "dependencies": {
+        "@raineworks/api": "workspace:*",
         "@raineworks/tools": "workspace:*",
         "@raineworks/ui": "workspace:*",
         "@tanstack/react-query": "catalog:",

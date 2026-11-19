@@ -5,7 +5,7 @@
  * /healthz, /readyz            probes
  * /api/build                   the build a zone is serving, for its update check (lib/spa)
  * /api/contact                 the contact form (POST; acknowledged, not yet stored or delivered)
- * /api/projects/stars          star counts of Raine's repositories on GitHub (lib/github; cached ten minutes)
+ * /api/projects                Raine's projects: repositories tagged `raineworks` on GitHub (lib/github; cached ten minutes)
  * /api/openapi.json            OpenAPI 3.1 document of every /api route (lib/openapi; cached publicly an hour)
  * /api/*                       anything else under /api: a JSON 404
  * /*                           the web zones (lib/spa), one per entry in @raineworks/tools/zones; `/` is `marketing`

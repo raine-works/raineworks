@@ -1,7 +1,7 @@
 /**
- * What the site says: Raine's profile, work, education, projects and hobbies. Sourced from Raine's public LinkedIn
- * (linkedin.com/in/rainepetersen), public listings and the pinned repositories on github.com/raine-works. The SSH
- * app (`@raineworks/ssh`) renders the same content. Copy still marked `TODO(raine)` is left off the pages (`isWritten`).
+ * What the site says: Raine's profile, work, education and hobbies. Sourced from Raine's public LinkedIn
+ * (linkedin.com/in/rainepetersen) and public listings. The projects aren't here: they're the repositories tagged
+ * `raineworks` on GitHub, live from `GET /api/projects`. The SSH app (`@raineworks/ssh`) renders the same content. Copy still marked `TODO(raine)` is left off the pages (`isWritten`).
  *
  * @module content/profile
  */
@@ -19,17 +19,6 @@ export interface EducationEntry {
 	school: string;
 	period: string;
 	focus: string;
-}
-
-export interface ProjectEntry {
-	name: string;
-	description: string;
-	stack: string[];
-	href: string;
-	/** Shown on the home page. */
-	featured?: boolean;
-	/** This site: marked as the one you're looking at. */
-	here?: boolean;
 }
 
 export interface HobbyEntry {
@@ -80,54 +69,6 @@ export const education: EducationEntry[] = [
 		school: 'Snow College',
 		period: '2011 — 2015',
 		focus: 'General education, design and information technology',
-	},
-];
-
-export const projects: ProjectEntry[] = [
-	{
-		name: 'devcontainer-features',
-		description: 'Dev container features for installing Bun and Deno.',
-		stack: ['Shell', 'Dev Containers'],
-		href: 'https://github.com/raine-works/devcontainer-features',
-	},
-	{
-		name: '.dotfiles',
-		description:
-			'My macOS development environment, managed with GNU Stow. One command sets up a new machine: Ghostty, Starship, shell tooling, and editor config.',
-		stack: ['Shell', 'GNU Stow', 'macOS'],
-		href: 'https://github.com/raine-works/.dotfiles',
-	},
-	{
-		name: 'ha-everscent',
-		description:
-			'An unofficial Home Assistant integration for EverScent whole-home HVAC scent diffusers: power, schedules, fragrance level and status, over the same cloud API the mobile app uses.',
-		stack: ['Python', 'Home Assistant', 'HACS'],
-		href: 'https://github.com/raine-works/ha-everscent',
-		featured: true,
-	},
-	{
-		name: 'ha-grok',
-		description:
-			'An unofficial Home Assistant integration for xAI Grok, built for a fast voice assistant: speech to text, conversation and text to speech all stream end to end.',
-		stack: ['Python', 'Home Assistant', 'HACS', 'xAI'],
-		href: 'https://github.com/raine-works/ha-grok',
-		featured: true,
-	},
-	{
-		name: 'raineworks',
-		description:
-			'This site. A Bun workspace monorepo: a Hono backend that compiles to a single binary with every micro-frontend embedded, serving a React 19 front end built on shadcn/ui and ui-sdk.',
-		stack: ['Bun', 'React 19', 'TypeScript', 'Hono', 'Tailwind v4', 'shadcn/ui', 'ui-sdk', 'Docker'],
-		href: 'https://github.com/raine-works/raineworks',
-		here: true,
-	},
-	{
-		name: 'sendspin-a1s-source',
-		description:
-			'ESPHome firmware that turns an ESP32-A1S audio kit into an encrypted line-in source for Music Assistant, streaming turntables and other analog gear to synchronized multi-room speakers.',
-		stack: ['C++', 'ESPHome', 'ESP-IDF', 'Noise Protocol', 'Opus'],
-		href: 'https://github.com/raine-works/sendspin-a1s-source',
-		featured: true,
 	},
 ];
 

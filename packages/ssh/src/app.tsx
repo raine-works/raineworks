@@ -3,13 +3,14 @@
  * overlays: the command palette (⌃K or `:`) and the keys (`?`). The keys belong to the mode: in `nav` they move between
  * screens; in `form` the contact form has them; an open overlay owns them. ⌃C always quits.
  *
- * Content is the site's (`@raineworks/web-marketing/content/profile`), through `sanitize`. Messages go through
- * `send`, which the server gives (the site's API); tests give their own.
+ * Content is the site's (`@raineworks/web-marketing/content/profile`), through `sanitize`. The projects come from
+ * `loadProjects` and messages go through `send`, both of which the server gives (the site's API); tests give their own.
  *
  * @module app
  */
 
 import { useKeyboard, useTerminalDimensions } from '@opentui/react';
+import type { Project } from '@raineworks/api';
 import { About } from '@raineworks/ssh/screens/about';
 import { Contact, type SendMessage } from '@raineworks/ssh/screens/contact';
 import { Hobbies } from '@raineworks/ssh/screens/hobbies';
@@ -23,10 +24,12 @@ import { type Command, Palette } from '@raineworks/ssh/ui/palette';
 import { type Mode, type ScreenId, SCREENS } from '@raineworks/ssh/ui/screens';
 import { Sidebar, SIDEBAR_WIDTH, Tabs } from '@raineworks/ssh/ui/sidebar';
 import { StatusBar } from '@raineworks/ssh/ui/status-bar';
-import { projects } from '@raineworks/web-marketing/content/profile';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export type { SendMessage };
+
+/** The projects (`GET /api/projects`), or `null` when they can't be had. */
+export type LoadProjects = () => Promise<Project[] | null>;
 
 /** The smallest terminal the app lays out in; smaller shows how much bigger it needs to be. */
 export const MIN_SIZE = { width: 60, height: 20 } as const;
@@ -38,11 +41,13 @@ const indexOf = (id: ScreenId) => SCREENS.findIndex((screen) => screen.id === id
 export function App({
 	version,
 	send,
+	loadProjects,
 	onQuit,
 	rain: initialRain = true,
 }: {
 	version: string;
 	send: SendMessage;
+	loadProjects: LoadProjects;
 	onQuit: () => void;
 	/** Whether the rain falls at first (tests hold it still). */
 	rain?: boolean;
@@ -52,6 +57,19 @@ export function App({
 	const [mode, setMode] = useState<Mode>('nav');
 	const [rain, setRain] = useState(initialRain);
 	const [project, setProject] = useState(0);
+	/** `undefined` while they load, `null` when they couldn't. */
+	const [projects, setProjects] = useState<Project[] | null>();
+
+	useEffect(() => {
+		let live = true;
+		void loadProjects().then((loaded) => {
+			if (live) setProjects(loaded);
+		});
+		return () => {
+			live = false;
+		};
+	}, [loadProjects]);
+	const projectCount = projects?.length ?? 0;
 
 	const go = (id: ScreenId) => {
 		setScreen(id);
@@ -87,10 +105,10 @@ export function App({
 		else if (/^[1-6]$/.test(key.sequence)) {
 			const target = SCREENS[Number(key.sequence) - 1];
 			if (target) go(target.id);
-		} else if (screen === 'projects' && (key.name === 'down' || key.name === 'j'))
-			setProject((current) => (current + 1) % projects.length);
-		else if (screen === 'projects' && (key.name === 'up' || key.name === 'k'))
-			setProject((current) => (current - 1 + projects.length) % projects.length);
+		} else if (screen === 'projects' && projectCount > 0 && (key.name === 'down' || key.name === 'j'))
+			setProject((current) => (current + 1) % projectCount);
+		else if (screen === 'projects' && projectCount > 0 && (key.name === 'up' || key.name === 'k'))
+			setProject((current) => (current - 1 + projectCount) % projectCount);
 		else if (screen === 'contact' && (key.name === 'return' || key.name === 'i')) setMode('form');
 	});
 
@@ -125,9 +143,11 @@ export function App({
 			<box style={{ flexDirection: 'row', flexGrow: 1 }}>
 				{withSidebar && <Sidebar current={screen} onPick={go} />}
 				<scrollbox key={screen} style={{ flexGrow: 1, rootOptions: { backgroundColor: theme.bg } }}>
-					{screen === 'home' && <Home width={contentWidth - 2} rain={rain} />}
+					{screen === 'home' && <Home width={contentWidth - 2} rain={rain} projects={projects} />}
 					{screen === 'work' && <Work />}
-					{screen === 'projects' && <Projects index={project} onPick={setProject} width={contentWidth} />}
+					{screen === 'projects' && (
+						<Projects projects={projects} index={project} onPick={setProject} width={contentWidth} />
+					)}
 					{screen === 'hobbies' && <Hobbies width={contentWidth} />}
 					{screen === 'contact' && <Contact mode={mode} onMode={setMode} send={send} width={contentWidth} />}
 					{screen === 'about' && <About version={version} width={width} height={height} />}

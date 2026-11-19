@@ -1,18 +1,19 @@
 /**
  * Home: the logo, as the site's lockup (the mark, `ui/logo`, then the name in big ASCII letters) over falling rain;
- * who Raine is, what Raine is building now, and the featured projects. The title takes the largest font that fits
+ * who Raine is, what Raine is building now, and the featured projects (once they're in: `app` loads them). The title takes the largest font that fits
  * beside the mark (`titleFont`); too narrow for both, the mark gives way.
  *
  * @module screens/home
  */
 
 import { measureText } from '@opentui/core';
+import type { Project } from '@raineworks/api';
 import { sanitize } from '@raineworks/ssh/sanitize';
 import { theme } from '@raineworks/ssh/theme';
 import { Logo } from '@raineworks/ssh/ui/logo';
 import { Card, Chips } from '@raineworks/ssh/ui/panel';
 import { Rain } from '@raineworks/ssh/ui/rain';
-import { profile, projects, work } from '@raineworks/web-marketing/content/profile';
+import { profile, work } from '@raineworks/web-marketing/content/profile';
 
 const TITLE = 'raineworks';
 /** The title's fonts, largest first. */
@@ -32,14 +33,23 @@ const MARK_COLS = 24;
 /** Between the mark and the title. */
 const MARK_GAP = 3;
 
-export function Home({ width, rain }: { width: number; rain: boolean }) {
+export function Home({
+	width,
+	rain,
+	projects,
+}: {
+	width: number;
+	rain: boolean;
+	/** `undefined` while they load, `null` when they couldn't. */
+	projects: Project[] | null | undefined;
+}) {
 	const wide = width >= 70;
 	// The lockup if the smallest title fits beside the mark; the title alone otherwise.
 	const withMark = width >= MARK_COLS + MARK_GAP + 4 + measureText({ text: TITLE, font: 'tiny' }).width + 4;
 	const title = titleFont(withMark ? width - MARK_COLS - MARK_GAP - 2 : width);
 	const heroHeight = withMark ? MARK_COLS / 2 + 2 : title.height + 2;
 	const titleLeft = withMark ? 2 + MARK_COLS + MARK_GAP : 2;
-	const featured = projects.filter((project) => project.featured);
+	const featured = projects?.filter((project) => project.featured) ?? [];
 	return (
 		<box style={{ flexDirection: 'column', gap: 1 }}>
 			<box style={{ height: heroHeight, width }}>
@@ -85,22 +95,26 @@ export function Home({ width, rain }: { width: number; rain: boolean }) {
 					</Card>
 				))}
 			</box>
-			<box style={{ flexDirection: 'column', paddingLeft: 1, paddingRight: 1 }}>
-				<Card title="featured projects · 3 → projects">
-					{featured.map((project) => (
-						<box key={project.name} style={{ flexDirection: 'column', marginBottom: 1 }}>
-							<text>
-								<span fg={theme.accent}>★ </span>
-								<strong fg={theme.text}>{sanitize(project.name)}</strong>
-							</text>
-							<text fg={theme.muted} wrapMode="word">
-								{sanitize(project.description)}
-							</text>
-							<Chips items={project.stack.map(sanitize)} />
-						</box>
-					))}
-				</Card>
-			</box>
+			{featured.length > 0 && (
+				<box style={{ flexDirection: 'column', paddingLeft: 1, paddingRight: 1 }}>
+					<Card title="featured projects · 3 → projects">
+						{featured.map((project) => (
+							<box key={project.name} style={{ flexDirection: 'column', marginBottom: 1 }}>
+								<text>
+									<span fg={theme.accent}>★ </span>
+									<strong fg={theme.text}>{sanitize(project.name)}</strong>
+								</text>
+								{project.description && (
+									<text fg={theme.muted} wrapMode="word">
+										{sanitize(project.description)}
+									</text>
+								)}
+								<Chips items={project.stack.map(sanitize)} />
+							</box>
+						))}
+					</Card>
+				</box>
+			)}
 		</box>
 	);
 }
