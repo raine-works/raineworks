@@ -1,7 +1,8 @@
 /**
  * The SSH server (`ssh2`): `none` auth only, one pty `shell` session per connection running the Ink app over the
  * channel. Exec, subsystems, forwarding and shells without a pty are refused. `loadHostKey` reads the host key from
- * `SSH_HOST_KEY` (PEM text, `\n` escapes allowed) or the file at `SSH_HOST_KEY_PATH`; never generated or baked in.
+ * `SSH_HOST_KEY` (PEM text, `\n` escapes allowed) or the file at `SSH_HOST_KEY_PATH` (`DEFAULT_HOST_KEY_PATH` when
+ * unset); never generated or baked in.
  *
  * @module server/index
  */
@@ -131,21 +132,25 @@ export function createServer(options: ServerOptions) {
  * accepted for platforms that store secrets on one line) or, failing that, the
  * file at `SSH_HOST_KEY_PATH`. Throws a descriptive error instead of dumping a stack.
  */
+/** Where the host key file is read from when `SSH_HOST_KEY_PATH` isn't set: the usual secret mount. */
+export const DEFAULT_HOST_KEY_PATH = '/run/secrets/ssh_host_key';
+
 export function loadHostKey(env: Record<string, string | undefined>): Buffer {
 	// .env-style stores may keep the surrounding quotes literally.
 	const inline = env.SSH_HOST_KEY?.trim().replace(/^(['"])([\s\S]*)\1$/, '$2');
 	let key: Buffer;
 	if (inline) {
 		key = Buffer.from(inline.replace(/\\n/g, '\n'));
-	} else if (env.SSH_HOST_KEY_PATH) {
+	} else {
+		const path = env.SSH_HOST_KEY_PATH || DEFAULT_HOST_KEY_PATH;
 		try {
-			key = readFileSync(env.SSH_HOST_KEY_PATH);
+			key = readFileSync(path);
 		} catch (error) {
 			const code = (error as NodeJS.ErrnoException).code;
-			throw new Error(`cannot read SSH_HOST_KEY_PATH (${env.SSH_HOST_KEY_PATH}): ${code ?? error}`);
+			throw new Error(
+				`no host key: set SSH_HOST_KEY (PEM text) or mount a key at SSH_HOST_KEY_PATH (${path}: ${code ?? error})`,
+			);
 		}
-	} else {
-		throw new Error('no host key: set SSH_HOST_KEY (PEM text) or mount a key at SSH_HOST_KEY_PATH');
 	}
 	const parsed = utils.parseKey(key);
 	if (parsed instanceof Error) throw new Error(`host key is not a valid private key: ${parsed.message}`);
