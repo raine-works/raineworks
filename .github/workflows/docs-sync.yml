@@ -70,9 +70,9 @@ jobs:
           # The pull request is opened (and pushed) with its own token, in its own step: the checkout's token isn't
           # left in .git/config while Claude runs.
           persist-credentials: false
-      # The open pull request's fixes, staged on top of this commit (a closed one's never come back). Its commit
-      # names where it began (a `Docs-Sync-Since:` trailer, written below): each run rebuilds it on its own commit, so
-      # its merge base is only the last run's. If its fixes no longer apply (master changed the same lines), they're
+      # The open pull request's fixes, staged on top of this commit (a closed one's never come back). Its commits name
+      # where it began (a `Docs-Sync-Since:` trailer, written below): each run rebuilds it on its own commit, so its
+      # merge base is only the last run's. If its fixes no longer apply (master changed the same lines), they're
       # dropped, and this run looks again at everything since it began.
       - name: Keep the open pull request's fixes
         id: open
@@ -85,7 +85,8 @@ jobs:
             echo "No open docs-sync pull request."
             exit 0
           fi
-          began="$(git log -1 --format='%(trailers:key=Docs-Sync-Since,valueonly)' "$BRANCH" | head -n 1)"
+          # Its newest commit with the trailer: one pushed on top (a review fix, master merged in) has none.
+          began="$(git log --format='%(trailers:key=Docs-Sync-Since,valueonly)' "HEAD..$BRANCH" | grep -m 1 . || true)"
           if ! git rev-parse -q --verify "${began:-none}^{commit}" >/dev/null; then began="$(git merge-base "$BRANCH" HEAD)"; fi
           echo "began=$began" >> "$GITHUB_OUTPUT"
           if git merge --squash "$BRANCH" >/dev/null 2>&1; then
