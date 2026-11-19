@@ -5,7 +5,7 @@ client over the server's `AppType`, so request and response types come from the 
 
 | Import | What it exports |
 | --- | --- |
-| `@raineworks/api` | `createApiClient({ url, fetch? })` (typed `hc<AppType>` client whose requests time out, an open event stream excepted), `createApiFetch`, `AppType`, `ApiClient` |
+| `@raineworks/api` | `createApiClient({ url, fetch? })` (typed `hc<AppType>` client whose requests time out, an open event stream excepted), `createApiFetch`, `AppType`, `Project`, `ApiClient` |
 
 Web zones don't use this package directly: `@raineworks/ui/lib/api` creates the page's single client and query cache
 (see [docs/architecture.md](../../docs/architecture.md)).

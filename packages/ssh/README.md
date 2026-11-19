@@ -11,7 +11,7 @@ zone: the server doesn't serve it and it has no `index.html`.
 | `src/screens/*.tsx` | Home (the logo over rain), Work, Projects, Hobbies, Contact (a form that sends), About (versions, licences) |
 | `src/ui/` | The parts: `logo` (the mark, from its SVG geometry, in braille), `rain`, `palette` (⌃K), `help` (?), `panel`, … |
 | `src/sanitize.ts` | Every piece of content goes through it before it's rendered, so none can inject terminal escape sequences |
-| `src/server/` | `ssh2` server (`index.ts`), limits (`limits.ts`), TTY streams over the channel (`terminal.ts`), messages (`messages.ts`) |
+| `src/server/` | `ssh2` server (`index.ts`), limits (`limits.ts`), TTY streams over the channel (`terminal.ts`), messages (`messages.ts`), projects (`projects.ts`) |
 | `src/lib/env.ts` | Its settings, Zod-validated (`.env.example` lists them) |
 | `scripts/build.ts` | `bun run build` → `dist/` (below) |
 | `Dockerfile` | Bun's distroless image, non-root (uid 65532), no shell |
@@ -34,7 +34,7 @@ palette, the contact form (empty, sent, refused), quitting. No SSH needed.
   client addresses: publish the port directly or use an L4 passthrough that keeps the source IP. Behind a proxy that
   rewrites it (PROXY protocol isn't supported), every visitor shares one bucket: raise the limits then.
 - Contact messages go to the site's `POST /api/contact` at `RAINEWORKS_API_URL` (default `https://raineworks.com`;
-  in development, the local server), one a minute per session.
+  in development, the local server), one a minute per session. The projects come from the same API.
 
 ## The build and its licences
 
