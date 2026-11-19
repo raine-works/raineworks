@@ -5,8 +5,9 @@
 # nothing.
 #
 # It signs in to Anthropic with the job's OIDC token (workload identity federation, as release-note.yml does): no API
-# key is stored. The federation rule has to accept this repository's tokens, for the branch the event runs on (an
-# issue or a comment on one runs on master; a pull request review comment on the pull request's own ref).
+# key is stored. The federation rule accepts this repository's tokens for every event. It answers, commits and pushes
+# as claude[bot] (the Claude GitHub App, installed on the repository, as Code review is), not the workflow's own token:
+# a branch that token pushed would start no checks, so a pull request from it could never pass them.
 name: Claude
 
 on:
@@ -57,7 +58,6 @@ jobs:
           anthropic_organization_id: 34318a61-fac0-4077-a795-808d80efef19
           anthropic_service_account_id: svac_015F3BEwDj2EJr7bHDgKmFkL
           anthropic_workspace_id: wrkspc_01G5WKL4tLYspnSa4BYdzUCS
-          github_token: ${{ secrets.GITHUB_TOKEN }}
           # Lets Claude see why a pull request's checks failed.
           additional_permissions: |
             actions: read
