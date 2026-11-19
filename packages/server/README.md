@@ -18,8 +18,8 @@ standalone binary with every zone embedded, run from a distroless image. How it 
 | `src/lib/x.ts` | The articles from the X API: the account looked up once, then only posts newer than the newest seen, an hour apart; the last list served while X is down |
 | `src/lib/rss.ts` | The articles as RSS 2.0, for `GET /feed.xml` (only with `X_BEARER_TOKEN`) |
 | `src/routers/contact.ts` | `POST /api/contact`: the contact form (validated, acknowledged with a 202) |
-| `src/routers/projects.ts` | `GET /api/projects/stars`: each repository's GitHub stars, for the project cards |
-| `src/lib/github.ts` | The stars from GitHub: one request for every repository, kept ten minutes, the last ones served while GitHub is down |
+| `src/routers/projects.ts` | `GET /api/projects`: the repositories tagged `raineworks` on GitHub, for the project cards and the SSH app |
+| `src/lib/github.ts` | The projects from GitHub (repositories tagged `raineworks`): one request for every repository, kept ten minutes, the last list served while GitHub is down |
 | `src/lib/validate.ts` | `validate(target, schema)`: Zod at the boundary, a 400 `invalid_request`, and the request documented |
 | `src/lib/openapi.ts` | The OpenAPI document (`GET /api/openapi.json`): `jsonResponse`, `errorResponse`, `invalidRequest` for each route's `describeRoute`; tagging; the version |
 | `scripts/openapi.ts` | `bun run openapi [--out api.json]`: the same document, from the routes alone |

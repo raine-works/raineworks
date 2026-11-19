@@ -6,7 +6,7 @@
  * /api/articles                Raine's articles on X (lib/x; cached an hour; `enabled: false` without X_BEARER_TOKEN)
  * /api/build                   the build a zone is serving, for its update check (lib/spa)
  * /api/contact                 the contact form (POST; acknowledged, not yet stored or delivered)
- * /api/projects/stars          star counts of Raine's repositories on GitHub (lib/github; cached ten minutes)
+ * /api/projects                Raine's projects: repositories tagged `raineworks` on GitHub (lib/github; cached ten minutes)
  * /api/openapi.json            OpenAPI 3.1 document of every /api route (lib/openapi; cached publicly an hour)
  * /api/*                       anything else under /api: a JSON 404
  * /feed.xml                    the articles as RSS (lib/rss; only with X_BEARER_TOKEN)

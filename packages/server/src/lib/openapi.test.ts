@@ -39,12 +39,7 @@ describe('the OpenAPI document', () => {
 	test('is OpenAPI 3.1, versioned, with every /api route tagged by where it sits', () => {
 		expect(spec.openapi).toStartWith('3.1');
 		expect(spec.info).toMatchObject({ title: 'raineworks API', version: '2026.11.1 (abc1234)' });
-		expect(Object.keys(spec.paths).sort()).toEqual([
-			'/api/articles',
-			'/api/build',
-			'/api/contact',
-			'/api/projects/stars',
-		]);
+		expect(Object.keys(spec.paths).sort()).toEqual(['/api/articles', '/api/build', '/api/contact', '/api/projects']);
 		expect(spec.tags.map(({ name }) => name)).toEqual(['Articles', 'Build', 'Contact', 'Projects']);
 		expect(spec.paths['/api/contact']?.post?.tags).toEqual(['Contact']);
 		expect(tagOf('/api/contact/{id}')).toBe('Contact');

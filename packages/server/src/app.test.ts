@@ -32,7 +32,7 @@ await Bun.write(join(zoneDir, 'build.json'), JSON.stringify({ version: '2026.11.
 Bun.env.WEB_DIST = webDist;
 
 const { createApp } = await import('@raineworks/server/app');
-const { resetRepoStars } = await import('@raineworks/server/lib/github');
+const { resetProjects } = await import('@raineworks/server/lib/github');
 const { env } = await import('@raineworks/server/lib/env');
 const { resetArticles } = await import('@raineworks/server/lib/x');
 const app = createApp();
@@ -110,27 +110,37 @@ describe('the contact form', () => {
 	});
 });
 
-describe('the project stars', () => {
+describe('the projects', () => {
 	const realFetch = globalThis.fetch;
 	afterEach(() => {
 		globalThis.fetch = realFetch;
-		resetRepoStars();
+		resetProjects();
 	});
 
-	test('are each repository’s, from GitHub, cached publicly as long as the server keeps them', async () => {
+	test('are the tagged repositories, from GitHub, cached publicly as long as the server keeps them', async () => {
 		globalThis.fetch = (async () =>
-			Response.json([{ name: 'ha-grok', stargazers_count: 7 }])) as unknown as typeof fetch;
-		const response = await get('/api/projects/stars');
+			Response.json([
+				{
+					name: 'ha-grok',
+					description: 'Grok for Home Assistant.',
+					html_url: 'https://github.com/raine-works/ha-grok',
+					language: 'Python',
+					topics: ['raineworks'],
+					stargazers_count: 7,
+				},
+			])) as unknown as typeof fetch;
+		const response = await get('/api/projects');
 		expect(response.status).toBe(200);
 		expect(response.headers.get('cache-control')).toBe('public, max-age=600');
-		expect(((await response.json()) as { stars: Record<string, number> }).stars).toEqual({ 'ha-grok': 7 });
+		const body = (await response.json()) as { projects: { name: string; stars: number }[] };
+		expect(body.projects.map((project) => [project.name, project.stars])).toEqual([['ha-grok', 7]]);
 	});
 
 	test('are a 503 when GitHub hasn’t answered yet', async () => {
 		globalThis.fetch = (async () => new Response('down', { status: 502 })) as unknown as typeof fetch;
-		const response = await get('/api/projects/stars');
+		const response = await get('/api/projects');
 		expect(response.status).toBe(503);
-		expect(((await response.json()) as { error: { code: string } }).error.code).toBe('stars_unavailable');
+		expect(((await response.json()) as { error: { code: string } }).error.code).toBe('projects_unavailable');
 	});
 });
 
