@@ -1,20 +1,3 @@
-<p align="center">
-  <a href="https://raineworks.com"><img src="packages/ui/src/assets/og-image.png" alt="raineworks: Raine Petersen, software, systems and open source" width="720"></a>
-</p>
-
-<p align="center">
-  <a href="https://github.com/raine-works/raineworks/actions/workflows/ci.yml"><img src="https://github.com/raine-works/raineworks/actions/workflows/ci.yml/badge.svg?branch=master" alt="CI: lint, typecheck and tests"></a>
-  <a href="https://github.com/raine-works/raineworks/releases/latest"><img src="https://img.shields.io/github/v/release/raine-works/raineworks?label=release&color=0a0a0a" alt="Latest release"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/raine-works/raineworks?color=0a0a0a" alt="MIT License"></a>
-  <img src="https://img.shields.io/badge/Bun-1.4.4-0a0a0a?logo=bun&logoColor=white" alt="Bun 1.4.4">
-  <img src="https://img.shields.io/badge/React-19-0a0a0a?logo=react&logoColor=white" alt="React 19">
-  <img src="https://img.shields.io/badge/TypeScript-strict-0a0a0a?logo=typescript&logoColor=white" alt="TypeScript, strict">
-</p>
-
-<p align="center">
-  <a href="https://buymeacoffee.com/raineworks"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black" alt="Buy Me a Coffee"></a>
-</p>
-
 # raineworks
 
 Raine Petersen's site: who Raine is, what Raine is building, and the projects behind it. Read it at
@@ -23,6 +6,15 @@ Raine Petersen's site: who Raine is, what Raine is building, and the projects be
 ```bash
 ssh raineworks.com
 ```
+
+[![CI](https://github.com/raine-works/raineworks/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/raine-works/raineworks/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/raine-works/raineworks?label=release&color=0a0a0a)](https://github.com/raine-works/raineworks/releases/latest)
+[![MIT License](https://img.shields.io/github/license/raine-works/raineworks?color=0a0a0a)](LICENSE)
+![Bun 1.4.4](https://img.shields.io/badge/Bun-1.4.4-0a0a0a?logo=bun&logoColor=white)
+![React 19](https://img.shields.io/badge/React-19-0a0a0a?logo=react&logoColor=white)
+![TypeScript, strict](https://img.shields.io/badge/TypeScript-strict-0a0a0a?logo=typescript&logoColor=white)
+
+<a href="https://buymeacoffee.com/raineworks"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black" alt="Buy Me a Coffee" /></a>
 
 ## How it's built
 
