@@ -29,7 +29,8 @@ formatted by `bun fmt`.
   `packages/server/Dockerfile`, and CI (`bun-version-file`). Move them together.
 - Workspace scripts fan out with `bun run --filter`.
 - A new dependency is a release at least two weeks old, added to the root catalog (`workspaces.catalog`, or
-  `catalogs.dev` for build and type tools) and referenced as `catalog:` / `catalog:dev`. (ui-sdk is the exception
+  `catalogs.dev` for build and type tools) and referenced as `catalog:` / `catalog:dev`. Never `bun add` a version into a package's own
+  `package.json`: add it to the catalog first (`packages/tools/src/catalog.test.ts` fails on any that isn't). (ui-sdk is the exception
   already made: a beta pinned exactly; read its changelog before moving it.)
 - Web zones are bundled only by `Bun.build` with its native React Compiler and Tailwind (`@raineworks/tools/build`,
   `runFrontendBuildCli`). Dev mode is `--watch` (rebuild on save, no HMR).
