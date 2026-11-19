@@ -26,11 +26,15 @@ jobs:
             const token = await core.getIDToken('https://api.anthropic.com');
             core.setSecret(token);
             core.exportVariable('JWT', token);
+      # Prints Anthropic's answer, tokens redacted, and fails unless it holds an access token: a refusal is an
+      # `authentication_error` (the federation rule's Authentication log says why; the token's subject is
+      # repo:<owner>/<repo>:ref:<the branch this ran on>).
       - name: Exchange for an Anthropic access token
         run: |
+          echo "Subject: repo:$GITHUB_REPOSITORY:ref:$GITHUB_REF"
           curl -sS https://api.anthropic.com/v1/oauth/token \
             -H "content-type: application/json" \
-            --data @- <<JSON | jq 'with_entries(if (.key | test("token$")) then .value = "<redacted>" else . end)'
+            --data @- > "$RUNNER_TEMP/exchange.json" <<JSON
           {
             "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
             "assertion": "$JWT",
@@ -40,3 +44,5 @@ jobs:
             "workspace_id": "wrkspc_01G5WKL4tLYspnSa4BYdzUCS"
           }
           JSON
+          jq 'with_entries(if (.key | test("token$")) then .value = "<redacted>" else . end)' "$RUNNER_TEMP/exchange.json"
+          jq -e '.access_token | strings' "$RUNNER_TEMP/exchange.json" >/dev/null || { echo "::error::Anthropic refused the exchange (above)."; exit 1; }
