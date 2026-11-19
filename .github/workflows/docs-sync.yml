@@ -4,6 +4,8 @@
 #
 # It follows CI (workflow_run), not the push: Claude's action doesn't take push events. What's new is everything since
 # the last commit it ran for: its previous successful run's. It skips its own merged pull requests and release notes'.
+# An open docs-sync pull request's fixes are carried into each run, which adds to them: the pull request is rewritten
+# from what the run leaves, so without them a run that finds nothing new would close it and drop them.
 #
 # It signs in to Anthropic with the job's OIDC token (workload identity federation: no API key is stored), and opens
 # its pull request as the docs-sync GitHub App (the DOCS_SYNC_APP_CLIENT_ID variable and DOCS_SYNC_APP_PRIVATE_KEY
@@ -68,15 +70,46 @@ jobs:
           # The pull request is opened (and pushed) with its own token, in its own step: the checkout's token isn't
           # left in .git/config while Claude runs.
           persist-credentials: false
+      # The open pull request's fixes, staged on top of this commit (a closed one's never come back). Its commits name
+      # where it began (a `Docs-Sync-Since:` trailer, written below): each run rebuilds it on its own commit, so its
+      # merge base is only the last run's. If its fixes no longer apply (master changed the same lines), they're
+      # dropped, and this run looks again at everything since it began.
+      - name: Keep the open pull request's fixes
+        id: open
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: origin/claude/docs-sync
+        run: |
+          open="$(gh pr list --head claude/docs-sync --state open --json number --jq length)"
+          if [ "$open" != 1 ] || ! git rev-parse -q --verify "$BRANCH" >/dev/null; then
+            echo "No open docs-sync pull request."
+            exit 0
+          fi
+          # Its newest commit with the trailer: one pushed on top (a review fix, master merged in) has none.
+          began="$(git log --format='%(trailers:key=Docs-Sync-Since,valueonly)' "HEAD..$BRANCH" | grep -m 1 . || true)"
+          if ! git rev-parse -q --verify "${began:-none}^{commit}" >/dev/null; then began="$(git merge-base "$BRANCH" HEAD)"; fi
+          echo "began=$began" >> "$GITHUB_OUTPUT"
+          if git merge --squash "$BRANCH" >/dev/null 2>&1; then
+            echo "Kept its fixes: $(git diff --cached --name-only | paste -sd ' ' -)."
+          else
+            git reset -q --hard HEAD
+            echo "Its fixes no longer apply: looking again since it began ($began)."
+            echo "since=$began" >> "$GITHUB_OUTPUT"
+          fi
       - name: What's new
         id: range
         env:
           GH_TOKEN: ${{ github.token }}
           HEAD_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+          OPEN_SINCE: ${{ steps.open.outputs.since }}
+          OPEN_BEGAN: ${{ steps.open.outputs.began }}
         run: |
-          # The commit this workflow last ran for (its previous successful run), else just the latest commit.
-          since="$(gh run list --workflow docs-sync.yml --branch master --status success --limit 1 --json headSha --jq '.[0].headSha // empty')"
+          # Where a dropped pull request began, else the commit this workflow last ran for (its previous successful
+          # run), else just the latest commit.
+          since="${OPEN_SINCE:-$(gh run list --workflow docs-sync.yml --branch master --status success --limit 1 --json headSha --jq '.[0].headSha // empty')}"
           if [ -z "$since" ] || ! git merge-base --is-ancestor "$since" "$HEAD_SHA"; then since="$HEAD_SHA~1"; fi
+          # Where the pull request this run opens or updates began: the open one's start, else this range's.
+          echo "began=$(git rev-parse "${OPEN_BEGAN:-$since}")" >> "$GITHUB_OUTPUT"
           echo "range=$since..$HEAD_SHA" >> "$GITHUB_OUTPUT"
       - uses: anthropics/claude-code-action@4fa93a88de49bbef68b10eb15aabedf28ca0e1ed # v1.0.271
         with:
@@ -98,6 +131,9 @@ jobs:
             If something is now wrong or missing, fix it in place, in the voice of the doc around it. Each fact
             belongs in one doc: link rather than repeat. Don't restructure, reword what's still right, or write
             about what didn't change. Don't touch release notes or code.
+
+            The working tree may already hold fixes from the open docs-sync pull request (`git diff HEAD` shows
+            them): keep them, unless these commits made one wrong.
 
             If nothing needs changing, change nothing.
           # Claude edits only Markdown at the root, in docs/, and the READMEs below it (a leading / is the repository
@@ -127,7 +163,10 @@ jobs:
           # Checked out on the commit CI passed, not a branch: the pull request is against master.
           base: master
           delete-branch: true
-          commit-message: Sync docs with master
+          commit-message: |
+            Sync docs with master
+
+            Docs-Sync-Since: ${{ steps.range.outputs.began }}
           title: Sync docs with master
           body: |
             Claude found docs that `${{ steps.range.outputs.range }}` made wrong or incomplete, and fixed them.
