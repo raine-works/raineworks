@@ -143,6 +143,23 @@ token would start no checks. Each run makes a token only after Claude's step, so
 
 Without it, both workflows stop at their first step, saying what's missing.
 
+### Protecting `master`
+
+Two repository rulesets protect `master` (Settings → Rules), defined in `.github/rulesets/` and applied with
+`gh api -X POST repos/raine-works/raineworks/rulesets --input .github/rulesets/<file>.json` (`PUT
+…/rulesets/<id>` to change one: edit the file first, so the repository holds what's applied):
+
+- **Protect master** (`protect-master.json`): no deleting it or force-pushing; every change through a pull request,
+  with one approval of its last push (stale approvals dismissed) and its review threads resolved.
+- **raineworks checks** (`checks.json`): `plan / plan` (CI's plan, with its `release check`), `checks / Lint`,
+  `checks / Typecheck`, `checks / Test` and `Code review / review` must pass, with the pull request up to date with
+  `master`, so its checks ran on what lands: `plan / plan` fails a release note whose version another release took
+  while it waited.
+
+The repository's admin may bypass both, only to merge a pull request: GitHub doesn't let anyone approve their own, so
+the owner's pull requests are merged that way, after reading them and the review; and a pull request that changes
+`code-review.yml` (whose review fails on purpose) needs it too.
+
 ## Deployment
 
 Every release is two images on GitHub's registry, each tagged `<version>`, `latest` and `sha-<commit>` (public, like

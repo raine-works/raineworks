@@ -188,5 +188,7 @@ Every change reaches `master` through a pull request. A pull request isn't done 
 - If `master` moves, bring it into the branch and resolve the conflicts; if it already contains the change, say so
   instead of merging a duplicate.
 - Never merge your own pull request, and never skip, disable or weaken a check or a review to get one through.
+  `master`'s rulesets (`.github/rulesets/`, [docs/development.md](docs/development.md#protecting-master)) require
+  the checks, the review, an approval and every thread resolved; only the owner bypasses them, to merge.
 - A pull request that changes `code-review.yml` can't be reviewed by Claude (it runs only `master`'s copy): its review
   fails on purpose, and a person reviews it. Change the review workflow in a pull request of its own.
