@@ -12,7 +12,7 @@
  *
  * The documents are the project's own text: raw HTML in them is refused, not passed
  * through, and a link or image may only point at `http:`, `https:`, `mailto:` or
- * a relative URL (anything else becomes `#`). Code blocks are coloured
+ * a relative URL (anything else becomes `#`); a link off the site opens in a new tab. Code blocks are coloured
  * (`highlight`) and labelled; `> [!NOTE]` and its kin become callouts.
  *
  * @module markdown
@@ -157,6 +157,11 @@ function renderHtml(markdown: string): string {
 			.replace(
 				/(<(?:a|img)\s[^>]*?\b(?:href|src)=")([^"]*)"/g,
 				(_, before: string, url: string) => `${before}${safeUrl(url)}"`,
+			)
+			// A link off the site opens in a new tab, so the page it was read on stays open.
+			.replace(
+				/<a href="(https?:\/\/[^"]*)"/gi,
+				(_, url: string) => `<a href="${url}" target="_blank" rel="noopener noreferrer"`,
 			)
 			// Code blocks coloured now (the zone ships no highlighter for them), each labelled with its language.
 			.replace(

@@ -125,6 +125,9 @@ Detail: [docs/frontend.md](docs/frontend.md).
   Use theme tokens, never raw colours; the brand (`--brand`) means "act here", never a status. Sentence case, typographic
   apostrophes and quotes (’ “ ”).
 - Every zone is used on phones: check every page at 375px wide, nothing scrolls sideways.
+- A link off the site opens in a new tab (`target="_blank" rel="noopener noreferrer"`); `mailto:` and the site's own
+  pages open in place. Rendered Markdown does it itself; `packages/tools/src/links.test.ts` fails on a JSX link that
+  doesn't.
 - The React Compiler compiles every first-party component and hook (`packages/tools/src/react-compiler.test.ts` fails
   for any it skips). Follow the Rules of React in [STYLEGUIDE.md](STYLEGUIDE.md#rules-of-react-the-react-compiler-depends-on-them).
 - **Adding shadcn components:** `cd packages/ui && bunx --bun shadcn@4.23.0 add <component>`. Afterwards check `cn`

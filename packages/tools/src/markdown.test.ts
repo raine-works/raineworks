@@ -108,13 +108,25 @@ describe('guides', () => {
 			'x',
 			'See <https://x.dev/a?b=1&c=2>, <mailto:a@b.dev> and https://y.dev.\n\n`<https://z.dev>`\n\n```\n<https://w.dev>\n```\n',
 		).html;
-		expect(html).toContain('<a href="https://x.dev/a?b=1&amp;c=2">https://x.dev/a?b=1&amp;c=2</a>');
+		expect(html).toContain(
+			'<a href="https://x.dev/a?b=1&amp;c=2" target="_blank" rel="noopener noreferrer">https://x.dev/a?b=1&amp;c=2</a>',
+		);
 		expect(html).toContain('<a href="mailto:a@b.dev">mailto:a@b.dev</a>');
-		expect(html).toContain('<a href="https://y.dev">');
+		expect(html).toContain('<a href="https://y.dev" target="_blank" rel="noopener noreferrer">');
 		expect(html).toContain('<code>&lt;https://z.dev&gt;</code>');
 		expect(html).toContain('&lt;https://w.dev&gt;');
 		expect(html).not.toContain('href="https://z.dev"');
 		expect(html).not.toContain('href="https://w.dev"');
+	});
+
+	test('a link off the site opens in a new tab; mail and the site’s own pages open in place', () => {
+		const html = renderDoc(
+			'x',
+			'[a](https://x.dev) [b](HTTP://y.dev) [c](mailto:a@b.dev) [d](/projects) [e](#top)',
+		).html;
+		expect(html).toContain('<a href="https://x.dev" target="_blank" rel="noopener noreferrer">');
+		expect(html).toContain('<a href="HTTP://y.dev" target="_blank" rel="noopener noreferrer">');
+		for (const url of ['mailto:a@b.dev', '/projects', '#top']) expect(html).toContain(`<a href="${url}">`);
 	});
 
 	test('a language named like an Object property is labelled with its own name', () => {
