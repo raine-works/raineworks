@@ -26,12 +26,15 @@ jobs:
             const token = await core.getIDToken('https://api.anthropic.com');
             core.setSecret(token);
             core.exportVariable('JWT', token);
+            // The subject the federation rule's pattern has to match, as GitHub wrote it (with the owner's and
+            // repository's IDs: repo:<owner>@<id>/<repo>@<id>:ref:<ref>).
+            const { sub } = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString());
+            core.info(`Subject: ${sub}`);
       # Prints Anthropic's answer, tokens redacted, and fails unless it holds an access token: a refusal is an
-      # `authentication_error` (the federation rule's Authentication log says why; the token's subject is
-      # repo:<owner>/<repo>:ref:<the branch this ran on>).
+      # `authentication_error` (the federation rule's Authentication log says why; the token's subject is printed
+      # by the step above).
       - name: Exchange for an Anthropic access token
         run: |
-          echo "Subject: repo:$GITHUB_REPOSITORY:ref:$GITHUB_REF"
           curl -sS https://api.anthropic.com/v1/oauth/token \
             -H "content-type: application/json" \
             --data @- > "$RUNNER_TEMP/exchange.json" <<JSON
