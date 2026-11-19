@@ -9,7 +9,10 @@
   <img src="https://img.shields.io/badge/Bun-1.4.4-0a0a0a?logo=bun&logoColor=white" alt="Bun 1.4.4">
   <img src="https://img.shields.io/badge/React-19-0a0a0a?logo=react&logoColor=white" alt="React 19">
   <img src="https://img.shields.io/badge/TypeScript-strict-0a0a0a?logo=typescript&logoColor=white" alt="TypeScript, strict">
-  <a href="https://buymeacoffee.com/raineworks"><img src="https://img.shields.io/badge/Buy_me_a_coffee-FFDD00?logo=buymeacoffee&logoColor=black" alt="Buy me a coffee"></a>
+</p>
+
+<p align="center">
+  <a href="https://buymeacoffee.com/raineworks"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black" alt="Buy Me a Coffee"></a>
 </p>
 
 # raineworks
