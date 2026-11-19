@@ -73,7 +73,7 @@ describe('the contact form', () => {
 		const missing = await post(JSON.stringify({ name: 'Ada', email: 'not-an-email', message: 'Hi' }));
 		expect(missing.status).toBe(400);
 		expect(await missing.json()).toEqual({
-			error: { code: 'invalid_request', message: 'Enter a valid email address.' },
+			error: { code: 'invalid_request', message: 'That doesn’t look like an email address.' },
 		});
 		const blank = await post(JSON.stringify({ name: '   ', email: 'ada@example.com', message: 'Hi' }));
 		expect(blank.status).toBe(400);

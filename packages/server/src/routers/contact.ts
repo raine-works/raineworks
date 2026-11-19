@@ -1,31 +1,18 @@
 /**
  * `POST /api/contact`: the contact form (`web-marketing`'s `/contact`). A submission is validated and acknowledged
- * with a 202; it isn't stored or delivered yet. The body is capped at `MAX_BODY_BYTES` before it's read.
+ * with a 202; it isn't stored or delivered yet. The body is capped at `MAX_BODY_BYTES` before it's read. The rules
+ * are `@raineworks/tools/contact`'s, the ones the form checks before it sends.
  *
  * @module routers/contact
  */
 
+import { contactSchema } from '@raineworks/tools/contact';
 import { tryCatch } from '@raineworks/tools/prototypes';
 import { Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
-import { z } from 'zod';
 
 /** Larger than any submission the schema allows (with JSON's escaping), refused before it's parsed. */
 const MAX_BODY_BYTES = 10_000;
-
-/** A submission: trimmed, each field required and capped. */
-export const contactSchema = z.object({
-	name: z.string().trim().min(1, 'Enter your name.').max(200, 'That name is too long.'),
-	email: z.email('Enter a valid email address.').trim().max(320, 'That email address is too long.'),
-	message: z
-		.string()
-		.trim()
-		.min(1, 'Enter a message.')
-		.max(5000, 'That message is too long (5,000 characters at most).'),
-});
-
-/** A valid submission. */
-export type ContactRequest = z.infer<typeof contactSchema>;
 
 const invalid = (message: string) => ({ error: { code: 'invalid_request', message } }) as const;
 

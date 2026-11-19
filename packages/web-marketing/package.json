@@ -19,8 +19,7 @@
 		"@ui-sdk/react": "catalog:",
 		"lucide-react": "catalog:",
 		"react": "catalog:",
-		"react-dom": "catalog:",
-		"sonner": "catalog:"
+		"react-dom": "catalog:"
 	},
 	"devDependencies": {
 		"@raineworks/tsconfig": "workspace:*",
