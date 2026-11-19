@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
+import { afterAll, afterEach, beforeAll, describe, expect, test } from 'bun:test';
 import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -12,12 +12,23 @@ await Bun.write(
 	join(zoneDir, 'index.html'),
 	'<!doctype html><html><head><title>raineworks</title></head><body><div id="root"></div></body></html>',
 );
+// Prerendered pages (`@raineworks/tools/build`): one route's and the page for paths nothing matches.
+await Bun.write(
+	join(zoneDir, 'work/index.html'),
+	'<!doctype html><html><head><title>Work · raineworks</title></head><body><div id="root"><h1>Work</h1></div></body></html>',
+);
+await Bun.write(
+	join(zoneDir, '404.html'),
+	'<!doctype html><html><head><title>Page not found · raineworks</title></head><body><div id="root"></div></body></html>',
+);
+await Bun.write(join(zoneDir, 'sitemap.xml'), '<?xml version="1.0"?><urlset></urlset>');
 await Bun.write(join(zoneDir, 'chunk-abcdefgh.js'), 'console.log("hello");');
 await Bun.write(join(zoneDir, 'chunk-abcdefgh.js.br'), brotliCompressSync('console.log("hello");'));
 await Bun.write(join(zoneDir, 'build.json'), JSON.stringify({ version: '2026.11.1', commit: '1234567' }));
 Bun.env.WEB_DIST = webDist;
 
 const { createApp } = await import('@raineworks/server/app');
+const { resetRepoStars } = await import('@raineworks/server/lib/github');
 const app = createApp();
 const get = (path: string, headers: Record<string, string> = {}) =>
 	app.request(`http://raineworks.test${path}`, { headers });
@@ -93,6 +104,30 @@ describe('the contact form', () => {
 	});
 });
 
+describe('the project stars', () => {
+	const realFetch = globalThis.fetch;
+	afterEach(() => {
+		globalThis.fetch = realFetch;
+		resetRepoStars();
+	});
+
+	test('are each repository’s, from GitHub, cached publicly as long as the server keeps them', async () => {
+		globalThis.fetch = (async () =>
+			Response.json([{ name: 'ha-grok', stargazers_count: 7 }])) as unknown as typeof fetch;
+		const response = await get('/api/projects/stars');
+		expect(response.status).toBe(200);
+		expect(response.headers.get('cache-control')).toBe('public, max-age=600');
+		expect(((await response.json()) as { stars: Record<string, number> }).stars).toEqual({ 'ha-grok': 7 });
+	});
+
+	test('are a 503 when GitHub hasn’t answered yet', async () => {
+		globalThis.fetch = (async () => new Response('down', { status: 502 })) as unknown as typeof fetch;
+		const response = await get('/api/projects/stars');
+		expect(response.status).toBe(503);
+		expect(((await response.json()) as { error: { code: string } }).error.code).toBe('stars_unavailable');
+	});
+});
+
 describe('the API’s document', () => {
 	test('is served at /api/openapi.json, cached publicly', async () => {
 		const response = await get('/api/openapi.json');
@@ -112,13 +147,35 @@ describe('the marketing zone', () => {
 		etag = (await get('/')).headers.get('etag');
 	});
 
-	test('serves its page at the root and for any route it handles itself, stamped with its build', async () => {
-		for (const path of ['/', '/projects', '/work/']) {
+	test('serves each prerendered page at its path, with or without a trailing slash, stamped with the zone’s build', async () => {
+		const { build } = (await (await get('/api/build?zone=marketing')).json()) as { build: string };
+		for (const [path, title] of [
+			['/', 'raineworks'],
+			['/work', 'Work · raineworks'],
+			['/work/', 'Work · raineworks'],
+		] as const) {
 			const response = await get(path);
 			expect(response.status).toBe(200);
 			expect(response.headers.get('content-type')).toStartWith('text/html');
-			expect(await response.text()).toContain('<meta name="raineworks-build"');
+			const html = await response.text();
+			expect(html).toContain(`<title>${title}</title>`);
+			expect(html).toContain(`<meta name="raineworks-build" content="${build}" />`);
 		}
+	});
+
+	test('answers a path no page has with its 404 page and status, never cached', async () => {
+		for (const path of ['/nope', '/work/index.html', '/404.html']) {
+			const response = await get(path);
+			expect(response.status).toBe(404);
+			expect(response.headers.get('etag')).toBeNull();
+			expect(await response.text()).toContain('<title>Page not found · raineworks</title>');
+		}
+	});
+
+	test('serves the sitemap as XML', async () => {
+		const response = await get('/sitemap.xml');
+		expect(response.status).toBe(200);
+		expect(response.headers.get('content-type')).toBe('application/xml; charset=utf-8');
 	});
 
 	test('answers a repeat visit from its ETag with a 304', async () => {

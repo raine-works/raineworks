@@ -70,9 +70,12 @@ wiring `release-plan.yml`, `checks.yml`, `release-images.yml` and `release-publi
 A push that changes nothing the image is built from (docs, workflows, tests) is checked, not released. Master's runs
 take turns (the `release` concurrency group), so versions are cut one at a time, in order.
 
-To have Claude write a release's note, run **Actions → Release note → Run workflow** (`release.yml`): it writes the next
-version's note from what changed since the last one and opens it as the pull request `Release note <version>`; merging
-it is the release. Claude signs in with workload identity federation: the job's GitHub OIDC token is exchanged
+**A release cut without a note gets one written.** Once CI has finished on `master` and released a commit that has no
+`<version>.md`, the Release note workflow (`release.yml`) runs on its own: Claude writes the next version's note from
+what changed since the last one and opens it as the pull request `Release note <version>`. Merging it is the release
+that puts it on the site (that release has its note, so it starts no other). It can also be run by hand: **Actions →
+Release note → Run workflow**. Writing the note in the pull request that makes the change (`bun run release`) is still
+best: the release then ships with it. Claude signs in with workload identity federation: the job's GitHub OIDC token is exchanged
 for a short-lived Anthropic one (the federation rule's identifiers are in `release-note.yml`; no API key is stored).
 **Actions → anthropic-wif-test** checks that exchange on its own. The pull request needs one repository secret,
 `RELEASE_NOTE_TOKEN` (a fine-grained token for this repository with contents and pull requests write; a pull request

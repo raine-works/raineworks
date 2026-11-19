@@ -1,16 +1,27 @@
-# Writes the next release's note, by hand (Actions → Release note → Run workflow), when a release has something
-# worth telling the people who use the app: Claude writes it (packages/ui/src/release-notes/<version>.md) from what
-# changed since the last note, scoped to the zones each change is for, and it's opened as the pull request
-# `Release note <version>`. Merging it is the release (ci.yml): its server image is built with the note, and the
-# GitHub release is published from it. Releases themselves are ci.yml's: every push to master that changes an image.
+# Writes the next release's note: Claude writes it (packages/ui/src/release-notes/<version>.md) from what changed since
+# the last note, scoped to the zones each change is for, and it's opened as the pull request `Release note <version>`.
+# Merging it is the release (ci.yml): its server image is built with the note, and the GitHub release is published from
+# it. Releases themselves are ci.yml's: every push to master that changes an image.
 #
-# The workflow is release-note.yml beside this file: this file only gives it its inputs.
+# It runs on its own once CI has finished on master and that run cut a release without a note (a release tag on the
+# commit, no <version>.md beside it), so no release goes unannounced for long; the note it writes is the next
+# version's, telling what that release (and any other since the last note) changed. The release its pull request
+# makes has a note, so it never starts another. By hand: Actions → Release note → Run workflow.
+#
+# It runs after CI rather than inside it: master's CI runs hold the `release` concurrency group the note workflow takes
+# its turn in, so a job of theirs would wait on itself.
+#
+# The workflow is release-note.yml beside this file: this file only decides when, and gives it its inputs.
 # Claude signs in with the job's OIDC token (workload identity federation); the pull request needs the
 # RELEASE_NOTE_TOKEN secret (release-note.yml says what it is).
 name: Release note
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [master]
 
 permissions:
   contents: write
@@ -18,8 +29,51 @@ permissions:
   id-token: write
 
 jobs:
+  # After CI: whether the push it checked was released without a note. A cancelled run was replaced by a newer one,
+  # which releases its push too; a pull request's run releases nothing.
+  unnoted:
+    name: Released without a note?
+    if: >-
+      github.event_name == 'workflow_run' && github.event.workflow_run.event == 'push'
+      && github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      write: ${{ steps.check.outputs.write }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          # The tags: a release is the version tag on the commit CI released.
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Check
+        id: check
+        env:
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          NOTES_DIR: packages/ui/src/release-notes
+        run: |
+          tag="$(git tag --points-at "$SHA" --list 'v*' | head -n 1)"
+          if [ -z "$tag" ]; then
+            echo "$SHA wasn't released." | tee -a "$GITHUB_STEP_SUMMARY"
+            write=false
+          elif [ -f "$NOTES_DIR/${tag#v}.md" ]; then
+            echo "$tag was released with its note." | tee -a "$GITHUB_STEP_SUMMARY"
+            write=false
+          else
+            echo "$tag was released without a note: writing the next release's." | tee -a "$GITHUB_STEP_SUMMARY"
+            write=true
+          fi
+          echo "write=$write" >> "$GITHUB_OUTPUT"
+
   release-note:
     name: Release note
+    needs: unnoted
+    # `unnoted` is skipped when run by hand.
+    if: >-
+      always() && (github.event_name == 'workflow_dispatch' || needs.unnoted.outputs.write == 'true')
     uses: ./.github/workflows/release-note.yml
     secrets: inherit
     with:

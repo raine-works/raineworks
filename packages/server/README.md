@@ -10,11 +10,13 @@ standalone binary with every zone embedded, run from a distroless image. How it 
 | `src/app.ts` | `createApp()`: headers, `/api`, the zones; `AppType` for `@raineworks/api`. Its module comment lists every route |
 | `src/index.ts` | The public entry: `createApp`, `AppType` (zones `import type` only) |
 | `src/lib/env.ts` | Settings, parsed with Zod: `PORT`, `HOST`, `WEB_DIST`, `SHUTDOWN_DRAIN_MS` (`.env.example`) |
-| `src/lib/spa.ts` | Serves the zones: embedded or from disk, deep links, precompression, ETags, the build stamp; `zoneBuild` |
+| `src/lib/spa.ts` | Serves the zones: embedded or from disk, each prerendered page at its path and the 404 page with its status (deep links fall back to `index.html`), precompression, ETags, the build stamp; `zoneBuild` |
 | `src/lib/shutdown.ts` | SIGTERM: `/readyz` fails for the drain, then the server stops and requests finish |
 | `src/routers/health.ts` | `/healthz`, `/readyz` |
 | `src/routers/build.ts` | `GET /api/build?zone=`: the build a zone serves, for pages' update check |
 | `src/routers/contact.ts` | `POST /api/contact`: the contact form (validated, acknowledged with a 202) |
+| `src/routers/projects.ts` | `GET /api/projects/stars`: each repository's GitHub stars, for the project cards |
+| `src/lib/github.ts` | The stars from GitHub: one request for every repository, kept ten minutes, the last ones served while GitHub is down |
 | `src/lib/validate.ts` | `validate(target, schema)`: Zod at the boundary, a 400 `invalid_request`, and the request documented |
 | `src/lib/openapi.ts` | The OpenAPI document (`GET /api/openapi.json`): `jsonResponse`, `errorResponse`, `invalidRequest` for each route's `describeRoute`; tagging; the version |
 | `scripts/openapi.ts` | `bun run openapi [--out api.json]`: the same document, from the routes alone |

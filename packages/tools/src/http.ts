@@ -30,6 +30,7 @@ export function getMimeType(filePath: string): string {
 	if (clean.endsWith('.woff')) return 'font/woff';
 	if (clean.endsWith('.map')) return 'application/json';
 	if (clean.endsWith('.txt')) return 'text/plain; charset=utf-8';
+	if (clean.endsWith('.xml')) return 'application/xml; charset=utf-8';
 	return 'application/octet-stream';
 }
 
@@ -44,7 +45,7 @@ export type ContentEncoding = (typeof CONTENT_ENCODINGS)[number];
 export const ENCODING_SUFFIX: Record<ContentEncoding, string> = { br: '.br', gzip: '.gz' };
 
 /** Text outputs worth compressing. Images and fonts are already compressed. */
-export const isCompressible = (filePath: string): boolean => /\.(m?js|css|html|svg|json|txt)$/i.test(filePath);
+export const isCompressible = (filePath: string): boolean => /\.(m?js|css|html|svg|json|txt|xml)$/i.test(filePath);
 
 /**
  * The best coding the client accepts (`Accept-Encoding`): the highest q-value, `br` over `gzip` on a tie, and

@@ -44,7 +44,7 @@ function TimelineItem({
 								href={metaHref}
 								target="_blank"
 								rel="noopener noreferrer"
-								className="item-link underline-offset-4 hover:underline"
+								className="item-link underline decoration-border underline-offset-4 hover:decoration-current"
 							>
 								{meta}
 							</a>

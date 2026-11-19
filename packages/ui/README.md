@@ -9,10 +9,11 @@ light and dark), the site's blocks, the zones' runtime and About. How the zones 
 | `@raineworks/ui/globals.css` | Tailwind v4 theme: tokens light and dark, Geist fonts, the `ui-sdk` layer, prose for rendered Markdown. Import once per zone. |
 | `@raineworks/ui/components/*` | shadcn/ui primitives (alert, badge, button, card, dialog, input, separator, skeleton, sonner, spinner, tabs, tooltip) |
 | `@raineworks/ui/blocks/*` | `brand` (`AppLogo`, `AppMark`), `page` (`Page`, `useDocumentTitle`), `theme-toggle` (ui-sdk Menu), `query-state` (`QueryState`, `ErrorState`), `release-notes` (About; `VersionLabel`, `openReleaseNotes`), `notices` (`Legal`), `route-error` (`RouteError`), `full-page` (`NotFoundPage`) |
-| `@raineworks/ui/app/root` | `mountZone(router)`: theme, modal history, providers (TanStack Query, tooltips, toasts, About); `RouterContext` |
-| `@raineworks/ui/lib/*` | `api` (`api`, `apiFetch`, `queryClient`, `unwrap`, `ApiError`, `errorMessage`), `brand` (`APP_NAME`, `APP_LICENSE`, `COPYRIGHT_HOLDER`, `SOURCE_URL`), `version` (`APP_VERSION`, `APP_COMMIT`, the update check), `lazy`, `modal-history`, `browser-storage`, `format`, `utils` (`cn`) |
+| `@raineworks/ui/app/root` | `mountZone(router)`: theme, modal history, the agent bridge, providers (TanStack Query, tooltips, toasts, About), hydrating a prerendered page; `RouterContext` |
+| `@raineworks/ui/app/prerender` | `prerenderZone(router)`: every page rendered at build time with its head, and the 404 |
+| `@raineworks/ui/lib/*` | `api` (`api`, `apiFetch`, `queryClient`, `unwrap`, `ApiError`, `errorMessage`), `brand` (`APP_NAME`, `APP_LICENSE`, `COPYRIGHT_HOLDER`, `SOURCE_URL`, `SITE_URL`, `SITE_DESCRIPTION`), `head` (`PageHead`, `staticData.head`, `headTags`, `SHARE_IMAGE`), `agent` (`connectAgent`: ui-sdk's agent bridge and WebMCP), `version` (`APP_VERSION`, `APP_COMMIT`, the update check), `lazy`, `modal-history`, `browser-storage`, `format`, `utils` (`cn`) |
 | `@raineworks/ui/hooks/*` | `use-theme` |
-| `@raineworks/ui/assets/*` | The favicon (the raineworks mark) and the home-screen icon |
+| `@raineworks/ui/assets/*` | The favicon (the raineworks mark), the home-screen icon, and the share image (`og-image.png`, drawn by `bun run og-image`) |
 
 Release notes live in `src/release-notes/<version>.md` (`bun run release` starts the next one); every zone's build
 bundles them for About.

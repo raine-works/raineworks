@@ -23,7 +23,7 @@
 # no release is cut while it writes. What's particular to a repository is in its caller's inputs: the commands, the
 # folder, and `guide`, anything Claude should know about its notes.
 #
-# Called by .github/workflows/release.yml (by hand), which
+# Called by .github/workflows/release.yml (after a release CI cut without a note, or by hand), which
 # grants it contents: write, pull-requests: write and id-token: write. It signs in to Anthropic with the job's OIDC
 # token (workload identity federation: no API key is stored). With a notes folder it needs one repository secret,
 # RELEASE_NOTE_TOKEN: a fine-grained token for this repository with contents and pull requests write, which opens the

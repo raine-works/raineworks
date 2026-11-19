@@ -8,4 +8,4 @@ import '@raineworks/tools/prototypes';
 import { mountZone } from '@raineworks/ui/app/root';
 import { router } from '@raineworks/web-marketing/router';
 
-mountZone(router);
+await mountZone(router);
