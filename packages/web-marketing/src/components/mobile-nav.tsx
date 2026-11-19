@@ -7,7 +7,7 @@
 
 import { buttonVariants } from '@raineworks/ui/components/button';
 import { cn } from '@raineworks/ui/lib/utils';
-import { NAV_LINKS } from '@raineworks/web-marketing/components/nav';
+import { useNavLinks } from '@raineworks/web-marketing/components/nav';
 import { Link } from '@tanstack/react-router';
 import { Drawer, DrawerBackdrop, DrawerClose, DrawerContent, DrawerTitle, DrawerTrigger } from '@ui-sdk/react/drawer';
 import { MenuIcon, XIcon } from 'lucide-react';
@@ -16,6 +16,7 @@ import { useState } from 'react';
 /** The site's pages in a sheet from the right, for phones (ui-sdk's Drawer: focus, Escape, swipe to close). */
 export function MobileNav() {
 	const [open, setOpen] = useState(false);
+	const links = useNavLinks();
 	return (
 		<Drawer side="right" open={open} onOpenChange={setOpen}>
 			<DrawerTrigger
@@ -40,7 +41,7 @@ export function MobileNav() {
 					</DrawerClose>
 				</div>
 				<nav className="flex flex-col gap-1">
-					{NAV_LINKS.map((link) => (
+					{links.map((link) => (
 						<Link
 							key={link.to}
 							to={link.to}

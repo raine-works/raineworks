@@ -38,6 +38,14 @@ export const envSchema = baseEnvSchema
 		 * tests.
 		 */
 		SHUTDOWN_DRAIN_MS: z.coerce.number().int().min(0).optional(),
+		/**
+		 * An X API bearer token (app-only), for Raine's articles on X (`lib/x`). Unset turns them off entirely: no
+		 * `/articles` page or `/feed.xml`, and `/api/articles` says they're off.
+		 */
+		X_BEARER_TOKEN: z
+			.string()
+			.optional()
+			.transform((value) => value?.trim() || undefined),
 	})
 	.transform((data) => ({
 		...data,

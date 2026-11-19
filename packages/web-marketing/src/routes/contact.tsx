@@ -1,12 +1,12 @@
 /**
- * The `/contact` page: email, GitHub and LinkedIn beside the contact form (`POST /api/contact`); stacked on phones.
+ * The `/contact` page: email, GitHub, LinkedIn and X beside the contact form (`POST /api/contact`); stacked on phones.
  *
  * @module routes/contact
  */
 
 import { Page } from '@raineworks/ui/blocks/page';
 import { Card, CardContent } from '@raineworks/ui/components/card';
-import { GitHubIcon, LinkedInIcon } from '@raineworks/web-marketing/components/brand-icons';
+import { GitHubIcon, LinkedInIcon, XIcon } from '@raineworks/web-marketing/components/brand-icons';
 import { ContactForm } from '@raineworks/web-marketing/components/contact-form';
 import { profile } from '@raineworks/web-marketing/content/profile';
 import { ArrowUpRightIcon, MailIcon } from 'lucide-react';
@@ -15,13 +15,14 @@ const CHANNELS = [
 	{ label: 'Email', value: profile.contact.email, href: `mailto:${profile.contact.email}`, Icon: MailIcon },
 	{ label: 'GitHub', value: 'raine-works', href: profile.contact.github, Icon: GitHubIcon },
 	{ label: 'LinkedIn', value: 'rainepetersen', href: profile.contact.linkedin, Icon: LinkedInIcon },
+	{ label: 'X', value: '@raineworks', href: profile.contact.x, Icon: XIcon },
 ] as const;
 
 const isMail = (href: string) => href.startsWith('mailto:');
 
 export function ContactPage() {
 	return (
-		<Page title="Contact" description="Email me, find me on GitHub or LinkedIn, or send a message right here.">
+		<Page title="Contact" description="Email me, find me on GitHub, LinkedIn or X, or send a message right here.">
 			<div className="grid items-start gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
 				<Card className="gap-0 overflow-hidden py-0">
 					<CardContent className="px-0">
@@ -30,7 +31,7 @@ export function ContactPage() {
 								<li key={label}>
 									<a
 										href={href}
-										// GitHub and LinkedIn open in a new tab; email opens the mail app, so it stays (a new tab would be left blank).
+										// The profiles open in a new tab; email opens the mail app, so it stays (a new tab would be left blank).
 										{...(isMail(href) ? {} : { target: '_blank', rel: 'noopener noreferrer' })}
 										className="group flex items-center gap-4 px-5 py-4 transition-colors outline-none hover:bg-accent/60 focus-visible:bg-accent/60"
 									>

@@ -40,6 +40,7 @@ async function renderPath(router: AnyRouter, path: string, image: string | undef
 		status: found ? 200 : 404,
 		head: `${headTags(head, { url, image })}\n\t\t<script>${THEME_SCRIPT}</script>`,
 		markup,
+		...(head.unlisted && { unlisted: true }),
 	};
 }
 

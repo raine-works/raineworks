@@ -57,8 +57,12 @@ describe('a prerendered page', () => {
 });
 
 describe('the sitemap', () => {
-	test('lists every page found, absolute, under the zone’s path, and not the 404', () => {
-		const xml = sitemapXml([page('/'), page('/work'), page('/nope', 404)], 'https://raineworks.com', '/');
+	test('lists every page found, absolute, under the zone’s path, and not the 404 nor one unlisted', () => {
+		const xml = sitemapXml(
+			[page('/'), page('/work'), { ...page('/articles'), unlisted: true }, page('/nope', 404)],
+			'https://raineworks.com',
+			'/',
+		);
 		expect([...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1])).toEqual([
 			'https://raineworks.com/',
 			'https://raineworks.com/work',
