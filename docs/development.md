@@ -131,7 +131,7 @@ last run made any doc wrong (`AGENTS.md`, `STYLEGUIDE.md`, `README.md`, `docs/*.
 opens (or updates) the `claude/docs-sync` pull request fixing them. It edits only those docs, never code or release
 notes, and skips its own merges and release notes'. Each run builds on the open docs-sync pull request's fixes rather
 than replacing them (if master has since changed the same lines, it drops them and looks again since that pull request
-began). It can also be run by hand: **Actions → Docs sync → Run workflow**.
+began, which its commit records as a `Docs-Sync-Since:` trailer); a closed one's never come back. It can also be run by hand: **Actions → Docs sync → Run workflow**.
 
 **The docs-sync GitHub App** opens Docs sync's and the release note's pull requests: one opened with a workflow's own
 token would start no checks. Each run makes a token only after Claude's step, so Claude never has it. Set it up once:

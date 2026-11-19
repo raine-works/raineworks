@@ -70,21 +70,30 @@ jobs:
           # The pull request is opened (and pushed) with its own token, in its own step: the checkout's token isn't
           # left in .git/config while Claude runs.
           persist-credentials: false
-      # The open pull request's fixes, staged on top of this commit. If they no longer apply (master changed the
-      # same lines), they're dropped, and this run looks again at everything since that pull request began.
+      # The open pull request's fixes, staged on top of this commit (a closed one's never come back). Its commit
+      # names where it began (a `Docs-Sync-Since:` trailer, written below): each run rebuilds it on its own commit, so
+      # its merge base is only the last run's. If its fixes no longer apply (master changed the same lines), they're
+      # dropped, and this run looks again at everything since it began.
       - name: Keep the open pull request's fixes
         id: open
         env:
+          GH_TOKEN: ${{ github.token }}
           BRANCH: origin/claude/docs-sync
         run: |
-          if ! git rev-parse -q --verify "$BRANCH" >/dev/null; then
+          open="$(gh pr list --head claude/docs-sync --state open --json number --jq length)"
+          if [ "$open" != 1 ] || ! git rev-parse -q --verify "$BRANCH" >/dev/null; then
             echo "No open docs-sync pull request."
-          elif git merge --squash "$BRANCH" >/dev/null 2>&1; then
+            exit 0
+          fi
+          began="$(git log -1 --format='%(trailers:key=Docs-Sync-Since,valueonly)' "$BRANCH" | head -n 1)"
+          if ! git rev-parse -q --verify "${began:-none}^{commit}" >/dev/null; then began="$(git merge-base "$BRANCH" HEAD)"; fi
+          echo "began=$began" >> "$GITHUB_OUTPUT"
+          if git merge --squash "$BRANCH" >/dev/null 2>&1; then
             echo "Kept its fixes: $(git diff --cached --name-only | paste -sd ' ' -)."
           else
             git reset -q --hard HEAD
-            echo "Its fixes no longer apply: looking again since it began."
-            echo "since=$(git merge-base "$BRANCH" HEAD)" >> "$GITHUB_OUTPUT"
+            echo "Its fixes no longer apply: looking again since it began ($began)."
+            echo "since=$began" >> "$GITHUB_OUTPUT"
           fi
       - name: What's new
         id: range
@@ -92,11 +101,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           HEAD_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
           OPEN_SINCE: ${{ steps.open.outputs.since }}
+          OPEN_BEGAN: ${{ steps.open.outputs.began }}
         run: |
           # Where a dropped pull request began, else the commit this workflow last ran for (its previous successful
           # run), else just the latest commit.
           since="${OPEN_SINCE:-$(gh run list --workflow docs-sync.yml --branch master --status success --limit 1 --json headSha --jq '.[0].headSha // empty')}"
           if [ -z "$since" ] || ! git merge-base --is-ancestor "$since" "$HEAD_SHA"; then since="$HEAD_SHA~1"; fi
+          # Where the pull request this run opens or updates began: the open one's start, else this range's.
+          echo "began=$(git rev-parse "${OPEN_BEGAN:-$since}")" >> "$GITHUB_OUTPUT"
           echo "range=$since..$HEAD_SHA" >> "$GITHUB_OUTPUT"
       - uses: anthropics/claude-code-action@4fa93a88de49bbef68b10eb15aabedf28ca0e1ed # v1.0.271
         with:
@@ -150,7 +162,10 @@ jobs:
           # Checked out on the commit CI passed, not a branch: the pull request is against master.
           base: master
           delete-branch: true
-          commit-message: Sync docs with master
+          commit-message: |
+            Sync docs with master
+
+            Docs-Sync-Since: ${{ steps.range.outputs.began }}
           title: Sync docs with master
           body: |
             Claude found docs that `${{ steps.range.outputs.range }}` made wrong or incomplete, and fixed them.
