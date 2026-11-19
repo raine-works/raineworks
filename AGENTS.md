@@ -78,14 +78,18 @@ Full detail in [STYLEGUIDE.md](STYLEGUIDE.md). The ones that break things if ign
 
 Detail: [packages/ssh/README.md](packages/ssh/README.md).
 
-- `ssh raineworks.com` is an Ink terminal UI, not a web zone: the server doesn't serve it. Its content is
+- `ssh raineworks.com` is an OpenTUI (`@opentui/react`) terminal UI, not a web zone: the server doesn't serve it. Its content is
   `@raineworks/web-marketing/content/profile`, the module the site renders: edit content there, never in a TUI copy.
 - Every piece of content goes through `sanitize()` before it's rendered, so none can inject terminal escape sequences.
-  Keep the TUI read-only and its width responsive (`useWindowSize`).
+  Keep the TUI read-only and responsive (`useTerminalDimensions`): it draws at every size from 60×20 up.
+- A message sent from the TUI goes through the site's own `POST /api/contact` (`src/server/messages.ts`), never
+  straight to email, with the same rules (`@raineworks/tools/contact`).
 - The server accepts `none` auth and one pty `shell` session only. Exec, subsystems, forwarding and shells without a
   pty are refused: don't add handlers for them. Limits live in `src/server/limits.ts` (tested); pty sizes are clamped.
-- The build keeps `target: 'bun'` and `minify.keepNames`: without names the binary crashes on disconnect (`ssh2`
-  checks `channel.constructor.name`).
+- The SSH image runs on Bun, not a compiled binary: `scripts/build.ts` bundles for `target: 'bun'` with
+  `minify.keepNames` (without names it crashes on disconnect: `ssh2` checks `channel.constructor.name`), and OpenTUI's
+  native library stays a separate file (`OTUI_ASSET_ROOT`). Don't compile it into the bundle: see the licence rule
+  below.
 - The host key is never baked in or generated: `SSH_HOST_KEY` or `SSH_HOST_KEY_PATH`, the same across deploys.
 
 ## Versions, releases and licences
@@ -107,6 +111,10 @@ Detail: [docs/development.md](docs/development.md#releases), [docs/frontend.md](
   site, not how. `bun run release check` fails a note that names a version already released.
 - The site is open source under the MIT License (`LICENSE`, © Raine Petersen). `@raineworks/ui/lib/brand` states the same
   (`APP_LICENSE`, `COPYRIGHT_HOLDER`); a test holds the two together.
+- **The one LGPL exception is the SSH image:** OpenTUI's native library statically links a decode-only FFmpeg
+  (LGPL-2.1-or-later). It ships only there, as a separate, replaceable file with its licence texts and
+  `FFMPEG-SOURCE.md` beside it and every shipped package's licence in `/app/licenses` (`scripts/build.ts`). Nothing
+  under the LGPL goes in a web zone or the server.
 - Only permissive licences (and the fonts' OFL-1.1) ship in a zone (`ALLOWED_LICENSES`, `@raineworks/tools/notices`):
   a bundled package under any other, or one stating none, fails the build. Code copied into the repo goes in
   `COPIED_NOTICES`; packages only CSS imports go in `STYLE_PACKAGES`.

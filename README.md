@@ -12,7 +12,7 @@ end built on shadcn/ui and ui-sdk.
 | [`@raineworks/api`](packages/api) | The typed `hc` client over the server's routes |
 | [`@raineworks/ui`](packages/ui) | The design system: tokens, shadcn components, blocks, the zone root, About (What's new and Legal) |
 | [`@raineworks/web-marketing`](packages/web-marketing) | The site itself, the `marketing` zone at `/`; its `content/profile` is what every page says |
-| [`@raineworks/ssh`](packages/ssh) | `ssh raineworks.com`: the site as an Ink terminal UI over an `ssh2` server, its own binary and image |
+| [`@raineworks/ssh`](packages/ssh) | `ssh raineworks.com`: the site as an OpenTUI terminal UI over an `ssh2` server, its own image |
 | [`@raineworks/tools`](packages/tools) | The shared toolbox: zones, the frontend build, env, HTTP, versions, releases, licence notices |
 | [`@raineworks/tsconfig`](packages/tsconfig) | The TypeScript configs every package extends |
 
