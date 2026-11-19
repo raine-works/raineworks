@@ -12,8 +12,8 @@
 # its turn in, so a job of theirs would wait on itself.
 #
 # The workflow is release-note.yml beside this file: this file only decides when, and gives it its inputs.
-# Claude signs in with the job's OIDC token (workload identity federation); the pull request needs the
-# RELEASE_NOTE_TOKEN secret (release-note.yml says what it is).
+# Claude signs in with the job's OIDC token (workload identity federation); the pull request is opened as the
+# docs-sync GitHub App (docs/development.md, Claude in GitHub).
 name: Release note
 
 on:
