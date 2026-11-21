@@ -20,8 +20,9 @@ packages/web-<zone>/
 ```
 
 `mountZone` (`@raineworks/ui/app/root`) applies the theme before the first render, connects the browser's history to
-modals (Back closes the one on top) and the agent bridge (`lib/agent`), and renders the router inside the zone's
-providers: TanStack Query, tooltips, toasts and About. A prerendered page is hydrated, not replaced.
+modals (Back closes the one on top), the favicon to the page's focus (`lib/favicon`) and the agent bridge
+(`lib/agent`), and renders the router inside the zone's providers: TanStack Query, tooltips, toasts and About. A
+prerendered page is hydrated, not replaced.
 
 ## Prerendering, search and share cards
 
