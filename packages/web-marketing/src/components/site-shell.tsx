@@ -75,8 +75,9 @@ export function SiteShell({ children }: { children: ReactNode }) {
 						</p>
 						<VersionLabel className="-mx-1" />
 					</div>
-					<div className="flex flex-wrap items-center gap-3">
-						<SocialLinks />
+					{/* Phones: the icons on a row of their own (lined up with the text above), the coffee button under them. */}
+					<div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:gap-3">
+						<SocialLinks className="-ml-2 md:ml-0" />
 						<CoffeeButton />
 					</div>
 				</div>
