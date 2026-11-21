@@ -276,9 +276,13 @@
  */
 @utility gradient-shadow {
 	--gradient-glow-strength: 60%;
-	box-shadow:
+	/* In Tailwind's shadow stack, as its `shadow-*` would be, so a focus `ring-*` adds to the glow, never replaces it. */
+	--tw-shadow:
 		-8px 6px 22px -4px color-mix(in oklab, var(--gradient-from) var(--gradient-glow-strength), transparent),
 		8px 8px 24px -4px color-mix(in oklab, var(--gradient-to) var(--gradient-glow-strength), transparent);
+	box-shadow:
+		var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
+		var(--tw-shadow);
 }
 
 /* A solid fill in the accent gradient, left to right: a short rule over a page's title. */
