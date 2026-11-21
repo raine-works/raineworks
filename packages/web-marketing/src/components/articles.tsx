@@ -95,7 +95,7 @@ export function ArticleList() {
 	return data.articles.map((article) => (
 		<Card
 			key={article.id}
-			className="group relative transition-[border-color,box-shadow,translate] duration-200 has-[a:hover]:-translate-y-0.5 has-[a:hover]:border-foreground/20 has-[a:hover]:shadow-md motion-reduce:transition-none"
+			className="group gradient-border relative has-[a:focus-visible]:[--gradient-border-mix:100%] has-[a:hover]:-translate-y-0.5 has-[a:hover]:shadow-md has-[a:hover]:[--gradient-border-mix:100%]"
 		>
 			<CardHeader className="gap-2">
 				<time dateTime={article.publishedAt} className="text-xs text-muted-foreground">

@@ -223,11 +223,28 @@
 }
 
 /*
- * A 1px border in the accent gradient, drawn by a ::before over the element's own border (so on any background and
- * any radius), at --gradient-border-opacity (0 by default: it shows where a state turns it up, e.g.
- * `hover:[--gradient-border-opacity:1]`). The element needs `relative`; its ::before is taken.
+ * How much of the accent a gradient border shows: a share of each colour mixed into the border colour. Faint at rest
+ * (the main content cards and outlined buttons), the full gradient where a state turns it up, e.g.
+ * `hover:[--gradient-border-mix:100%]`. Registered, so it eases between the two.
+ */
+@property --gradient-border-mix {
+	syntax: '<percentage>';
+	/* Inherited, so the ::before that draws the border sees its element's; each bordered element sets its own. */
+	inherits: true;
+	initial-value: 40%;
+}
+
+/*
+ * A 1px border in the accent gradient, top left to bottom right, drawn by a ::before over the element's own border
+ * (so on any background and any radius), --gradient-border-mix of the way from the border colour to the gradient.
+ * The main content cards (Home's companies, the projects, the articles) and outlined buttons have it; the element needs
+ * `relative`, and its ::before is taken.
  */
 @utility gradient-border {
+	/* At rest, whatever an ancestor's is: a button in a hovered card stays faint. */
+	--gradient-border-mix: 40%;
+	transition-property: --gradient-border-mix, color, background-color, box-shadow, translate;
+	transition-duration: 200ms;
 	&::before {
 		content: '';
 		position: absolute;
@@ -235,18 +252,19 @@
 		z-index: 0;
 		border: 1px solid transparent;
 		border-radius: inherit;
-		background: linear-gradient(135deg in oklab, var(--gradient-from), var(--gradient-to)) border-box;
+		background: linear-gradient(
+				135deg in oklab,
+				color-mix(in oklab, var(--gradient-from) var(--gradient-border-mix), var(--border)),
+				color-mix(in oklab, var(--gradient-to) var(--gradient-border-mix), var(--border))
+			)
+			border-box;
 		mask:
 			linear-gradient(#000 0 0) padding-box exclude,
 			linear-gradient(#000 0 0) border-box;
-		opacity: var(--gradient-border-opacity, 0);
 		pointer-events: none;
-		transition: opacity 200ms ease;
 	}
 	@media (prefers-reduced-motion: reduce) {
-		&::before {
-			transition: none;
-		}
+		transition-duration: 0s;
 	}
 }
 

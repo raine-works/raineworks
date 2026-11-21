@@ -1,7 +1,7 @@
 /**
  * Projects as cards: each one's name (the whole card opens its page, `/projects/<slug>`, or the repository for a
  * project without one, `content/projects`), what it is, what it's built with (the first few), and its stars on
- * GitHub. The accent gradient borders a card under the pointer or the keyboard's focus. The list is live (`GET /api/projects`: the repositories tagged `raineworks`), fetched by the browser,
+ * GitHub. Its border is the accent, faint, and in full under the pointer or the keyboard's focus. The list is live (`GET /api/projects`: the repositories tagged `raineworks`), fetched by the browser,
  * never prerendered, so never stale: the prerendered page has placeholder cards the same size, so nothing jumps when
  * the projects arrive. When they can't load, a card says so and links to GitHub instead.
  *
@@ -64,7 +64,7 @@ export function ProjectCard({ project }: { project: Project }) {
 	const stack = project.stack.slice(0, CARD_STACK);
 	const hidden = project.stack.length - stack.length;
 	return (
-		<Card className="group gradient-border relative h-full gap-5 transition-[box-shadow,translate] duration-200 has-[a:focus-visible]:[--gradient-border-opacity:1] has-[a:hover]:-translate-y-0.5 has-[a:hover]:shadow-md has-[a:hover]:[--gradient-border-opacity:1] motion-reduce:transition-none">
+		<Card className="group gradient-border relative h-full gap-5 has-[a:focus-visible]:[--gradient-border-mix:100%] has-[a:hover]:-translate-y-0.5 has-[a:hover]:shadow-md has-[a:hover]:[--gradient-border-mix:100%]">
 			<CardHeader className="gap-2">
 				<CardTitle className="flex items-center gap-2 font-mono text-base">
 					<GitHubIcon className="size-4 shrink-0 text-muted-foreground" />
