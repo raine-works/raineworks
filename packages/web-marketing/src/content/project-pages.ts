@@ -24,6 +24,73 @@ export interface ProjectPage {
 }
 
 export const projectPages: Record<string, ProjectPage> = {
+	'ha-dashboards': {
+		overview: [
+			'Raineworks Dashboards are Home Assistant dashboards that work like an app: one for desktops and phones, and one for wall tablets. They’re built with Preact, shadcn/ui and Tailwind CSS, and they discover your house on their own: lights by room and floor, locks, garage doors, cameras, thermostats, curtains, fans, music, TVs and people.',
+			'You add a card and there’s nothing to configure per entity. Each feature is a module that turns itself on when your house has what it needs, and stays out of the way when it doesn’t.',
+			'It comes with a Home Assistant integration, installed through HACS, that serves the cards on every page, says who the household is, and gives the dashboards what Home Assistant alone can’t: announcements, phone pushes, to-do assignment, bedtime switches and the wall tablets’ hardware.',
+		],
+		highlights: [
+			{
+				title: 'Two cards, whole dashboards',
+				text: 'A home dashboard for desktops and phones, three columns on a wide screen and a tab per section on a phone, and a wall panel card sized for fingers, with its own floor first.',
+			},
+			{
+				title: 'Lighting and scenes',
+				text: 'Every light labeled Household Light, by floor and room, with dimmers, colors and effects, Stateful Scenes, All off with Undo, and bedtime per room.',
+			},
+			{
+				title: 'Security and cameras',
+				text: 'Alarmo with a PIN pad and countdowns, locks with their door sensors, garage doors, open doors and windows, and live WebRTC cameras with pinch to zoom, talkback and UniFi Protect clips.',
+			},
+			{
+				title: 'Climate, music and the header',
+				text: 'Thermostats with presets, curtains, fans and scent diffusers; a Music Assistant player with the whole queue, browsing and a party mode; and weather, calendar, to-do lists, people on a map, energy, TVs and the daily brief up top.',
+			},
+			{
+				title: 'Messages and Assist',
+				text: 'Announcements on your speakers and TVs, typed or recorded, pushes to phones, notes on a receipt printer, and Assist with voice, with a glow along the bottom of the screen while it listens.',
+			},
+			{
+				title: 'Wall tablets, handled',
+				text: 'A tablet’s status light follows the alarm and its screen wakes on the doorbell, found on its own device, so any tablet works and each part can be left out.',
+			},
+		],
+		sections: [
+			{
+				heading: 'Getting started',
+				body: [
+					'Install the integration, add a dashboard that hosts a card, and label your lights. There’s no Lovelace resource to add, since the integration serves the cards on every page.',
+				],
+				points: [
+					'In HACS, add the repository as a custom integration, install Raineworks Dashboards and restart Home Assistant, then add it under Settings → Devices & services.',
+					'Add a dashboard from scratch, edit it in YAML mode, and give it a view with panel set to true that hosts the custom:home-dashboard card.',
+					'Give room lights the label household_light so the lighting section lists them. Indicator LEDs and other non-room lights stay unlabeled.',
+					'For a wall tablet, add a dashboard with the wall panel card, then register the tablet on the integration’s page with Add wall panel, picking its device.',
+				],
+			},
+			{
+				heading: 'Configuration',
+				body: [
+					'Discovery covers most houses. What it can’t tell, such as which speaker announces, the voice, the laundry’s sensors and quiet hours, is in the integration’s options, or in a card’s house option in YAML, which wins key by key.',
+					'Any module can be turned off the same way. The integration also gives the dashboards their household, from a Warden group or every person with a device tracker.',
+				],
+			},
+			{
+				heading: 'Documentation',
+				body: [
+					'The documentation is rendered on this site from the repository’s docs folder, so it follows the project as it changes: installation, the cards and their settings, wall panels, setting up with an assistant, and references to every module, integration option and action.',
+				],
+			},
+			{
+				heading: 'Under the hood',
+				body: [
+					'Every card is one Preact bundle sharing a component library, with the same shadcn/ui components as this site, ported without Radix. Nothing in the source names an entity of any particular house.',
+					'A demo runs every card on a made-up house with no Home Assistant at all, so you can try a change before it touches yours. It’s MIT licensed.',
+				],
+			},
+		],
+	},
 	'ha-googletv': {
 		overview: [
 			'Raineworks TV is an unofficial Home Assistant integration for Google TV and Android TV, with a TV app of its own. One local connection does what used to take the Android TV Remote, Google Cast and ADB integrations together, and a few things none of them can.',
@@ -171,6 +238,62 @@ export const projectPages: Record<string, ProjectPage> = {
 					'xAI bills streaming speech to text at a higher rate than batch.',
 					'Images attached in a conversation aren’t sent to the model; use the AI Task entity for those.',
 					'Generating images uses grok-imagine-image-2.0, which xAI bills per image.',
+				],
+			},
+		],
+	},
+	'ha-music-assistant': {
+		overview: [
+			'This is Home Assistant’s own Music Assistant integration with more of Music Assistant in it: the whole queue, with edits, podcast episodes, the Party link, and the Party dashboard on your TVs.',
+			'It’s a fork of the built-in integration and keeps its domain, so it replaces it in place. Your config entry, speakers, entity ids, history and every music_assistant action in your automations stay as they are, and the new actions are added beside them. Remove it and Home Assistant goes back to the built-in one.',
+			'The new actions use the integration’s own connection to Music Assistant, so there’s no token to keep in your configuration.',
+		],
+		highlights: [
+			{
+				title: 'The whole queue',
+				text: 'A speaker’s queue a page at a time, from the playing item or an offset, with each item’s name, artist, album, length, cover and address, where the queue came from, and its shuffle, repeat and Don’t stop the music. The built-in action has only the current and next item.',
+			},
+			{
+				title: 'Queue edits',
+				text: 'Play an item, move it by a number of places, remove it, or resume the queue after a live input such as a turntable.',
+			},
+			{
+				title: 'Podcast episodes',
+				text: 'A podcast’s episodes by its address, newest first, with your progress, the resume point and whether it’s played, and short show notes.',
+			},
+			{
+				title: 'The Party link',
+				text: 'The Party plugin’s guest link, for a QR code, or none while guest access is off. The Party dashboard on a TV works through the built-in integration’s own media players.',
+			},
+			{
+				title: 'Replaces the built-in one',
+				text: 'The same domain, so there’s nothing to migrate and nothing to rewrite, and the original returns when you remove it.',
+			},
+		],
+		sections: [
+			{
+				heading: 'Getting started',
+				body: [
+					'Install it from HACS and restart. Home Assistant logs that the built-in integration is overridden by a custom one, and that’s this.',
+				],
+				points: [
+					'In HACS, add the repository as a custom integration, then install Music Assistant (raine-works).',
+					'Restart Home Assistant.',
+					'Already set up Music Assistant? Nothing else to do. New to it? Add the Music Assistant integration as usual under Settings → Devices & services.',
+				],
+			},
+			{
+				heading: 'Following Home Assistant',
+				body: [
+					'Each release follows a Home Assistant release: the built-in integration’s code and tests at that release, with this fork’s changes on top. Home Assistant’s own tests run on every change.',
+					'Use the release that matches your Home Assistant, since the built-in integration changes with Home Assistant and so does this. A script brings a newer release in as a diff to merge.',
+				],
+			},
+			{
+				heading: 'What it’s for',
+				body: [
+					'It was built for Raineworks Dashboards, whose music player shows the whole queue with drag to reorder, podcast pages and a party mode. Any automation or dashboard can use the actions.',
+					'It’s licensed Apache 2.0, as Home Assistant is.',
 				],
 			},
 		],
@@ -360,6 +483,68 @@ export const projectPages: Record<string, ProjectPage> = {
 					'Add the Warden integration under Settings → Devices & services and confirm.',
 					'Open Warden in the sidebar to create groups, add members and set two-factor requirements.',
 					'To remove it, delete the integration before its files, so every managed user gets their original role back.',
+				],
+			},
+		],
+	},
+	'ha-gitops': {
+		overview: [
+			'GitOps keeps your Home Assistant configuration in a Git repository and deploys it when you push. It keeps a folder of your configuration in step with a branch: every push brings it up to date, Home Assistant’s own configuration check runs, and what changed is reloaded.',
+			'A configuration that doesn’t pass the check is rolled back before anything reloads, so a typo in a push doesn’t take your house down.',
+			'It’s for anyone who would rather review a change in a pull request than edit YAML in the browser, and wants the repository to be the source of truth.',
+		],
+		highlights: [
+			{
+				title: 'Clones and pulls',
+				text: 'The branch is kept in a folder under your configuration, which your configuration includes from. Edits made to its files in Home Assistant are discarded on the next deploy.',
+			},
+			{
+				title: 'Private repositories',
+				text: 'Over SSH it makes a deploy key for you to add, read-only is enough. Public repositories work over HTTPS with nothing to add.',
+			},
+			{
+				title: 'Deploys on push',
+				text: 'A webhook from GitHub, GitLab, Gitea or Forgejo, checked against its secret. Without an external URL it checks for pushes every few minutes, and it catches up at startup with any push it missed.',
+			},
+			{
+				title: 'Checks first, rolls back',
+				text: 'It runs what Check configuration runs. When that fails the folder goes back to the commit it had, nothing reloads, and a notification shows the errors.',
+			},
+			{
+				title: 'Reloads what changed',
+				text: 'Everything Home Assistant can reload, the integrations you pick, or nothing.',
+			},
+			{
+				title: 'Tells your automations',
+				text: 'A deployed event with the commit, its subject and the files that changed, and a failed one, for refreshing dashboards, reloading a config entry or restarting for a change that needs it.',
+			},
+		],
+		sections: [
+			{
+				heading: 'Getting started',
+				body: ['It needs git, which Home Assistant’s container and Home Assistant OS ship.'],
+				points: [
+					'In HACS, add the repository as a custom integration, install GitOps and restart Home Assistant.',
+					'Add the GitOps integration under Settings → Devices & services, with the repository’s address, its branch and the folder to keep it in.',
+					'For an SSH address, add the deploy key it shows to the repository.',
+					'Add the webhook it shows, with content type application/json, the push event only and the secret it gives, which is shown once.',
+					'Include the folder from your configuration and restart once. Every push after that deploys.',
+				],
+			},
+			{
+				heading: 'What you get',
+				body: [
+					'Per repository there’s a Status entity (deployed, up to date, failed, rolled back or deploying, with the last deploy’s commit, changed files and error as attributes), a Last deploy entity and a Deploy button. The deploy action runs one repository or all, and answers what each did.',
+				],
+			},
+			{
+				heading: 'Good to know',
+				body: [
+					'Deploys happen one at a time per repository, and pushes that arrive meanwhile become one more deploy after it.',
+				],
+				points: [
+					'Deploy keys live in a folder of their own with their known hosts. Removing a repository from GitOps deletes its key, never the folder.',
+					'Files the repository doesn’t track are left alone.',
 				],
 			},
 		],

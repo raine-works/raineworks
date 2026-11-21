@@ -21,6 +21,13 @@ export interface ProjectEntry {
 /** In the order the pages link on to each other. */
 export const projects: ProjectEntry[] = [
 	{
+		repo: 'ha-dashboards',
+		slug: 'ha-dashboards',
+		title: 'Raineworks Dashboards',
+		summary:
+			'Home Assistant dashboards for desktops, phones and wall tablets, built with Preact, shadcn/ui and Tailwind, with an integration that serves them.',
+	},
+	{
 		repo: 'ha-googletv',
 		slug: 'ha-googletv',
 		title: 'Raineworks TV',
@@ -33,6 +40,13 @@ export const projects: ProjectEntry[] = [
 		title: 'xAI Grok for Home Assistant',
 		summary:
 			'An unofficial Home Assistant integration for xAI’s Grok, built for a fast voice assistant: conversation, speech to text and text to speech, all streaming.',
+	},
+	{
+		repo: 'ha-music-assistant',
+		slug: 'ha-music-assistant',
+		title: 'Music Assistant for Home Assistant',
+		summary:
+			'Home Assistant’s Music Assistant integration with the whole queue and its edits, podcast episodes and the Party link, replacing the built-in one in place.',
 	},
 	{
 		repo: 'sendspin-a1s-source',
@@ -54,6 +68,13 @@ export const projects: ProjectEntry[] = [
 		title: 'Warden for Home Assistant',
 		summary:
 			'Groups, fine-grained permissions and required two-factor authentication for Home Assistant users, enforced by Home Assistant’s own permission engine.',
+	},
+	{
+		repo: 'ha-gitops',
+		slug: 'ha-gitops',
+		title: 'GitOps for Home Assistant',
+		summary:
+			'Keep your Home Assistant configuration in Git and deploy it by pushing: a configuration check first, a rollback when it fails, and a reload of what changed.',
 	},
 	{
 		repo: 'raineworks',
