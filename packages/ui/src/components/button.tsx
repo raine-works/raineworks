@@ -8,12 +8,13 @@ const buttonVariants = cva(
 	{
 		variants: {
 			variant: {
-				default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+				// The call to action: a soft glow of the accent behind it (`gradient-shadow`, globals.css), brighter on hover.
+				default:
+					'bg-primary text-primary-foreground gradient-shadow hover:bg-primary/90 hover:[--gradient-glow-strength:95%] focus-visible:[--gradient-glow-strength:95%]',
 				destructive:
 					'bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40',
-				// The accent, faint, in its border (`gradient-border`, globals.css), the full gradient under the pointer.
 				outline:
-					'gradient-border relative border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground hover:[--gradient-border-mix:100%] focus-visible:[--gradient-border-mix:100%] dark:border-input dark:bg-input/30 dark:hover:bg-input/50',
+					'border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50',
 				secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
 				ghost: 'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
 				link: 'text-primary underline-offset-4 hover:underline',

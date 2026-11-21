@@ -164,6 +164,9 @@ jobs:
           anthropic_organization_id: 34318a61-fac0-4077-a795-808d80efef19
           anthropic_service_account_id: svac_015F3BEwDj2EJr7bHDgKmFkL
           anthropic_workspace_id: wrkspc_01G5WKL4tLYspnSa4BYdzUCS
+          # The docs-sync app's pull requests are reviewed too (the job's `if`), but the action refuses any run a bot
+          # started unless it's named here. Only that app: never '*', which would let any app start a review.
+          allowed_bots: raineworks-doc-sync
           # A progress comment for each push, not for each reply.
           track_progress: ${{ github.event_name == 'pull_request' }}
           prompt: |

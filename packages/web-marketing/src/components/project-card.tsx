@@ -1,7 +1,7 @@
 /**
  * Projects as cards: each one's name (the whole card opens its page, `/projects/<slug>`, or the repository for a
  * project without one, `content/projects`), what it is, what it's built with (the first few), and its stars on
- * GitHub. Its border is the accent, faint, and in full under the pointer or the keyboard's focus. The list is live (`GET /api/projects`: the repositories tagged `raineworks`), fetched by the browser,
+ * GitHub. Its border turns to the accent under the pointer or the keyboard's focus. The list is live (`GET /api/projects`: the repositories tagged `raineworks`), fetched by the browser,
  * never prerendered, so never stale: the prerendered page has placeholder cards the same size, so nothing jumps when
  * the projects arrive. When they can't load, a card says so and links to GitHub instead.
  *

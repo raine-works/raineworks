@@ -19,7 +19,8 @@
  * borders that answer a pointer, and a little prominent text. --gradient-from / --gradient-to are the two colours as
  * they are, for lines and the mark; --gradient-ink-from / --gradient-ink-to are the same colours made readable as
  * text (>= 4.5:1 on the background in both themes: deepened in light mode, as they are in dark). Use the utilities,
- * not the variables: `text-gradient`, `gradient-border`, `gradient-fill`, `gradient-hairline`, `gradient-glow`.
+ * not the variables: `text-gradient`, `gradient-border`, `gradient-shadow`, `gradient-fill`, `gradient-hairline`,
+ * `gradient-glow`.
  */
 
 /* ui-sdk adds the little CSS its behaviours need in this layer; declared first so every style here wins over it. */
@@ -223,26 +224,26 @@
 }
 
 /*
- * How much of the accent a gradient border shows: a share of each colour mixed into the border colour. Faint at rest
- * (the main content cards and outlined buttons), the full gradient where a state turns it up, e.g.
- * `hover:[--gradient-border-mix:100%]`. Registered, so it eases between the two.
+ * How much of the accent a gradient border shows: a share of each colour mixed into the border colour. None at rest
+ * (the border colour alone), the full gradient where a state turns it up, e.g. `hover:[--gradient-border-mix:100%]`.
+ * Registered, so it eases between the two.
  */
 @property --gradient-border-mix {
 	syntax: '<percentage>';
 	/* Inherited, so the ::before that draws the border sees its element's; each bordered element sets its own. */
 	inherits: true;
-	initial-value: 40%;
+	initial-value: 0%;
 }
 
 /*
  * A 1px border in the accent gradient, top left to bottom right, drawn by a ::before over the element's own border
  * (so on any background and any radius), --gradient-border-mix of the way from the border colour to the gradient.
- * The main content cards (Home's companies, the projects, the articles) and outlined buttons have it; the element needs
- * `relative`, and its ::before is taken.
+ * The main content cards (Home's companies, the projects, the articles) have it, showing under the pointer or the
+ * keyboard's focus; the element needs `relative`, and its ::before is taken.
  */
 @utility gradient-border {
-	/* At rest, whatever an ancestor's is: a button in a hovered card stays faint. */
-	--gradient-border-mix: 40%;
+	/* At rest, whatever an ancestor's is: a bordered element in a hovered card stays plain. */
+	--gradient-border-mix: 0%;
 	transition-property: --gradient-border-mix, color, background-color, box-shadow, translate;
 	transition-duration: 200ms;
 	&::before {
@@ -266,6 +267,22 @@
 	@media (prefers-reduced-motion: reduce) {
 		transition-duration: 0s;
 	}
+}
+
+/*
+ * The call to action's glow: the two colours, soft, behind it (peach to the left, teal to the right), at
+ * --gradient-glow-strength (faint at rest; `hover:[--gradient-glow-strength:95%]` brings it up). Every primary button
+ * has it (`components/button`), so the glow is what says "act here" alongside the brand.
+ */
+@utility gradient-shadow {
+	--gradient-glow-strength: 60%;
+	/* In Tailwind's shadow stack, as its `shadow-*` would be, so a focus `ring-*` adds to the glow, never replaces it. */
+	--tw-shadow:
+		-8px 6px 22px -4px color-mix(in oklab, var(--gradient-from) var(--gradient-glow-strength), transparent),
+		8px 8px 24px -4px color-mix(in oklab, var(--gradient-to) var(--gradient-glow-strength), transparent);
+	box-shadow:
+		var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
+		var(--tw-shadow);
 }
 
 /* A solid fill in the accent gradient, left to right: a short rule over a page's title. */

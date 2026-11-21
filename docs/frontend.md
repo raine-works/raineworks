@@ -84,13 +84,15 @@ and Geist Mono. The brand is monochrome, like the logo, with one accent: a gradi
   brand means "act here" (primary buttons, focus rings, the active nav item), never a status.
 - **Pages:** a `Page` (`blocks/page`: `h1`, description, `document.title` as "<title> · raineworks") of cards, blocks
   `gap-6` apart; card grids `grid items-start gap-4 lg:grid-cols-2`; cards `px-5 py-5`.
-- **Accent:** the gradient is decoration, never a meaning (not "act here", not a status), and used sparingly: the
-  logo's mark, the hairlines under the header and over the footer and under the current page, the rule over each
-  page's title, the home page's name and eyebrows, the borders of the main content cards (the companies on Home,
-  the projects, the articles) and of outlined buttons, the timeline's dots. Through the utilities in `globals.css`: `text-gradient` (text, readable in both themes: deepened in light
-  mode), `gradient-border` (a 1px border, `--gradient-border-mix` of the way from the border colour to the gradient:
-  40% at rest, 100% on hover or focus; the outline `Button` has it built in, a content card adds it), `gradient-fill`,
-  `gradient-hairline`, `gradient-glow`. Fills, focus rings and links stay black and white.
+- **Accent:** the gradient is decoration, and used sparingly: the logo's mark, the hairlines under the header and
+  over the footer and under the current page, the rule over each page's title, the home page's name and eyebrows,
+  the timeline's dots, the border of a main content card (the companies on Home, the projects, the articles) under
+  the pointer, and the call to action's glow. It's never a status. Through the utilities in `globals.css`:
+  `text-gradient` (text, readable in both themes: deepened in light mode), `gradient-border` (a 1px border,
+  `--gradient-border-mix` of the way from the border colour to the gradient: none at rest, 100% on hover or focus; a
+  content card adds it), `gradient-shadow` (the soft glow every primary `Button` has, `--gradient-glow-strength`
+  brighter on hover), `gradient-fill`, `gradient-hairline`, `gradient-glow`. Fills, focus rings and links stay black
+  and white.
 - **Logo:** `AppLogo` (mark and wordmark) and `AppMark` (`blocks/brand`), drawn inline from the logo's SVG source so
   they follow the theme; `gradient` strokes the mark in the accent. The favicon (`assets/favicon.svg`) is the gradient
   mark on a tile that swaps white and black with the OS scheme.
