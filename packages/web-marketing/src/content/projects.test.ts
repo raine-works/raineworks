@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 
 import '@raineworks/tools/prototypes';
+import { DOCS_SOURCES, isDocsProject } from '@raineworks/tools/docs';
 import { projectPages } from '@raineworks/web-marketing/content/project-pages';
 import { projectByRepo, projectBySlug, projects } from '@raineworks/web-marketing/content/projects';
 
@@ -24,6 +25,13 @@ describe('the projects’ pages', () => {
 		for (const { slug } of projects) expect(slug).toMatch(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 		expect(projects.map((project) => project.slug).unique()).toHaveLength(projects.length);
 		expect(projects.map((project) => project.repo).unique()).toHaveLength(projects.length);
+	});
+
+	test('with documentation are projects with a page, built from their repository', () => {
+		for (const [slug, source] of Object.entries(DOCS_SOURCES)) {
+			expect(isDocsProject(slug)).toBe(true);
+			expect(projectBySlug(slug)?.repo).toBe(source.repo);
+		}
 	});
 
 	test('are found by their address and by their repository', () => {

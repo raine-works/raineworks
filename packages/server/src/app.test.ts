@@ -22,6 +22,10 @@ await Bun.write(
 	'<!doctype html><html><head><title>Articles · raineworks</title></head><body><div id="root"><h1>Articles</h1></div></body></html>',
 );
 await Bun.write(
+	join(zoneDir, 'projects/ha-dashboards/docs/index.html'),
+	'<!doctype html><html><head><title>Docs · raineworks</title></head><body><div id="root"><h1>Docs shell</h1></div></body></html>',
+);
+await Bun.write(
 	join(zoneDir, '404.html'),
 	'<!doctype html><html><head><title>Page not found · raineworks</title></head><body><div id="root"></div></body></html>',
 );
@@ -32,6 +36,7 @@ await Bun.write(join(zoneDir, 'build.json'), JSON.stringify({ version: '2026.11.
 Bun.env.WEB_DIST = webDist;
 
 const { createApp } = await import('@raineworks/server/app');
+const { resetDocs } = await import('@raineworks/server/lib/docs');
 const { resetProjects } = await import('@raineworks/server/lib/github');
 const { env } = await import('@raineworks/server/lib/env');
 const { resetArticles } = await import('@raineworks/server/lib/x');
@@ -141,6 +146,87 @@ describe('the projects', () => {
 		const response = await get('/api/projects');
 		expect(response.status).toBe(503);
 		expect(((await response.json()) as { error: { code: string } }).error.code).toBe('projects_unavailable');
+	});
+});
+
+describe('the docs', () => {
+	const realFetch = globalThis.fetch;
+	const requested: string[] = [];
+	afterEach(() => {
+		globalThis.fetch = realFetch;
+		requested.length = 0;
+		resetDocs();
+	});
+	const githubDocs = () => {
+		globalThis.fetch = (async (input: string | URL | Request) => {
+			const url = String(input);
+			requested.push(url);
+			if (url.endsWith('/docs/README.md'))
+				return new Response('# Docs\n\n| Guide | |\n| - | - |\n| [Install](installation.md) | |\n');
+			if (url.endsWith('/docs/installation.md'))
+				return new Response('<!-- x -->\n# Installation\n\nSee [the index](README.md).\n');
+			return new Response('Not Found', { status: 404 });
+		}) as unknown as typeof fetch;
+	};
+
+	test('are a project’s pages rendered from its repository, cached publicly', async () => {
+		githubDocs();
+		const response = await get('/api/docs/ha-dashboards?page=installation');
+		expect(response.status).toBe(200);
+		expect(response.headers.get('cache-control')).toBe('public, max-age=300');
+		const body = (await response.json()) as { title: string; html: string; nav: { page: string }[] };
+		expect(body.title).toBe('Installation');
+		expect(body.html).toContain('href="/projects/ha-dashboards/docs"');
+		expect(body.nav.map((item) => item.page)).toEqual(['installation']);
+		expect(requested).toEqual([
+			'https://raw.githubusercontent.com/raine-works/ha-dashboards/master/docs/installation.md',
+			'https://raw.githubusercontent.com/raine-works/ha-dashboards/master/docs/README.md',
+		]);
+	});
+
+	test('are the index without a page', async () => {
+		githubDocs();
+		expect(((await (await get('/api/docs/ha-dashboards')).json()) as { title: string }).title).toBe('Docs');
+	});
+
+	test('refuse a page name that isn’t in the docs tree’s shape, without asking GitHub', async () => {
+		githubDocs();
+		for (const page of ['..%2F..%2Fetc', 'a/b/c', 'Installation', 'a.md', 'a%00', '%2e%2e/x']) {
+			const response = await get(`/api/docs/ha-dashboards?page=${page}`);
+			expect({ page, status: response.status }).toEqual({ page, status: 400 });
+			expect(((await response.json()) as { error: { code: string } }).error.code).toBe('invalid_request');
+		}
+		expect(requested).toEqual([]);
+	});
+
+	test('are a 404 for a page GitHub doesn’t have, and for a project without docs', async () => {
+		githubDocs();
+		const missing = await get('/api/docs/ha-dashboards?page=nope');
+		expect(missing.status).toBe(404);
+		expect(((await missing.json()) as { error: { code: string } }).error.code).toBe('docs_not_found');
+		const other = await get('/api/docs/dotfiles');
+		expect(other.status).toBe(404);
+		expect(requested).toHaveLength(1);
+	});
+
+	test('are a 503 when GitHub hasn’t answered yet', async () => {
+		globalThis.fetch = (async () => new Response('down', { status: 502 })) as unknown as typeof fetch;
+		const response = await get('/api/docs/ha-dashboards?page=installation');
+		expect(response.status).toBe(503);
+		expect(((await response.json()) as { error: { code: string } }).error.code).toBe('docs_unavailable');
+	});
+
+	test('have their pages served the project’s prerendered docs page, which loads them', async () => {
+		for (const path of [
+			'/projects/ha-dashboards/docs',
+			'/projects/ha-dashboards/docs/installation',
+			'/projects/ha-dashboards/docs/reference/modules',
+		]) {
+			const response = await get(path);
+			expect({ path, status: response.status }).toEqual({ path, status: 200 });
+			expect(await response.text()).toContain('Docs shell');
+		}
+		expect((await get('/projects/ha-grok/docs/installation')).status).toBe(404);
 	});
 });
 

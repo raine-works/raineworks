@@ -16,11 +16,13 @@ import json from 'highlight.js/lib/languages/json';
 import php from 'highlight.js/lib/languages/php';
 import python from 'highlight.js/lib/languages/python';
 import ruby from 'highlight.js/lib/languages/ruby';
+import yaml from 'highlight.js/lib/languages/yaml';
 
-for (const [name, language] of Object.entries({ bash, go, http, javascript, json, php, python, ruby })) {
+for (const [name, language] of Object.entries({ bash, go, http, javascript, json, php, python, ruby, yaml })) {
 	hljs.registerLanguage(name, language);
 }
 hljs.registerAliases(['sh', 'shell', 'curl'], { languageName: 'bash' });
+hljs.registerAliases(['yml'], { languageName: 'yaml' });
 hljs.registerAliases(['js', 'ts', 'typescript', 'node'], { languageName: 'javascript' });
 
 /** `code` as highlighted HTML (escaped); just escaped when `language` isn't one of these. */

@@ -5,6 +5,7 @@
  * /healthz, /readyz            probes
  * /api/articles                Raine's articles on X (lib/x; cached an hour; `enabled: false` without X_BEARER_TOKEN)
  * /api/build                   the build a zone is serving, for its update check (lib/spa)
+ * /api/docs                   a project's documentation, rendered from its repository (lib/docs; cached five minutes)
  * /api/contact                 the contact form (POST; acknowledged, not yet stored or delivered)
  * /api/projects                Raine's projects: repositories tagged `raineworks` on GitHub (lib/github; cached ten minutes)
  * /api/openapi.json            OpenAPI 3.1 document of every /api route (lib/openapi; cached publicly an hour)
@@ -21,11 +22,12 @@
 
 import { specFor } from '@raineworks/server/lib/openapi';
 import { articlesFeed } from '@raineworks/server/lib/rss';
-import { serveSpa } from '@raineworks/server/lib/spa';
+import { type PageShell, serveSpa } from '@raineworks/server/lib/spa';
 import { articles, ARTICLES_TTL_MS, articlesEnabled } from '@raineworks/server/lib/x';
 import { articlesRouter } from '@raineworks/server/routers/articles';
 import { buildRouter } from '@raineworks/server/routers/build';
 import { contactRouter } from '@raineworks/server/routers/contact';
+import { docsRouter } from '@raineworks/server/routers/docs';
 import { healthRouter } from '@raineworks/server/routers/health';
 import { projectsRouter } from '@raineworks/server/routers/projects';
 import { type Context, Hono } from 'hono';
@@ -37,7 +39,16 @@ export const api = new Hono()
 	.route('/articles', articlesRouter)
 	.route('/build', buildRouter)
 	.route('/contact', contactRouter)
+	.route('/docs', docsRouter)
 	.route('/projects', projectsRouter);
+
+/**
+ * A project's documentation pages (`/projects/<slug>/docs/<page>`) come from its repository, so the build can't list
+ * them: each is served the prerendered docs index of its project, which hydrates as the page and loads it.
+ */
+const PAGE_SHELLS: readonly PageShell[] = [
+	{ match: /^projects\/([a-z0-9-]+)\/docs\/.+$/, file: 'projects/$1/docs/index.html' },
+];
 
 /** Browser features no zone uses, denied outright. Turn one on here when a zone needs it. */
 const PERMISSIONS_POLICY = {
@@ -97,7 +108,8 @@ export function createApp() {
 
 	app.get(
 		'*',
-		async (c) => (await serveSpa(c.req.raw, articlesEnabled() ? [] : ['/articles'])) ?? c.text('Not Found', 404),
+		async (c) =>
+			(await serveSpa(c.req.raw, articlesEnabled() ? [] : ['/articles'], PAGE_SHELLS)) ?? c.text('Not Found', 404),
 	);
 
 	app.onError(renderError);

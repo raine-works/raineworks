@@ -55,6 +55,7 @@ Every zone shares the origin, so they share cookies and `localStorage` (the them
 /api/articles                Raine's articles on X (lib/x; cached an hour; `{ enabled: false }` without X_BEARER_TOKEN)
 /api/build                   the build a zone is serving, for its update check
 /api/contact                 the contact form (POST; validated and acknowledged with a 202, not yet stored or delivered)
+/api/docs/<project>          a project's documentation page, rendered from its repository's docs folder on GitHub (lib/docs; cached five minutes)
 /api/projects                Raine's projects: repositories tagged `raineworks` on GitHub, with stars (lib/github; cached)
 /api/openapi.json            the OpenAPI 3.1 document of every /api route, generated from the routes (lib/openapi)
 /api/*                       anything else: a JSON 404
@@ -82,6 +83,9 @@ Every zone shares the origin, so they share cookies and `localStorage` (the them
   Pages are compressed per request.
 - **Caching:** content-hashed files (`chunk-x.js`) for a year, immutable; pages revalidated on every load against a
   strong ETag (304 when it matches). Development never caches HTML.
+- **Pages the build can't list:** a `PageShell` (`app.ts`) serves every page under a prerendered one the same file: a
+  project's documentation pages (`/projects/<slug>/docs/<page>`) come from its repository, so each gets the prerendered
+  docs page, which hydrates as the page asked for and loads it.
 - **Build stamp:** each page gets `<meta name="raineworks-build">` (the hash of its zone's `index.html`, which changes
   whenever any of the zone's files does). Pages compare it with `GET /api/build` to notice a new release under them
   ([frontend.md](frontend.md#versions-and-updates)).

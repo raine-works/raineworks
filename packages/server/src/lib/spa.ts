@@ -9,7 +9,8 @@
  * A path without a file extension is a page: the zone's prerendered one for it (`<path>/index.html`,
  * `@raineworks/tools/build`) when there is one, else its `404.html` with a 404 status, else (a zone that doesn't
  * prerender) its `index.html`, so client-side routes deep-link. A page that's off (`hidden`: the articles without an
- * X API token) is that 404 too. Assets:
+ * X API token) is that 404 too. A `shell` (`PageShell`) gives the pages under a prerendered one the same file, for
+ * routes whose pages the build can't list (a project's documentation pages come from its repository). Assets:
  *
  * - Sent precompressed when the client accepts it: the build writes `.br` / `.gz` siblings
  *   (`@raineworks/tools/build`), picked by `Accept-Encoding`.
@@ -152,11 +153,33 @@ function matchesEtag(ifNoneMatch: string | null, etag: string): boolean {
 	return ifNoneMatch.split(',').some((tag) => tag.trim().replace(/^W\//, '') === etag);
 }
 
+/**
+ * Pages the build can't list, served as a prerendered page of their own: a route (no leading or trailing slash) matching
+ * `match` gets `file` (`$1`… from the match) when the zone has it, instead of the 404. The page hydrates as the route it
+ * is, so what's prerendered must be what that route shows before its data arrives.
+ */
+export interface PageShell {
+	match: RegExp;
+	file: string;
+}
+
 /** The page file for `path` inside a zone, and its status: a `hidden` page is the 404. */
-function pageFor(resolve: Resolver, path: string, hidden: readonly string[]): { file: string; status: 200 | 404 } {
+function pageFor(
+	resolve: Resolver,
+	path: string,
+	hidden: readonly string[],
+	shells: readonly PageShell[],
+): { file: string; status: 200 | 404 } {
 	const route = path.replace(/^\/+|\/+$/g, '');
 	const prerendered = route ? `${route}/index.html` : 'index.html';
 	if (!hidden.includes(`/${route}`) && resolve(prerendered)) return { file: prerendered, status: 200 };
+	if (!hidden.includes(`/${route}`)) {
+		for (const shell of shells) {
+			if (!shell.match.test(route)) continue;
+			const file = route.replace(shell.match, shell.file);
+			if (resolve(file)) return { file, status: 200 };
+		}
+	}
 	if (resolve('404.html')) return { file: '404.html', status: 404 };
 	return { file: 'index.html', status: 200 };
 }
@@ -166,8 +189,9 @@ async function servePage(
 	path: string,
 	request: Request,
 	hidden: readonly string[],
+	shells: readonly PageShell[],
 ): Promise<Response | null> {
-	const { file, status } = pageFor(resolve, path, hidden);
+	const { file, status } = pageFor(resolve, path, hidden, shells);
 	const template = await pageTemplate(resolve, file);
 	if (!template) return null;
 	const encoding = negotiateEncoding(request.headers.get('accept-encoding'));
@@ -200,9 +224,13 @@ function serveAsset(resolve: Resolver, path: string, asset: Blob, request: Reque
 
 /**
  * The zone page or asset for `request`, or `null` when its zone isn't built. `hidden` pages (paths inside their zone,
- * `/articles`) are served as its 404: pages that are off.
+ * `/articles`) are served as its 404: pages that are off; `shells` are described at {@link PageShell}.
  */
-export async function serveSpa(request: Request, hidden: readonly string[] = []): Promise<Response | null> {
+export async function serveSpa(
+	request: Request,
+	hidden: readonly string[] = [],
+	shells: readonly PageShell[] = [],
+): Promise<Response | null> {
 	const { zone, path: encoded } = resolveZone(new URL(request.url).pathname);
 	const resolve = spaResolver(zone);
 	if (!resolve) return null;
@@ -215,5 +243,5 @@ export async function serveSpa(request: Request, hidden: readonly string[] = [])
 	const asset = path && !isPage(path) ? resolve(path) : null;
 	if (asset) return serveAsset(resolve, path, asset, request);
 	if (/\.[a-z0-9]+$/i.test(path) && !isPage(path)) return new Response('Not Found', { status: 404 });
-	return servePage(resolve, path === 'index.html' ? '' : path, request, hidden);
+	return servePage(resolve, path === 'index.html' ? '' : path, request, hidden, shells);
 }

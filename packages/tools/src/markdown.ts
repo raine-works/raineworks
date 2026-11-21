@@ -96,6 +96,8 @@ const LANGUAGE_LABELS = new Map([
 	['js', 'JavaScript'],
 	['javascript', 'JavaScript'],
 	['python', 'Python'],
+	['yaml', 'YAML'],
+	['yml', 'YAML'],
 	['http', 'HTTP'],
 	['text', 'Text'],
 ]);
