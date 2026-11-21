@@ -121,7 +121,8 @@ can run the checks (`bun run lint`, `typecheck`, `test`) but nothing else.
 drafts or forks), Claude reviews the change against `AGENTS.md` and the docs it lists, inline, with one summary comment
 ending `Reviewed up to <sha>`. On each push it follows up on its own findings (resolving what's fixed) and reviews
 what's new; a reply to one of its inline comments is answered in that thread (one mentioning `@claude` is
-`claude.yml`'s instead). It reviews the docs-sync app's pull requests too. It fails when it couldn't finish, so a review
+`claude.yml`'s instead). It reviews the docs-sync app's pull requests too (the action runs for that app
+alone: `allowed_bots: raineworks-doc-sync`). It fails when it couldn't finish, so a review
 that didn't happen never passes quietly, and on a pull request that changes `code-review.yml` itself (Claude runs only
 `master`'s copy), so a person reviews that one. It posts as `claude[bot]`: the [Claude GitHub
 App](https://github.com/apps/claude) must be installed on the repository. How a pull request handles the review:
