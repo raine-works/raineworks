@@ -7,6 +7,7 @@
  * @module routes/project
  */
 
+import { isDocsProject } from '@raineworks/tools/docs';
 import { Page } from '@raineworks/ui/blocks/page';
 import { Badge } from '@raineworks/ui/components/badge';
 import { Button } from '@raineworks/ui/components/button';
@@ -19,7 +20,7 @@ import { projectPages, type ProjectSection } from '@raineworks/web-marketing/con
 import { type ProjectEntry, projects } from '@raineworks/web-marketing/content/projects';
 import { useQuery } from '@tanstack/react-query';
 import { getRouteApi, Link } from '@tanstack/react-router';
-import { ArrowLeftIcon, ArrowRightIcon, ArrowUpRightIcon } from 'lucide-react';
+import { ArrowLeftIcon, ArrowRightIcon, ArrowUpRightIcon, BookOpenIcon } from 'lucide-react';
 
 const route = getRouteApi('/projects/$slug');
 
@@ -104,6 +105,14 @@ function AtAGlance({ project }: { project: ProjectEntry }) {
 						</div>
 					)}
 				</div>
+				{isDocsProject(project.slug) && (
+					<Button asChild variant="outline" className="w-full">
+						<Link to="/projects/$slug/docs" params={{ slug: project.slug }}>
+							<BookOpenIcon />
+							Read the documentation
+						</Link>
+					</Button>
+				)}
 				<Button asChild className="w-full">
 					<a href={href} target="_blank" rel="noopener noreferrer">
 						<GitHubIcon />

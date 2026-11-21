@@ -20,6 +20,9 @@ standalone binary with every zone embedded, run from a distroless image. How it 
 | `src/routers/contact.ts` | `POST /api/contact`: the contact form (validated, acknowledged with a 202) |
 | `src/routers/projects.ts` | `GET /api/projects`: the repositories tagged `raineworks` on GitHub, for the project cards and the SSH app |
 | `src/lib/github.ts` | The projects from GitHub (repositories tagged `raineworks`): one request for every repository, kept ten minutes, the last list served while GitHub is down |
+| `src/routers/docs.ts` | `GET /api/docs/<project>?page=`: a project's documentation page, rendered, with the navigation its index gives |
+| `src/lib/docs.ts` | The docs from the project's repository on GitHub (raw files of its docs folder, only names `@raineworks/tools/docs` allows): cached five minutes, a missing page a minute, bounded, the last copy served while GitHub is down |
+| `src/lib/docs-render.ts` | A docs page's Markdown as HTML (no raw HTML, comments stripped), its title, its links (to site routes, GitHub or out) and images, and the index's navigation |
 | `src/lib/validate.ts` | `validate(target, schema)`: Zod at the boundary, a 400 `invalid_request`, and the request documented |
 | `src/lib/openapi.ts` | The OpenAPI document (`GET /api/openapi.json`): `jsonResponse`, `errorResponse`, `invalidRequest` for each route's `describeRoute`; tagging; the version |
 | `scripts/openapi.ts` | `bun run openapi [--out api.json]`: the same document, from the routes alone |

@@ -9,6 +9,7 @@ mostly on a phone. How zones work: [docs/frontend.md](../../docs/frontend.md).
 | Work | `/work` | Experience and education as timelines |
 | Projects | `/projects` | Every project, each card opening its page (or its repository, without one) |
 | A project | `/projects/<slug>` | One project in detail: overview, highlights, getting started, what GitHub says about it now |
+| Docs | `/projects/<slug>/docs[/<page>]` | A project's documentation, rendered from its repository's docs folder (projects in `@raineworks/tools/docs`): navigation, on this page, a link to the source |
 | Articles | `/articles` | Raine's articles on X, each opening it there, and the RSS feed (`/feed.xml`); only on with the server's `X_BEARER_TOKEN` |
 | Hobbies | `/hobbies` | Each hobby with its icon |
 | Contact | `/contact` | Email, GitHub, LinkedIn, X, Buy Me a Coffee |
@@ -25,6 +26,11 @@ one-sentence summary) with its words in `src/content/project-pages.ts` (an overv
 from its README; plain text, typographic quotes; loaded only with the page). Each page is prerendered with its own
 head (`staticData.pages` on the route); any other slug is the 404. `src/content/projects.test.ts` holds the two files
 together.
+
+A project's **documentation** is its repository's `docs/` Markdown, fetched and rendered by the server (`GET
+/api/docs/<project>`, cached) so the site follows the repository with no release. List the project in `DOCS_SOURCES`
+(`@raineworks/tools/docs`) and it has `/projects/<slug>/docs`: the index is prerendered, every page under it is served
+that page (`PageShell`) and loaded in the browser.
 
 The layout (`src/components/site-shell.tsx`) is the header (logo, pages, theme, phone menu) and footer (version
 opening About, social links, coffee). Every page but Home loads lazily. Every page is prerendered (`src/prerender.tsx`)

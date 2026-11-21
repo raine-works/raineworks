@@ -6,6 +6,7 @@
  * /work        experience and education
  * /projects    every open-source project
  * /projects/*  a project's own page, for each in `content/projects` (any other is the 404)
+ * /projects/<slug>/docs[/<page>]  a project's documentation, from its repository (`@raineworks/tools/docs`)
  * /hobbies     what Raine does away from work
  * /articles    Raine's articles on X (only with the server's X API token; otherwise its 404, and out of the nav)
  * /contact     email, GitHub, LinkedIn, X
@@ -18,6 +19,7 @@
  * @module router
  */
 
+import { DOCS_SOURCES, isDocsProject } from '@raineworks/tools/docs';
 import { ZONES } from '@raineworks/tools/zones';
 import type { RouterContext } from '@raineworks/ui/app/root';
 import { NotFoundPage } from '@raineworks/ui/blocks/full-page';
@@ -126,6 +128,37 @@ const projectRoute = createRoute({
 	component: lazyRouteComponent(() => import('@raineworks/web-marketing/routes/project'), 'ProjectPage'),
 });
 
+/** The projects with documentation: its pages come from their repositories, so only the index is prerendered. */
+const docsProjects = Object.keys(DOCS_SOURCES).flatMap((slug) => projectBySlug(slug) ?? []);
+
+const docsLoader = ({ params }: { params: { slug: string } }) => {
+	if (!isDocsProject(params.slug) || !projectBySlug(params.slug)) throw notFound();
+};
+
+const projectDocsRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: '/projects/$slug/docs',
+	staticData: {
+		pages: docsProjects.map((project) => ({
+			params: { slug: project.slug },
+			head: {
+				title: `${project.title} documentation`,
+				description: `The documentation for ${project.title}, from its repository: ${project.summary}`,
+			},
+		})),
+	},
+	loader: docsLoader,
+	component: lazyRouteComponent(() => import('@raineworks/web-marketing/routes/project-docs'), 'ProjectDocsPage'),
+});
+
+/** Every page under a project's docs: served the prerendered index above (`lib/spa`'s `PageShell`), which hydrates as it. */
+const projectDocsPageRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: '/projects/$slug/docs/$',
+	loader: docsLoader,
+	component: lazyRouteComponent(() => import('@raineworks/web-marketing/routes/project-docs'), 'ProjectDocsPage'),
+});
+
 const hobbiesRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: '/hobbies',
@@ -174,6 +207,8 @@ export const router = createRouter({
 		workRoute,
 		projectsRoute,
 		projectRoute,
+		projectDocsRoute,
+		projectDocsPageRoute,
 		articlesRoute,
 		hobbiesRoute,
 		contactRoute,

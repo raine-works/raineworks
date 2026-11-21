@@ -54,6 +54,9 @@
 .guide li > ol {
 	@apply mt-1.5;
 }
+.guide img {
+	@apply h-auto max-w-full rounded-lg border;
+}
 .guide hr {
 	@apply my-4;
 }
