@@ -1,6 +1,7 @@
 /**
  * The root of every zone: providers (TanStack Query, tooltips, toasts, what's new) around the zone's TanStack Router,
- * with the theme, modal history and the agent bridge (`lib/agent`) connected before it renders.
+ * with the theme, modal history, the focus-following favicon (`lib/favicon`) and the agent bridge (`lib/agent`)
+ * connected before it renders.
  *
  * ```tsx
  * // packages/web-<zone>/src/main.tsx
@@ -20,6 +21,7 @@ import { TooltipProvider } from '@raineworks/ui/components/tooltip';
 import { applyTheme } from '@raineworks/ui/hooks/use-theme';
 import { connectAgent } from '@raineworks/ui/lib/agent';
 import { queryClient } from '@raineworks/ui/lib/api';
+import { connectFavicon } from '@raineworks/ui/lib/favicon';
 import { connectModalHistory } from '@raineworks/ui/lib/modal-history';
 import { type QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { type AnyRouter, RouterProvider } from '@tanstack/react-router';
@@ -54,6 +56,8 @@ export async function mountZone(router: AnyRouter): Promise<Root> {
 	applyTheme();
 	// Back closes the modal on top (`lib/modal-history`).
 	connectModalHistory(router);
+	// The gradient favicon while the page has focus, white on black while it doesn't (`lib/favicon`).
+	connectFavicon();
 	// An agent can use the page's ui-sdk components directly (`lib/agent`), the browser's own through WebMCP.
 	connectAgent();
 	const container = document.getElementById('root');

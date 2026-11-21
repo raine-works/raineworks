@@ -8,3 +8,9 @@ declare module 'raineworks:release-notes' {
 	type RenderedDoc = import('@raineworks/tools/markdown').RenderedDoc;
 	export const docs: Array<DocMeta & { load: () => Promise<{ default: RenderedDoc }> }>;
 }
+
+/** An image a module imports (`@raineworks/ui/assets/*.svg`): bundled, content-hashed, and its URL the import. */
+declare module '*.svg' {
+	const url: string;
+	export default url;
+}

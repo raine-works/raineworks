@@ -1,10 +1,10 @@
 /**
- * Draws the brand assets in `brand/` at the repository's root, and the site's favicon and home-screen icon
- * (`src/assets/favicon.svg`, `src/assets/apple-touch-icon.png`): the mark and the logo, drawn from `blocks/brand`, in
- * the accent gradient and in black and white, on white, on black and on nothing, as SVG and PNG; the favicons; and
- * the social images (avatars, the X header, the LinkedIn banner, GitHub's social preview). Rasterised by a headless
- * Chrome, drawing each SVG onto a canvas, so PNGs keep their transparency. Run it again when the logo or the
- * accent's colours change; `bun run og-image` draws the share image.
+ * Draws the brand assets in `brand/` at the repository's root, and the site's favicons and home-screen icon
+ * (`src/assets/favicon.svg`, `src/assets/favicon-inactive.svg`, `src/assets/apple-touch-icon.png`): the mark and the
+ * logo, drawn from `blocks/brand`, in the accent gradient and in black and white, on white, on black and on nothing, as
+ * SVG and PNG; the favicons; and the social images (avatars, the X header, the LinkedIn banner, GitHub's social
+ * preview). Rasterised by a headless Chrome, drawing each SVG onto a canvas, so PNGs keep their transparency. Run it
+ * again when the logo or the accent's colours change; `bun run og-image` draws the share image.
  *
  * ```bash
  * bun run brand-assets [path/to/chrome]   # defaults to macOS's Google Chrome
@@ -120,11 +120,14 @@ for (const variant of VARIANTS) {
 
 /** The favicon: the gradient mark on a tile, white or the dark background with the OS's scheme. */
 const FAVICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-52.8 -52.8 105.6 105.6"><title>raineworks</title><style>rect{fill:${WHITE}}@media (prefers-color-scheme:dark){rect{fill:${NEAR_BLACK}}}</style><rect x="-52.8" y="-52.8" width="105.6" height="105.6" rx="14"/>${markInner(VARIANTS[1]!, 3.2)}</svg>\n`;
+/** The favicon while the page isn't focused (`lib/favicon`): the mark in white on a black tile. */
+const FAVICON_INACTIVE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-52.8 -52.8 105.6 105.6"><title>raineworks</title><rect x="-52.8" y="-52.8" width="105.6" height="105.6" rx="14" fill="${BLACK}"/>${markInner(VARIANTS[5]!, 3.2)}</svg>\n`;
 /** The icons a browser or phone shows: the gradient mark on the dark background, heavier the smaller it's drawn. */
 const tile = (strokeWidth: number, radius = 0) =>
 	svgFile('-52.8 -52.8 105.6 105.6', markInner(VARIANTS[0]!, strokeWidth), NEAR_BLACK, radius);
 
 svgOut('favicon/favicon.svg', FAVICON);
+svgOut('favicon/favicon-inactive.svg', FAVICON_INACTIVE);
 raster('favicon/favicon-16.png', tile(4.4, 14), 16, 16);
 raster('favicon/favicon-32.png', tile(3.6, 14), 32, 32);
 raster('favicon/favicon-48.png', tile(3.2, 14), 48, 48);
@@ -249,8 +252,9 @@ await write(
 	ico([16, 32, 48].map((size) => ({ size, png: bytes.get(`favicon/favicon-${size}.png`)! }))),
 );
 
-// The site's own: the favicon and the home-screen icon.
+// The site's own: the favicons and the home-screen icon.
 await write(join(assets, 'favicon.svg'), FAVICON.trimEnd());
+await write(join(assets, 'favicon-inactive.svg'), FAVICON_INACTIVE.trimEnd());
 await write(join(assets, 'apple-touch-icon.png'), bytes.get('favicon/apple-touch-icon.png')!);
 
-console.log(`✅ Wrote ${outputs.length + 1} files to ${root}, and the favicon and home-screen icon to ${assets}`);
+console.log(`✅ Wrote ${outputs.length + 1} files to ${root}, and the favicons and home-screen icon to ${assets}`);

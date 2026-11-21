@@ -13,7 +13,7 @@ light and dark), the site's blocks, the zones' runtime and About. How the zones 
 | `@raineworks/ui/app/prerender` | `prerenderZone(router)`: every page rendered at build time with its head (a route with parameters lists its pages in `staticData.pages`), and the 404 |
 | `@raineworks/ui/lib/*` | `api` (`api`, `apiFetch`, `queryClient`, `unwrap`, `ApiError`, `errorMessage`), `brand` (`APP_NAME`, `APP_LICENSE`, `COPYRIGHT_HOLDER`, `SOURCE_URL`, `SITE_URL`, `SITE_DESCRIPTION`), `head` (`PageHead`, `staticData.head` and `.pages`, `headTags`, `interpolatePath`, `SHARE_IMAGE`), `agent` (`connectAgent`: ui-sdk's agent bridge and WebMCP), `version` (`APP_VERSION`, `APP_COMMIT`, the update check), `lazy`, `modal-history`, `browser-storage`, `format`, `utils` (`cn`) |
 | `@raineworks/ui/hooks/*` | `use-theme` |
-| `@raineworks/ui/assets/*` | The favicon (the raineworks mark), the home-screen icon (both drawn by `bun run brand-assets`, with `brand/` at the root), and the share image (`og-image.png`, drawn by `bun run og-image`) |
+| `@raineworks/ui/assets/*` | The favicons (the raineworks mark: in the gradient, and white on black while the page isn't focused), the home-screen icon (drawn by `bun run brand-assets`, with `brand/` at the root), and the share image (`og-image.png`, drawn by `bun run og-image`) |
 
 Release notes live in `src/release-notes/<version>.md` (`bun run release` starts the next one); every zone's build
 bundles them for About.
