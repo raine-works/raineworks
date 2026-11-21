@@ -13,6 +13,13 @@
  * text on the page and on its own 10% tint (>= 4.5:1), with a foreground for text on the solid colour.
  *
  * Input borders are darker than shadcn's (>= 3:1 on the background, WCAG's minimum for a control's boundary).
+ *
+ * The accent is a gradient of two colours, peach (#ea9a7e) into teal (#2998ad), blended in oklab. It's decoration on
+ * a black and white site, never a meaning of its own (not "act here", not a status): the logo's mark, hairlines and
+ * borders that answer a pointer, and a little prominent text. --gradient-from / --gradient-to are the two colours as
+ * they are, for lines and the mark; --gradient-ink-from / --gradient-ink-to are the same colours made readable as
+ * text (>= 4.5:1 on the background in both themes: deepened in light mode, as they are in dark). Use the utilities,
+ * not the variables: `text-gradient`, `gradient-border`, `gradient-fill`, `gradient-hairline`, `gradient-glow`.
  */
 
 /* ui-sdk adds the little CSS its behaviours need in this layer; declared first so every style here wins over it. */
@@ -35,6 +42,11 @@
 	--brand: oklch(0.205 0 0);
 	--brand-foreground: oklch(0.985 0 0);
 	--brand-ink: oklch(0.205 0 0);
+	/* The accent gradient. */
+	--gradient-from: #ea9a7e;
+	--gradient-to: #2998ad;
+	--gradient-ink-from: oklch(0.565 0.12 39);
+	--gradient-ink-to: oklch(0.55 0.1 213.5);
 
 	--background: oklch(1 0 0);
 	--foreground: oklch(0.145 0 0);
@@ -88,6 +100,9 @@
 	--brand: oklch(0.922 0 0);
 	--brand-foreground: oklch(0.205 0 0);
 	--brand-ink: oklch(0.922 0 0);
+	/* The accent gradient: on near-black, both colours read as text as they are. */
+	--gradient-ink-from: var(--gradient-from);
+	--gradient-ink-to: var(--gradient-to);
 
 	--background: oklch(0.145 0 0);
 	--foreground: oklch(0.985 0 0);
@@ -143,6 +158,8 @@
 	--color-brand: var(--brand);
 	--color-brand-foreground: var(--brand-foreground);
 	--color-brand-ink: var(--brand-ink);
+	--color-gradient-from: var(--gradient-from);
+	--color-gradient-to: var(--gradient-to);
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
 	--color-card: var(--card);
@@ -191,6 +208,71 @@
  */
 @utility item-link {
 	@apply rounded-xs transition-colors outline-none hover:text-brand-ink focus-visible:text-brand-ink focus-visible:ring-[3px] focus-visible:ring-ring/50;
+}
+
+/* Text in the accent gradient: a name, an eyebrow, a figure worth seeing first. Readable in both themes. */
+@utility text-gradient {
+	background-image: linear-gradient(100deg in oklab, var(--gradient-ink-from), var(--gradient-ink-to));
+	background-clip: text;
+	-webkit-background-clip: text;
+	color: transparent;
+	-webkit-text-fill-color: transparent;
+	/* Descenders and italics stay inside the painted box. */
+	padding-bottom: 0.08em;
+	margin-bottom: -0.08em;
+}
+
+/*
+ * A 1px border in the accent gradient, drawn by a ::before over the element's own border (so on any background and
+ * any radius), at --gradient-border-opacity (0 by default: it shows where a state turns it up, e.g.
+ * `hover:[--gradient-border-opacity:1]`). The element needs `relative`; its ::before is taken.
+ */
+@utility gradient-border {
+	&::before {
+		content: '';
+		position: absolute;
+		inset: -1px;
+		z-index: 0;
+		border: 1px solid transparent;
+		border-radius: inherit;
+		background: linear-gradient(135deg in oklab, var(--gradient-from), var(--gradient-to)) border-box;
+		mask:
+			linear-gradient(#000 0 0) padding-box exclude,
+			linear-gradient(#000 0 0) border-box;
+		opacity: var(--gradient-border-opacity, 0);
+		pointer-events: none;
+		transition: opacity 200ms ease;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		&::before {
+			transition: none;
+		}
+	}
+}
+
+/* A solid fill in the accent gradient, left to right: a short rule over a page's title. */
+@utility gradient-fill {
+	background-image: linear-gradient(90deg in oklab, var(--gradient-from), var(--gradient-to));
+}
+
+/* A horizontal hairline in the accent gradient, fading out at both ends: a header's or footer's edge. */
+@utility gradient-hairline {
+	height: 1px;
+	background-image: linear-gradient(
+		90deg in oklab,
+		transparent,
+		var(--gradient-from) 20%,
+		var(--gradient-to) 80%,
+		transparent
+	);
+}
+
+/* A soft wash of the two colours, blurred, behind something (the hero's mark). Faint on purpose. */
+@utility gradient-glow {
+	background-image:
+		radial-gradient(closest-side at 30% 30%, color-mix(in oklab, var(--gradient-from) 45%, transparent), transparent),
+		radial-gradient(closest-side at 70% 70%, color-mix(in oklab, var(--gradient-to) 45%, transparent), transparent);
+	filter: blur(48px);
 }
 
 @layer base {
@@ -263,5 +345,9 @@
 	body {
 		@apply bg-background text-foreground antialiased;
 		font-family: var(--font-sans);
+	}
+	/* Selected text takes a tint of the accent, readable in both themes. */
+	::selection {
+		background-color: color-mix(in oklab, var(--gradient-to) 28%, transparent);
 	}
 }

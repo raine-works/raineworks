@@ -9,9 +9,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@raineworks/ui/compone
 import { education, isWritten, work } from '@raineworks/web-marketing/content/profile';
 import type { ReactNode } from 'react';
 
-/** A vertical timeline: a dot per entry on a line down the left. */
+/** A vertical timeline: a dot per entry, in the accent gradient, on a line down the left. */
 function Timeline({ children }: { children: ReactNode }) {
-	return <ol className="relative flex flex-col gap-7 border-l pl-6">{children}</ol>;
+	return <ol className="relative flex flex-col gap-7 border-l pl-5 md:pl-6">{children}</ol>;
 }
 
 function TimelineItem({
@@ -32,7 +32,7 @@ function TimelineItem({
 		<li className="relative flex flex-col gap-1">
 			<span
 				aria-hidden="true"
-				className="absolute top-1.5 -left-[1.8rem] size-2.5 rounded-full border-2 border-background bg-foreground ring-1 ring-border"
+				className="absolute top-1.5 -left-[1.55rem] size-2.5 rounded-full gradient-fill ring-4 ring-card md:-left-[1.8rem]"
 			/>
 			<h3 className="font-medium">
 				{title}

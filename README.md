@@ -42,6 +42,8 @@ built on shadcn/ui and ui-sdk.
 | [`@raineworks/tools`](packages/tools) | The shared toolbox: zones, the frontend build, env, HTTP, versions, releases, licence notices |
 | [`@raineworks/tsconfig`](packages/tsconfig) | The TypeScript configs every package extends |
 
+The logo, the favicons and the social images, in every colourway, are in [`brand/`](brand).
+
 ## Getting started
 
 Bun 1.4.4 (`.bun-version`), then:

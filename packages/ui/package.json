@@ -12,6 +12,7 @@
 		"./lib/*": "./src/lib/*.ts"
 	},
 	"scripts": {
+		"brand-assets": "bun scripts/brand-assets.tsx",
 		"og-image": "bun scripts/og-image.tsx",
 		"test": "bun test",
 		"typecheck": "bun check"

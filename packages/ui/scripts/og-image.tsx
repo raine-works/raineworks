@@ -1,6 +1,7 @@
 /**
  * Draws the site's share image (`src/assets/og-image.png`, 1200×630, `SHARE_IMAGE` in `lib/head`): the logo, drawn
- * from `blocks/brand`, Raine's name and the site's address in Geist, on the dark theme's colours. Rendered with a
+ * from `blocks/brand` with its mark in the accent gradient, Raine's name and the site's address in Geist, on the dark
+ * theme's colours with the accent's two colours glowing faintly behind. Rendered with a
  * headless Chrome; run it again when the logo or the words change.
  *
  * ```bash
@@ -15,6 +16,9 @@ import { join } from 'node:path';
 import { AppLogo, AppMark } from '@raineworks/ui/blocks/brand';
 import { SHARE_IMAGE } from '@raineworks/ui/lib/head';
 import { renderToStaticMarkup } from 'react-dom/server';
+
+/** The accent, as `globals.css` has it. */
+const GRADIENT = { from: '#ea9a7e', to: '#2998ad' };
 
 const chrome = process.argv[2] ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const font = (name: string) =>
@@ -31,20 +35,22 @@ const page = renderToStaticMarkup(
 				@font-face { font-family: Geist Mono; src: url(${font('geist-mono')}) format('woff2'); font-weight: 100 900; }
 				* { margin: 0; box-sizing: border-box; }
 				body { width: ${SHARE_IMAGE.width}px; height: ${SHARE_IMAGE.height}px; overflow: hidden; background: #0a0a0a; color: #fafafa; font-family: Geist; }
+				.glow { position: absolute; inset: 0; background: radial-gradient(circle at 78% 30%, #ea9a7e2e, transparent 42%), radial-gradient(circle at 92% 78%, #2998ad33, transparent 48%); }
 				.grid { position: absolute; inset: 0; background-image: linear-gradient(#ffffff0d 1px, transparent 1px), linear-gradient(90deg, #ffffff0d 1px, transparent 1px); background-size: 48px 48px; mask-image: radial-gradient(ellipse at 80% 40%, #000 20%, transparent 75%); }
-				.mark { position: absolute; right: -40px; top: 50%; width: 520px; height: 520px; transform: translateY(-50%); color: #ffffff1f; }
+				.mark { position: absolute; right: -40px; top: 50%; width: 520px; height: 520px; transform: translateY(-50%); opacity: 0.32; }
 				main { position: relative; display: flex; height: 100%; flex-direction: column; justify-content: space-between; padding: 72px 80px; }
 				.logo { height: 56px; width: auto; align-self: flex-start; }
-				h1 { font-size: 88px; font-weight: 600; letter-spacing: -0.04em; line-height: 1; }
+				h1 { font-size: 88px; font-weight: 600; letter-spacing: -0.04em; line-height: 1.05; padding-bottom: 6px; display: inline-block; background: linear-gradient(100deg in oklab, ${GRADIENT.from}, ${GRADIENT.to}); -webkit-background-clip: text; background-clip: text; color: transparent; }
 				p { margin-top: 20px; font-size: 36px; color: #a1a1a1; letter-spacing: -0.01em; }
 				footer { font-family: Geist Mono; font-size: 26px; color: #a1a1a1; }
 			`}</style>
 		</head>
 		<body>
+			<div className="glow" />
 			<div className="grid" />
-			<AppMark className="mark" strokeWidth={1.6} />
+			<AppMark className="mark" strokeWidth={1.6} gradient={GRADIENT} />
 			<main>
-				<AppLogo className="logo" strokeWidth={3.6} />
+				<AppLogo className="logo" strokeWidth={3.6} gradient={GRADIENT} />
 				<div>
 					<h1>Raine Petersen</h1>
 					<p>Software, systems and open source.</p>
@@ -62,6 +68,7 @@ try {
 	const run = Bun.spawnSync([
 		chrome,
 		'--headless=new',
+		'--no-sandbox',
 		'--hide-scrollbars',
 		'--force-device-scale-factor=1',
 		`--window-size=${SHARE_IMAGE.width},${SHARE_IMAGE.height}`,
