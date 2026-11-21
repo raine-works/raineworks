@@ -55,8 +55,8 @@ describe('the projects’ pages', () => {
 	});
 
 	test('use typographic quotes and plain text: no straight quotes, no Markdown, nothing blank', () => {
-		for (const { slug, title, summary } of projects) {
-			for (const text of [title, summary, ...allText(slug)]) {
+		for (const { slug, title, summary, disclaimer } of projects) {
+			for (const text of [title, summary, ...(disclaimer ? [disclaimer] : []), ...allText(slug)]) {
 				expect({ slug, text }).toEqual({ slug, text: expect.not.stringMatching(/['"`*<>]|\]\(/) });
 				expect(text.trim().isEmpty()).toBe(false);
 			}

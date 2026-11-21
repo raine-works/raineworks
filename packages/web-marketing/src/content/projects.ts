@@ -22,6 +22,8 @@ export interface ProjectEntry {
 	screenshots?: { path: string; alt: string }[];
 	/** A Home Assistant integration: the page offers to open it in the Home Assistant Marketplace. */
 	homeAssistant?: true;
+	/** For another company’s product: who it isn’t affiliated with, shown on its page. */
+	disclaimer?: string;
 }
 
 /** Whose repositories. */
@@ -63,7 +65,10 @@ export const projects: ProjectEntry[] = [
 		title: 'Raineworks TV',
 		summary:
 			'A Home Assistant integration with a TV app of its own for Google TV and Android TV: control, notifications, live cameras, media and dashboards.',
-		logo: brandIcon('googletv'),
+		// The TV app’s icon, Raineworks TV’s own (the integration’s icon in Home Assistant is Google TV’s)
+		logo: 'android/play/icon-512.png',
+		disclaimer:
+			'Not affiliated with, authorized or endorsed by Google. Google TV and Android TV are trademarks of Google LLC.',
 		screenshots: [
 			{
 				path: 'docs/images/3-notification-buttons.png',
@@ -82,6 +87,8 @@ export const projects: ProjectEntry[] = [
 		summary:
 			'An unofficial Home Assistant integration for xAI’s Grok, built for a fast voice assistant: conversation, speech to text and text to speech, all streaming.',
 		logo: brandIcon('xai_grok'),
+		disclaimer:
+			'Not affiliated with, authorized or endorsed by xAI. Grok and its logo are xAI’s. It uses xAI’s API with your own key.',
 		homeAssistant: true,
 	},
 	{
@@ -91,6 +98,8 @@ export const projects: ProjectEntry[] = [
 		summary:
 			'Home Assistant’s Music Assistant integration with the whole queue and its edits, podcast episodes and the Party link, replacing the built-in one in place.',
 		logo: brandIcon('music_assistant'),
+		disclaimer:
+			'Not affiliated with, authorized or endorsed by the Music Assistant project or the Open Home Foundation. Music Assistant’s name and logo are its project’s.',
 		homeAssistant: true,
 	},
 	{
@@ -107,6 +116,7 @@ export const projects: ProjectEntry[] = [
 		summary:
 			'An unofficial Home Assistant integration for EverScent whole-home HVAC scent diffusers: power, schedules, fragrance levels and quick scent bursts.',
 		logo: brandIcon('everscent'),
+		disclaimer: 'Not affiliated with, authorized or endorsed by EverScent. EverScent’s name and logo are its own.',
 		homeAssistant: true,
 	},
 	{
