@@ -13,7 +13,7 @@ import { highlight } from '@raineworks/tools/highlight';
 describe('the documented projects', () => {
 	test('are found by their slug, never by an inherited property', () => {
 		expect(isDocsProject('ha-dashboards')).toBe(true);
-		expect(isDocsProject('ha-grok')).toBe(false);
+		expect(isDocsProject('dotfiles')).toBe(false);
 		expect(isDocsProject('constructor')).toBe(false);
 		expect(isDocsProject('toString')).toBe(false);
 	});
@@ -25,7 +25,7 @@ describe('the documented projects', () => {
 			'https://github.com/raine-works/ha-dashboards/blob/master/AGENTS.md',
 		);
 		expect(docsRepoUrl('ha-dashboards')).toBe('https://github.com/raine-works/ha-dashboards');
-		expect(Object.values(DOCS_SOURCES).map((source) => source.dir)).toEqual(['docs']);
+		expect(new Set(Object.values(DOCS_SOURCES).map((source) => source.dir))).toEqual(new Set(['docs']));
 	});
 
 	test('name pages with lowercase letters, digits and hyphens, one `/` at most', () => {

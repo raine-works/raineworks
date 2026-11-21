@@ -16,7 +16,29 @@ export interface ProjectEntry {
 	title: string;
 	/** One sentence: under the title, and in search results and link previews (120 to 160 characters). */
 	summary: string;
+	/** Its logo, a square image in the repository (a path from its root), shown beside the title. */
+	logo?: string;
+	/** Screenshots in the repository (paths from its root), shown on the page in this order. */
+	screenshots?: { path: string; alt: string }[];
+	/** A Home Assistant integration: the page offers to open it in the Home Assistant Marketplace. */
+	homeAssistant?: true;
 }
+
+/** Whose repositories. */
+export const PROJECTS_OWNER = 'raine-works';
+
+/** A file of a project's repository as GitHub serves it, from its default branch's latest commit. */
+export function repoFileUrl(project: ProjectEntry, path: string): string {
+	return `https://raw.githubusercontent.com/${PROJECTS_OWNER}/${project.repo}/HEAD/${path}`;
+}
+
+/** My Home Assistant's link that opens the project's repository in the Home Assistant Marketplace (2026.11+). */
+export function marketplaceUrl(project: ProjectEntry): string {
+	const query = new URLSearchParams({ owner: PROJECTS_OWNER, repository: project.repo, category: 'integration' });
+	return `https://my.home-assistant.io/redirect/marketplace_repository/?${query}`;
+}
+
+const brandIcon = (domain: string) => `custom_components/${domain}/brand/icon@2x.png`;
 
 /** In the order the pages link on to each other. */
 export const projects: ProjectEntry[] = [
@@ -26,6 +48,14 @@ export const projects: ProjectEntry[] = [
 		title: 'Raineworks Dashboards',
 		summary:
 			'Home Assistant dashboards for desktops, phones and wall tablets, built with Preact, shadcn/ui and Tailwind, with an integration that serves them.',
+		logo: brandIcon('raineworks_dashboards'),
+		screenshots: [
+			{ path: 'docs/images/home-dark.png', alt: 'The Home dashboard on a desktop, in the Raineworks theme' },
+			{ path: 'docs/images/wall-panel.png', alt: 'The wall panel card on a 10.5-inch tablet' },
+			{ path: 'docs/images/phone.png', alt: 'The Home dashboard on a phone' },
+			{ path: 'docs/images/home-light.png', alt: 'The Home dashboard in light mode' },
+		],
+		homeAssistant: true,
 	},
 	{
 		repo: 'ha-googletv',
@@ -33,6 +63,17 @@ export const projects: ProjectEntry[] = [
 		title: 'Raineworks TV',
 		summary:
 			'A Home Assistant integration with a TV app of its own for Google TV and Android TV: control, notifications, live cameras, media and dashboards.',
+		logo: brandIcon('googletv'),
+		screenshots: [
+			{
+				path: 'docs/images/3-notification-buttons.png',
+				alt: 'A doorbell pop-up over the TV app, answered with the remote: Unlock or Ignore',
+			},
+			{ path: 'docs/images/0a-home.png', alt: 'The TV app’s home screen: connected to Home Assistant, over ADB' },
+			{ path: 'docs/images/5-song.png', alt: 'Music from Home Assistant playing on the TV' },
+			{ path: 'docs/images/6-dashboard.png', alt: 'A Home Assistant dashboard cast to the TV' },
+		],
+		homeAssistant: true,
 	},
 	{
 		repo: 'ha-grok',
@@ -40,6 +81,8 @@ export const projects: ProjectEntry[] = [
 		title: 'xAI Grok for Home Assistant',
 		summary:
 			'An unofficial Home Assistant integration for xAI’s Grok, built for a fast voice assistant: conversation, speech to text and text to speech, all streaming.',
+		logo: brandIcon('xai_grok'),
+		homeAssistant: true,
 	},
 	{
 		repo: 'ha-music-assistant',
@@ -47,6 +90,8 @@ export const projects: ProjectEntry[] = [
 		title: 'Music Assistant for Home Assistant',
 		summary:
 			'Home Assistant’s Music Assistant integration with the whole queue and its edits, podcast episodes and the Party link, replacing the built-in one in place.',
+		logo: brandIcon('music_assistant'),
+		homeAssistant: true,
 	},
 	{
 		repo: 'sendspin-a1s-source',
@@ -61,6 +106,8 @@ export const projects: ProjectEntry[] = [
 		title: 'EverScent for Home Assistant',
 		summary:
 			'An unofficial Home Assistant integration for EverScent whole-home HVAC scent diffusers: power, schedules, fragrance levels and quick scent bursts.',
+		logo: brandIcon('everscent'),
+		homeAssistant: true,
 	},
 	{
 		repo: 'ha-warden',
@@ -68,6 +115,8 @@ export const projects: ProjectEntry[] = [
 		title: 'Warden for Home Assistant',
 		summary:
 			'Groups, fine-grained permissions and required two-factor authentication for Home Assistant users, enforced by Home Assistant’s own permission engine.',
+		logo: brandIcon('warden'),
+		homeAssistant: true,
 	},
 	{
 		repo: 'ha-gitops',
@@ -75,6 +124,8 @@ export const projects: ProjectEntry[] = [
 		title: 'GitOps for Home Assistant',
 		summary:
 			'Keep your Home Assistant configuration in Git and deploy it by pushing: a configuration check first, a rollback when it fails, and a reload of what changed.',
+		logo: brandIcon('gitops'),
+		homeAssistant: true,
 	},
 	{
 		repo: 'raineworks',

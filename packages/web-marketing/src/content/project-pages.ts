@@ -28,7 +28,8 @@ export const projectPages: Record<string, ProjectPage> = {
 		overview: [
 			'Raineworks Dashboards are Home Assistant dashboards that work like an app: one for desktops and phones, and one for wall tablets. They’re built with Preact, shadcn/ui and Tailwind CSS, and they discover your house on their own: lights by room and floor, locks, garage doors, cameras, thermostats, curtains, fans, music, TVs and people.',
 			'You add a card and there’s nothing to configure per entity. Each feature is a module that turns itself on when your house has what it needs, and stays out of the way when it doesn’t.',
-			'It comes with a Home Assistant integration, installed through HACS, that serves the cards on every page, says who the household is, and gives the dashboards what Home Assistant alone can’t: announcements, phone pushes, to-do assignment, bedtime switches and the wall tablets’ hardware.',
+			'Its themes style Home Assistant itself, not just the cards: Raineworks, with this site’s gradient edges and glow, Neutral and five colors, and an editor for your own that takes themes from shadcn and tweakcn. Each person picks theirs.',
+			'It comes with a Home Assistant integration, installed from the Home Assistant Marketplace, that serves the cards on every page, says who the household is, and gives the dashboards what Home Assistant alone can’t: announcements, phone pushes, to-do assignment, bedtime switches and the wall tablets’ hardware.',
 		],
 		highlights: [
 			{
@@ -63,7 +64,7 @@ export const projectPages: Record<string, ProjectPage> = {
 					'Install the integration, add a dashboard that hosts a card, and label your lights. There’s no Lovelace resource to add, since the integration serves the cards on every page.',
 				],
 				points: [
-					'In HACS, add the repository as a custom integration, install Raineworks Dashboards and restart Home Assistant, then add it under Settings → Devices & services.',
+					'Open the repository in the Home Assistant Marketplace with Add to Home Assistant, download Raineworks Dashboards and restart Home Assistant, then add it under Settings → Devices & services.',
 					'Add a dashboard from scratch, edit it in YAML mode, and give it a view with panel set to true that hosts the custom:home-dashboard card.',
 					'Give room lights the label household_light so the lighting section lists them. Indicator LEDs and other non-room lights stay unlabeled.',
 					'For a wall tablet, add a dashboard with the wall panel card, then register the tablet on the integration’s page with Add wall panel, picking its device.',
@@ -131,7 +132,7 @@ export const projectPages: Record<string, ProjectPage> = {
 					'It needs Home Assistant 2025.2 or newer.',
 				],
 				points: [
-					'Add the repository to HACS as a custom integration, download Raineworks TV and restart Home Assistant.',
+					'Open the repository in the Home Assistant Marketplace with Add to Home Assistant, download Raineworks TV and restart Home Assistant.',
 					'Install the TV app on the TV and open it, or turn on network debugging so Home Assistant can install it over ADB.',
 					'Add the TV when it appears under Settings → Devices & services → Discovered.',
 					'Choose Allow on the TV when it asks to let Home Assistant connect. There’s no code to type.',
@@ -205,7 +206,7 @@ export const projectPages: Record<string, ProjectPage> = {
 					'It needs Home Assistant 2026.10 or newer, and an API key from console.x.ai. The key needs Voice access for speech to text and text to speech.',
 				],
 				points: [
-					'Add the repository to HACS as a custom integration, install xAI Grok and restart Home Assistant.',
+					'Open the repository in the Home Assistant Marketplace with Add to Home Assistant, download xAI Grok and restart Home Assistant.',
 					'Add the xAI Grok integration under Settings → Devices & services and enter your API key.',
 					'In Settings → Voice assistants, choose Grok as the conversation agent, with Grok Speech to text and Grok Text to speech.',
 				],
@@ -274,10 +275,10 @@ export const projectPages: Record<string, ProjectPage> = {
 			{
 				heading: 'Getting started',
 				body: [
-					'Install it from HACS and restart. Home Assistant logs that the built-in integration is overridden by a custom one, and that’s this.',
+					'Download it from the Home Assistant Marketplace and restart. Home Assistant logs that the built-in integration is overridden by a custom one, and that’s this.',
 				],
 				points: [
-					'In HACS, add the repository as a custom integration, then install Music Assistant (raine-works).',
+					'Open the repository in the Home Assistant Marketplace with Add to Home Assistant, then download Music Assistant (raine-works).',
 					'Restart Home Assistant.',
 					'Already set up Music Assistant? Nothing else to do. New to it? Add the Music Assistant integration as usual under Settings → Devices & services.',
 				],
@@ -399,7 +400,7 @@ export const projectPages: Record<string, ProjectPage> = {
 					'If you sign in to EverScent with Google, Apple or Facebook and never set a password, use Forgot password in the EverScent app to set one first. Your social login keeps working in the app.',
 				],
 				points: [
-					'Add the repository to HACS as a custom integration, install EverScent and restart Home Assistant.',
+					'Open the repository in the Home Assistant Marketplace with Add to Home Assistant, download EverScent and restart Home Assistant.',
 					'Add the EverScent integration under Settings → Devices & services.',
 					'Sign in with your EverScent email and password.',
 				],
@@ -479,7 +480,7 @@ export const projectPages: Record<string, ProjectPage> = {
 				heading: 'Getting started',
 				body: ['It needs Home Assistant 2026.10 or newer.'],
 				points: [
-					'Add the repository to HACS as a custom integration, install Warden and restart Home Assistant.',
+					'Open the repository in the Home Assistant Marketplace with Add to Home Assistant, download Warden and restart Home Assistant.',
 					'Add the Warden integration under Settings → Devices & services and confirm.',
 					'Open Warden in the sidebar to create groups, add members and set two-factor requirements.',
 					'To remove it, delete the integration before its files, so every managed user gets their original role back.',
@@ -524,7 +525,7 @@ export const projectPages: Record<string, ProjectPage> = {
 				heading: 'Getting started',
 				body: ['It needs git, which Home Assistant’s container and Home Assistant OS ship.'],
 				points: [
-					'In HACS, add the repository as a custom integration, install GitOps and restart Home Assistant.',
+					'Open the repository in the Home Assistant Marketplace with Add to Home Assistant, download GitOps and restart Home Assistant.',
 					'Add the GitOps integration under Settings → Devices & services, with the repository’s address, its branch and the folder to keep it in.',
 					'For an SSH address, add the deploy key it shows to the repository.',
 					'Add the webhook it shows, with content type application/json, the push event only and the secret it gives, which is shown once.',

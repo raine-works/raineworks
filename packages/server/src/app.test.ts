@@ -204,7 +204,7 @@ describe('the docs', () => {
 		const missing = await get('/api/docs/ha-dashboards?page=nope');
 		expect(missing.status).toBe(404);
 		expect(((await missing.json()) as { error: { code: string } }).error.code).toBe('docs_not_found');
-		const other = await get('/api/docs/ha-grok');
+		const other = await get('/api/docs/dotfiles');
 		expect(other.status).toBe(404);
 		expect(requested).toHaveLength(1);
 	});

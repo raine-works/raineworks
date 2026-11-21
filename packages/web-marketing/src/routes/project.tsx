@@ -13,11 +13,11 @@ import { Badge } from '@raineworks/ui/components/badge';
 import { Button } from '@raineworks/ui/components/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@raineworks/ui/components/card';
 import { Skeleton } from '@raineworks/ui/components/skeleton';
-import { GitHubIcon } from '@raineworks/web-marketing/components/brand-icons';
+import { GitHubIcon, HomeAssistantIcon } from '@raineworks/web-marketing/components/brand-icons';
 import { projectsQuery, StarCount } from '@raineworks/web-marketing/components/project-card';
 import { profile } from '@raineworks/web-marketing/content/profile';
 import { projectPages, type ProjectSection } from '@raineworks/web-marketing/content/project-pages';
-import { type ProjectEntry, projects } from '@raineworks/web-marketing/content/projects';
+import { marketplaceUrl, type ProjectEntry, projects, repoFileUrl } from '@raineworks/web-marketing/content/projects';
 import { useQuery } from '@tanstack/react-query';
 import { getRouteApi, Link } from '@tanstack/react-router';
 import { ArrowLeftIcon, ArrowRightIcon, ArrowUpRightIcon, BookOpenIcon } from 'lucide-react';
@@ -105,6 +105,14 @@ function AtAGlance({ project }: { project: ProjectEntry }) {
 						</div>
 					)}
 				</div>
+				{project.homeAssistant && (
+					<Button asChild variant="outline" className="w-full">
+						<a href={marketplaceUrl(project)} target="_blank" rel="noopener noreferrer">
+							<HomeAssistantIcon />
+							Add to Home Assistant
+						</a>
+					</Button>
+				)}
 				{isDocsProject(project.slug) && (
 					<Button asChild variant="outline" className="w-full">
 						<Link to="/projects/$slug/docs" params={{ slug: project.slug }}>
@@ -121,6 +129,50 @@ function AtAGlance({ project }: { project: ProjectEntry }) {
 				</Button>
 			</CardContent>
 		</Card>
+	);
+}
+
+/** Screenshots from the repository: the first wide, the rest in a grid; each opens full size. */
+function Screenshots({ project }: { project: ProjectEntry }) {
+	if (!project.screenshots?.length) return null;
+	return (
+		<section aria-labelledby="screenshots" className="flex flex-col gap-4">
+			<SectionTitle id="screenshots">Screenshots</SectionTitle>
+			<ul className="grid gap-3 sm:grid-cols-2">
+				{project.screenshots.map((shot, index) => (
+					<li key={shot.path} className={index === 0 ? 'sm:col-span-2' : undefined}>
+						<a
+							href={repoFileUrl(project, shot.path)}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="block overflow-hidden rounded-xl border bg-card transition-[border-color,box-shadow] outline-none hover:border-foreground/20 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring"
+						>
+							<img
+								src={repoFileUrl(project, shot.path)}
+								alt={shot.alt}
+								loading="lazy"
+								decoding="async"
+								className="h-auto w-full"
+							/>
+						</a>
+					</li>
+				))}
+			</ul>
+		</section>
+	);
+}
+
+/** The project's logo from its repository, beside the title. */
+function ProjectLogo({ project }: { project: ProjectEntry }) {
+	if (!project.logo) return null;
+	return (
+		<img
+			src={repoFileUrl(project, project.logo)}
+			alt=""
+			width={56}
+			height={56}
+			className="size-12 shrink-0 rounded-xl md:size-14"
+		/>
 	);
 }
 
@@ -168,7 +220,12 @@ export function ProjectPage() {
 				<ArrowLeftIcon className="size-4" />
 				Projects
 			</Link>
-			<Page title={project.title} description={project.summary} className="[&>header]:max-w-3xl">
+			<Page
+				title={project.title}
+				icon={<ProjectLogo project={project} />}
+				description={project.summary}
+				className="[&>header]:max-w-3xl"
+			>
 				<div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-12">
 					<div className="flex min-w-0 flex-col gap-10 md:gap-12">
 						{page && (
@@ -208,6 +265,8 @@ export function ProjectPage() {
 										))}
 									</ul>
 								</section>
+
+								<Screenshots project={project} />
 
 								<div className="flex max-w-2xl flex-col gap-10 md:gap-12">
 									{page.sections.map((section, index) => (
