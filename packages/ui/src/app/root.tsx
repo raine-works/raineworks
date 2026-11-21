@@ -1,7 +1,7 @@
 /**
  * The root of every zone: providers (TanStack Query, tooltips, toasts, what's new) around the zone's TanStack Router,
- * with the theme, modal history, the focus-following favicon (`lib/favicon`) and the agent bridge (`lib/agent`) connected
- * before it renders.
+ * with the theme, modal history, the focus-following favicon (`lib/favicon`) and the agent bridge (`lib/agent`)
+ * connected before it renders.
  *
  * ```tsx
  * // packages/web-<zone>/src/main.tsx

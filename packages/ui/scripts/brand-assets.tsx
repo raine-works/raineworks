@@ -1,8 +1,8 @@
 /**
  * Draws the brand assets in `brand/` at the repository's root, and the site's favicons and home-screen icon
- * (`src/assets/favicon.svg`, `src/assets/favicon-inactive.svg`, `src/assets/apple-touch-icon.png`): the mark and the logo, drawn from `blocks/brand`, in
- * the accent gradient and in black and white, on white, on black and on nothing, as SVG and PNG; the favicons; and
- * the social images (avatars, the X header, the LinkedIn banner, GitHub's social preview). Rasterised by a headless
+ * (`src/assets/favicon.svg`, `src/assets/favicon-inactive.svg`, `src/assets/apple-touch-icon.png`): the mark and the
+ * logo, drawn from `blocks/brand`, in the accent gradient and in black and white, on white, on black and on nothing,
+ * as SVG and PNG; the favicons; and the social images (avatars, the X header, the LinkedIn banner, GitHub's social preview). Rasterised by a headless
  * Chrome, drawing each SVG onto a canvas, so PNGs keep their transparency. Run it again when the logo or the
  * accent's colours change; `bun run og-image` draws the share image.
  *
