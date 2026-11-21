@@ -87,11 +87,11 @@ and Geist Mono. The brand is monochrome, like the logo, with one accent: a gradi
 - **Accent:** the gradient is decoration, and used sparingly: the logo's mark, the hairlines under the header and
   over the footer and under the current page, the rule over each page's title, the home page's name and eyebrows,
   the timeline's dots, the border of a main content card (the companies on Home, the projects, the articles) under
-  the pointer, and the call to action's glow. It's never a status. Through the utilities in `globals.css`:
+  the pointer, and the call to action's edge and glow. It's never a status. Through the utilities in `globals.css`:
   `text-gradient` (text, readable in both themes: deepened in light mode), `gradient-border` (a 1px border,
   `--gradient-border-mix` of the way from the border colour to the gradient: none at rest, 100% on hover or focus; a
   content card adds it), `gradient-shadow` (the soft glow every primary `Button` has, `--gradient-glow-strength`
-  brighter on hover), `gradient-fill`, `gradient-hairline`, `gradient-glow`. Fills, focus rings and links stay black
+  brighter on hover, with a `gradient-border` edge in full: `[--gradient-border-rest:100%]`), `gradient-fill`, `gradient-hairline`, `gradient-glow`. Fills, focus rings and links stay black
   and white.
 - **Logo:** `AppLogo` (mark and wordmark) and `AppMark` (`blocks/brand`), drawn inline from the logo's SVG source so
   they follow the theme; `gradient` strokes the mark in the accent. The favicon (`assets/favicon.svg`) is the gradient
