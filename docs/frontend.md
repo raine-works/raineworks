@@ -26,7 +26,9 @@ providers: TanStack Query, tooltips, toasts and About. A prerendered page is hyd
 ## Prerendering, search and share cards
 
 Every page is rendered at build time (`@raineworks/ui/app/prerender`, run by the zone's build through
-`src/prerender.tsx`): each route without parameters to `<path>/index.html`, and the not-found page to `404.html`,
+`src/prerender.tsx`): each route without parameters to `<path>/index.html`, each page a route with parameters
+lists in `staticData.pages` (its params and its own head; without the list, none) the same way, and the not-found
+page to `404.html`,
 which the server sends with a 404 status. So a page shows before its script has loaded, and search engines and link
 previews (Slack, iMessage, X, LinkedIn) see each page for what it is.
 
@@ -38,7 +40,8 @@ previews (Slack, iMessage, X, LinkedIn) see each page for what it is.
   `packages/ui/scripts/og-image.tsx` (`bun run og-image` in `packages/ui`, with Chrome). Run it again when the logo
   or the words change; the build serves it under a content-hashed name, so a changed image is a new URL to every
   cache.
-- **`sitemap.xml` and `robots.txt`** list every page found, at `SITE_URL` (`lib/brand`).
+- **`sitemap.xml` and `robots.txt`** list every page found, at `SITE_URL` (`lib/brand`), but one whose head is `unlisted` (a
+  page that may be off, like the articles).
 - **Hydration waits for the first paint.** The page is all in its HTML (its links work without a script), so its
   script loads once the content has painted (`hydrateAfterLoad`, `@raineworks/tools/build`) and never competes with
   the stylesheet and fonts. The router is marked server-rendered (`router.ssr`) so the tree it hydrates is the one
