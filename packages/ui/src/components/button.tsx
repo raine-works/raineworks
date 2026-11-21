@@ -8,9 +8,10 @@ const buttonVariants = cva(
 	{
 		variants: {
 			variant: {
-				// The call to action: a soft glow of the accent behind it (`gradient-shadow`, globals.css), brighter on hover.
+				// The call to action: the accent as its edge (`gradient-border`, in full) and a soft glow behind it
+				// (`gradient-shadow`, brighter on hover), globals.css.
 				default:
-					'bg-primary text-primary-foreground gradient-shadow hover:bg-primary/90 hover:[--gradient-glow-strength:95%] focus-visible:[--gradient-glow-strength:95%]',
+					'gradient-border relative bg-primary text-primary-foreground gradient-shadow [--gradient-border-rest:100%] hover:bg-primary/90 hover:[--gradient-glow-strength:95%] focus-visible:[--gradient-glow-strength:95%]',
 				destructive:
 					'bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40',
 				outline:

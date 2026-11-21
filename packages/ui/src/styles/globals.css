@@ -239,11 +239,12 @@
  * A 1px border in the accent gradient, top left to bottom right, drawn by a ::before over the element's own border
  * (so on any background and any radius), --gradient-border-mix of the way from the border colour to the gradient.
  * The main content cards (Home's companies, the projects, the articles) have it, showing under the pointer or the
- * keyboard's focus; the element needs `relative`, and its ::before is taken.
+ * keyboard's focus; primary buttons have it in full all the time (`[--gradient-border-rest:100%]`). The element needs
+ * `relative`, and its ::before is taken.
  */
 @utility gradient-border {
-	/* At rest, whatever an ancestor's is: a bordered element in a hovered card stays plain. */
-	--gradient-border-mix: 0%;
+	/* At rest: its own --gradient-border-rest (none unless set), whatever an ancestor's is. */
+	--gradient-border-mix: var(--gradient-border-rest, 0%);
 	transition-property: --gradient-border-mix, color, background-color, box-shadow, translate;
 	transition-duration: 200ms;
 	&::before {
@@ -272,7 +273,8 @@
 /*
  * The call to action's glow: the two colours, soft, behind it (peach to the left, teal to the right), at
  * --gradient-glow-strength (faint at rest; `hover:[--gradient-glow-strength:95%]` brings it up). Every primary button
- * has it (`components/button`), so the glow is what says "act here" alongside the brand.
+ * has it, with a `gradient-border` edge in full (`components/button`), so the accent is what says "act here" alongside
+ * the brand.
  */
 @utility gradient-shadow {
 	--gradient-glow-strength: 60%;
