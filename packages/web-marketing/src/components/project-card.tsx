@@ -64,7 +64,7 @@ export function ProjectCard({ project }: { project: Project }) {
 	const stack = project.stack.slice(0, CARD_STACK);
 	const hidden = project.stack.length - stack.length;
 	return (
-		<Card className="group h-full gap-5 has-[a:focus-visible]:[--gradient-border-mix:100%] has-[a:hover]:-translate-y-0.5 has-[a:hover]:shadow-md has-[a:hover]:[--gradient-border-mix:100%]">
+		<Card className="group gradient-border relative h-full gap-5 has-[a:focus-visible]:[--gradient-border-mix:100%] has-[a:hover]:-translate-y-0.5 has-[a:hover]:shadow-md has-[a:hover]:[--gradient-border-mix:100%]">
 			<CardHeader className="gap-2">
 				<CardTitle className="flex items-center gap-2 font-mono text-base">
 					<GitHubIcon className="size-4 shrink-0 text-muted-foreground" />

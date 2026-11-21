@@ -70,7 +70,7 @@ export function HomePage() {
 					{work.map((entry) => (
 						<Card
 							key={entry.org}
-							className="gap-2 has-[a:focus-visible]:[--gradient-border-mix:100%] has-[a:hover]:shadow-md has-[a:hover]:[--gradient-border-mix:100%]"
+							className="gradient-border relative gap-2 has-[a:focus-visible]:[--gradient-border-mix:100%] has-[a:hover]:shadow-md has-[a:hover]:[--gradient-border-mix:100%]"
 						>
 							<CardHeader>
 								<CardTitle className="text-lg">
