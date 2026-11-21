@@ -132,7 +132,7 @@ function NextProject({ project }: { project: ProjectEntry }) {
 			<Link
 				to="/projects/$slug"
 				params={{ slug: next.slug }}
-				className="group gradient-border relative flex min-w-0 flex-col gap-1 rounded-xl border bg-card px-5 py-4 transition-shadow outline-none hover:shadow-md hover:[--gradient-border-opacity:1] focus-visible:ring-2 focus-visible:ring-ring focus-visible:[--gradient-border-opacity:1] sm:ml-auto sm:max-w-sm sm:text-right"
+				className="group gradient-border relative flex min-w-0 flex-col gap-1 rounded-xl border bg-card px-5 py-4 outline-none hover:shadow-md hover:[--gradient-border-mix:100%] focus-visible:ring-2 focus-visible:ring-ring focus-visible:[--gradient-border-mix:100%] sm:ml-auto sm:max-w-sm sm:text-right"
 			>
 				<span className="font-mono text-[11px] tracking-widest text-muted-foreground uppercase">Next project</span>
 				<span className="inline-flex items-center gap-1.5 font-medium sm:justify-end">
@@ -185,7 +185,7 @@ export function ProjectPage() {
 										{page.highlights.map((highlight) => (
 											<li
 												key={highlight.title}
-												className="flex flex-col gap-1.5 rounded-xl border bg-card px-4 py-4 sm:px-5"
+												className="gradient-border relative flex flex-col gap-1.5 rounded-xl border bg-card px-4 py-4 sm:px-5"
 											>
 												<h3 className="flex items-center gap-2.5 font-medium">
 													<span
