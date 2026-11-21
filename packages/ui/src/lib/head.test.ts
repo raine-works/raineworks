@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 
 import { THEME_SCRIPT } from '@raineworks/ui/hooks/use-theme';
-import { documentTitle, headTags } from '@raineworks/ui/lib/head';
+import { documentTitle, headTags, interpolatePath } from '@raineworks/ui/lib/head';
 
 const content = (html: string, attribute: string, name: string) =>
 	html.match(new RegExp(`<meta ${attribute}="${name}" content="([^"]*)" />`))?.[1];
@@ -96,5 +96,16 @@ describe('the theme script', () => {
 
 	test('follows the system where storage is refused', () => {
 		expect(run(new Error('SecurityError'), true)).toBe(true);
+	});
+});
+
+describe('a page of a route with parameters', () => {
+	test('has its path filled in from its parameters, each one encoded', () => {
+		expect(interpolatePath('/projects/$slug', { slug: 'ha-grok' })).toBe('/projects/ha-grok');
+		expect(interpolatePath('/a/$x/b/$y', { x: '1', y: 'two words' })).toBe('/a/1/b/two%20words');
+	});
+
+	test('can’t be rendered without every parameter its path names', () => {
+		expect(() => interpolatePath('/projects/$slug', {})).toThrow('/projects/$slug needs the parameter slug.');
 	});
 });

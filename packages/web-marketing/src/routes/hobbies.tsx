@@ -37,14 +37,15 @@ export function HobbiesPage() {
 					return (
 						<li key={hobby.name}>
 							<Card className="h-full">
-								<CardHeader className="gap-3">
+								{/* Phones: the icon beside the name and note, so each card is a line or two; stacked from sm. */}
+								<CardHeader className="grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5 sm:grid-cols-1 sm:gap-3">
 									<span
-										className="flex size-9 items-center justify-center rounded-lg border bg-muted text-foreground"
+										className="row-span-2 flex size-9 items-center justify-center rounded-lg border bg-muted text-foreground sm:row-span-1"
 										aria-hidden="true"
 									>
 										<Icon className="size-4" />
 									</span>
-									<CardTitle>
+									<CardTitle className="self-center sm:self-auto">
 										<h2>{hobby.name}</h2>
 									</CardTitle>
 									<CardDescription className="leading-relaxed">{hobby.note}</CardDescription>

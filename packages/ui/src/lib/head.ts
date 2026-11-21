@@ -22,10 +22,27 @@ export interface PageHead {
 	structuredData?: Record<string, unknown>;
 }
 
+/** One page of a route with parameters (`/projects/$slug`): its parameters and its head. */
+export interface StaticPage {
+	params: Record<string, string>;
+	head: PageHead;
+}
+
 declare module '@tanstack/react-router' {
 	interface StaticDataRouteOption {
 		head?: PageHead;
+		/** A route with parameters: every page it has, each prerendered with its own head. Without it, none is. */
+		pages?: StaticPage[];
 	}
+}
+
+/** `path` with its `$name` segments filled in from `params`; throws for one `params` doesn't give. */
+export function interpolatePath(path: string, params: Record<string, string>): string {
+	return path.replace(/\$(\w+)/g, (_, name: string) => {
+		const value = params[name];
+		if (value === undefined) throw new Error(`${path} needs the parameter ${name}.`);
+		return encodeURIComponent(value);
+	});
 }
 
 /** The site's share image (`assets/og-image.png`): its file name in a zone's build, size and what it shows. */

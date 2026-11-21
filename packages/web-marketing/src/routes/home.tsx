@@ -20,42 +20,46 @@ import { ArrowRightIcon, ArrowUpRightIcon, MapPinIcon } from 'lucide-react';
 export function HomePage() {
 	useDocumentTitle(profile.name);
 	return (
-		<div className="flex flex-col gap-20 md:gap-28">
+		<div className="flex flex-col gap-16 md:gap-28">
 			<section className="relative isolate">
 				<div
 					aria-hidden="true"
 					className="bg-grid pointer-events-none absolute -inset-x-4 -top-8 -z-10 h-[28rem] md:-inset-x-8 md:-top-12"
 				/>
-				<div className="grid items-center gap-10 pt-4 md:grid-cols-[1fr_auto] md:pt-12">
+				<div className="grid items-center gap-10 pt-2 md:grid-cols-[1fr_auto] md:pt-12">
 					<div className="flex flex-col items-start gap-6">
 						<Badge variant="outline" className="gap-1.5 rounded-full bg-background px-3 py-1 text-muted-foreground">
 							<MapPinIcon />
 							{profile.location}
 						</Badge>
 						<div className="flex flex-col gap-4">
-							<h1 className="text-5xl font-semibold tracking-tighter text-balance md:text-7xl">{profile.name}</h1>
-							<p className="text-lg text-balance text-muted-foreground md:text-xl">{profile.title}</p>
+							<h1 className="text-[2.75rem] leading-[1.05] font-semibold tracking-tighter text-balance sm:text-5xl md:text-7xl">
+								<span className="text-gradient">{profile.name}</span>
+							</h1>
+							<p className="text-base text-balance text-muted-foreground sm:text-lg md:text-xl">{profile.title}</p>
 						</div>
-						<p className="max-w-xl text-lg leading-relaxed text-pretty">{profile.tagline}</p>
+						<p className="max-w-xl text-lg leading-relaxed text-pretty md:text-xl md:leading-relaxed">
+							{profile.tagline}
+						</p>
 						{isWritten(profile.bio) && (
 							<p className="max-w-xl leading-relaxed text-pretty text-muted-foreground">{profile.bio}</p>
 						)}
-						<div className="flex flex-wrap items-center gap-3 pt-2">
-							<Button asChild size="lg">
+						<div className="flex w-full flex-wrap items-center gap-3 pt-2">
+							<Button asChild size="lg" className="flex-1 sm:flex-none">
 								<Link to="/projects">
 									See my projects
 									<ArrowRightIcon />
 								</Link>
 							</Button>
-							<Button asChild size="lg" variant="outline" className="bg-background">
+							<Button asChild size="lg" variant="outline" className="flex-1 bg-background sm:flex-none">
 								<Link to="/contact">Get in touch</Link>
 							</Button>
-							<SocialLinks />
+							<SocialLinks className="-ml-2 basis-full sm:ml-0 sm:basis-auto" />
 						</div>
 					</div>
 					<div className="relative hidden md:block" aria-hidden="true">
-						<div className="absolute inset-6 rounded-full bg-gradient-to-br from-foreground/10 to-transparent blur-2xl" />
-						<AppMark className="relative size-72 text-foreground/85" strokeWidth={1.4} />
+						<div className="absolute inset-0 rounded-full gradient-glow opacity-25 dark:opacity-30" />
+						<AppMark gradient className="relative size-72" strokeWidth={1.4} />
 					</div>
 				</div>
 			</section>
@@ -64,7 +68,10 @@ export function HomePage() {
 				<SectionHeading eyebrow="Now" title="What I’m building" more={{ to: '/work', label: 'Work history' }} />
 				<div className="grid items-start gap-4 md:grid-cols-2">
 					{work.map((entry) => (
-						<Card key={entry.org} className="gap-2">
+						<Card
+							key={entry.org}
+							className="gradient-border relative gap-2 transition-shadow has-[a:focus-visible]:[--gradient-border-opacity:1] has-[a:hover]:shadow-md has-[a:hover]:[--gradient-border-opacity:1]"
+						>
 							<CardHeader>
 								<CardTitle className="text-lg">
 									<h3>
@@ -93,8 +100,8 @@ export function HomePage() {
 					title="Selected projects"
 					more={{ to: '/projects', label: 'All projects' }}
 				/>
-				<div className="grid items-stretch gap-4 md:grid-cols-2 lg:grid-cols-3">
-					<ProjectCards featured placeholders={3} />
+				<div className="grid items-stretch gap-4 md:grid-cols-2">
+					<ProjectCards featured placeholders={4} />
 				</div>
 			</section>
 		</div>

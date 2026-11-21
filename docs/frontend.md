@@ -74,14 +74,27 @@ for a chunk gone after a release) and `notFoundComponent: NotFoundPage`.
 ## Design system
 
 shadcn/ui on Tailwind v4, the neutral palette in light and dark (`@raineworks/ui/globals.css`), Geist
-and Geist Mono. The brand is monochrome, like the logo.
+and Geist Mono. The brand is monochrome, like the logo, with one accent: a gradient of peach (`#ea9a7e`) into teal
+(`#2998ad`).
 
 - **Tokens, never colours:** `bg-background`, `text-muted-foreground`, `border`, `bg-brand` / `text-brand-ink`. The
   brand means "act here" (primary buttons, focus rings, the active nav item), never a status.
 - **Pages:** a `Page` (`blocks/page`: `h1`, description, `document.title` as "<title> · raineworks") of cards, blocks
   `gap-6` apart; card grids `grid items-start gap-4 lg:grid-cols-2`; cards `px-5 py-5`.
+- **Accent:** the gradient is decoration, never a meaning (not "act here", not a status), and used sparingly: the
+  logo's mark, the hairlines under the header and over the footer and under the current page, the rule over each
+  page's title, the home page's name and eyebrows, borders that answer the pointer, the timeline's dots. Through the
+  utilities in `globals.css`: `text-gradient` (text, readable in both themes: deepened in light mode),
+  `gradient-border` (a 1px border at `--gradient-border-opacity`, 0 until a state turns it up), `gradient-fill`,
+  `gradient-hairline`, `gradient-glow`. Buttons, focus rings and links stay black and white.
 - **Logo:** `AppLogo` (mark and wordmark) and `AppMark` (`blocks/brand`), drawn inline from the logo's SVG source so
-  they follow the theme. The favicon (`assets/favicon.svg`) swaps black and white with the OS scheme.
+  they follow the theme; `gradient` strokes the mark in the accent. The favicon (`assets/favicon.svg`) is the gradient
+  mark on a tile that swaps white and black with the OS scheme.
+- **Brand assets:** `brand/` at the repository's root has the mark and the logo in every colourway (the gradient, and
+  black and white, on white, on black and on nothing) as SVG and PNG, the favicons, and the social images (avatars, X
+  header, LinkedIn banner, GitHub's social preview, the share image). `bun run brand-assets` in `packages/ui` draws
+  them all from `blocks/brand`, with Chrome, and the site's favicon and home-screen icon with them; run it again when
+  the logo or the accent changes.
 - **Theme:** light, dark or the system's (`hooks/use-theme`, stored in `localStorage` through `lib/browser-storage`,
   applied as `.dark` on `<html>`), chosen from `blocks/theme-toggle`.
 - **ui-sdk** gives the behaviour of the theme menu and the phone menu (focus, keys, dismissal, swipe); they're styled

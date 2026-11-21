@@ -5,6 +5,7 @@
  * /            home: who Raine is, what Raine is building, a few projects
  * /work        experience and education
  * /projects    every open-source project
+ * /projects/*  a project's own page, for each in `content/projects` (any other is the 404)
  * /hobbies     what Raine does away from work
  * /articles    Raine's articles on X (only with the server's X API token; otherwise its 404, and out of the nav)
  * /contact     email, GitHub, LinkedIn, X
@@ -27,12 +28,14 @@ import type { PageHead } from '@raineworks/ui/lib/head';
 import { ensureArticlesOn } from '@raineworks/web-marketing/components/articles';
 import { SiteShell } from '@raineworks/web-marketing/components/site-shell';
 import { profile, work } from '@raineworks/web-marketing/content/profile';
+import { projectBySlug, projects } from '@raineworks/web-marketing/content/projects';
 import { HomePage } from '@raineworks/web-marketing/routes/home';
 import {
 	createRootRouteWithContext,
 	createRoute,
 	createRouter,
 	lazyRouteComponent,
+	notFound,
 	Outlet,
 } from '@tanstack/react-router';
 
@@ -95,6 +98,34 @@ const projectsRoute = createRoute({
 	component: lazyRouteComponent(() => import('@raineworks/web-marketing/routes/projects'), 'ProjectsPage'),
 });
 
+const projectRoute = createRoute({
+	getParentRoute: () => rootRoute,
+	path: '/projects/$slug',
+	staticData: {
+		// Each project's page, prerendered with its own head; it's open source, so schema.org has it as such.
+		pages: projects.map((project) => ({
+			params: { slug: project.slug },
+			head: {
+				title: project.title,
+				description: project.summary,
+				structuredData: {
+					'@type': 'SoftwareSourceCode',
+					name: project.title,
+					description: project.summary,
+					codeRepository: `${profile.contact.github}/${project.repo}`,
+					author: { '@type': 'Person', name: profile.name, url: SITE_URL },
+				},
+			},
+		})),
+	},
+	loader: ({ params }) => {
+		const project = projectBySlug(params.slug);
+		if (!project) throw notFound();
+		return { project };
+	},
+	component: lazyRouteComponent(() => import('@raineworks/web-marketing/routes/project'), 'ProjectPage'),
+});
+
 const hobbiesRoute = createRoute({
 	getParentRoute: () => rootRoute,
 	path: '/hobbies',
@@ -138,7 +169,15 @@ const articlesRoute = createRoute({
 
 /** The marketing zone's router, at `/`. Preloads a page's chunk on intent (hover, focus). */
 export const router = createRouter({
-	routeTree: rootRoute.addChildren([homeRoute, workRoute, projectsRoute, articlesRoute, hobbiesRoute, contactRoute]),
+	routeTree: rootRoute.addChildren([
+		homeRoute,
+		workRoute,
+		projectsRoute,
+		projectRoute,
+		articlesRoute,
+		hobbiesRoute,
+		contactRoute,
+	]),
 	basepath: ZONES.marketing.basepath,
 	context: { queryClient },
 	defaultPreload: 'intent',

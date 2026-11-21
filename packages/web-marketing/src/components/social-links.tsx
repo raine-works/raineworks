@@ -5,6 +5,7 @@
  */
 
 import { Button } from '@raineworks/ui/components/button';
+import { cn } from '@raineworks/ui/lib/utils';
 import { GitHubIcon, LinkedInIcon, XIcon } from '@raineworks/web-marketing/components/brand-icons';
 import { profile } from '@raineworks/web-marketing/content/profile';
 import { MailIcon } from 'lucide-react';
@@ -17,9 +18,9 @@ const LINKS = [
 ] as const;
 
 /** Icon buttons to GitHub, LinkedIn, X and email. */
-export function SocialLinks() {
+export function SocialLinks({ className }: { className?: string }) {
 	return (
-		<ul className="flex items-center gap-1">
+		<ul className={cn('flex items-center gap-1', className)}>
 			{LINKS.map(({ label, href, Icon }) => (
 				<li key={label}>
 					<Button asChild variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">

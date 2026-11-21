@@ -7,6 +7,9 @@
 **/.types
 **/*.tgz
 
+# The brand assets (logo, favicons, social images): no image is built from them
+brand
+
 # Version control
 .git
 .gitignore

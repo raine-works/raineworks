@@ -20,7 +20,9 @@ export function SectionHeading({
 	return (
 		<div className="flex flex-wrap items-end justify-between gap-3">
 			<div className="flex flex-col gap-1">
-				<p className="font-mono text-xs tracking-widest text-muted-foreground uppercase">{eyebrow}</p>
+				<p className="self-start font-mono text-xs tracking-widest uppercase">
+					<span className="text-gradient">{eyebrow}</span>
+				</p>
 				<h2 className="text-2xl font-semibold tracking-tight">{title}</h2>
 			</div>
 			{more && (
