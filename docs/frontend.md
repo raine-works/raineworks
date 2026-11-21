@@ -95,11 +95,12 @@ and Geist Mono. The brand is monochrome, like the logo, with one accent: a gradi
   and white.
 - **Logo:** `AppLogo` (mark and wordmark) and `AppMark` (`blocks/brand`), drawn inline from the logo's SVG source so
   they follow the theme; `gradient` strokes the mark in the accent. The favicon (`assets/favicon.svg`) is the gradient
-  mark on a tile that swaps white and black with the OS scheme.
+  mark on a tile that swaps white and black with the OS scheme; while the page isn't focused it's the mark in white on
+  black instead (`assets/favicon-inactive.svg`, swapped by `lib/favicon`).
 - **Brand assets:** `brand/` at the repository's root has the mark and the logo in every colourway (the gradient, and
   black and white, on white, on black and on nothing) as SVG and PNG, the favicons, and the social images (avatars, X
   header, LinkedIn banner, GitHub's social preview, the share image). `bun run brand-assets` in `packages/ui` draws
-  them all from `blocks/brand`, with Chrome, and the site's favicon and home-screen icon with them; run it again when
+  them all from `blocks/brand`, with Chrome, and the site's favicons and home-screen icon with them; run it again when
   the logo or the accent changes.
 - **Theme:** light, dark or the system's (`hooks/use-theme`, stored in `localStorage` through `lib/browser-storage`,
   applied as `.dark` on `<html>`), chosen from `blocks/theme-toggle`.
