@@ -127,6 +127,11 @@ function AtAGlance({ project }: { project: ProjectEntry }) {
 						View the source
 					</a>
 				</Button>
+				{project.disclaimer && (
+					<p className="border-t pt-4 text-xs leading-relaxed text-pretty text-muted-foreground">
+						{project.disclaimer}
+					</p>
+				)}
 			</CardContent>
 		</Card>
 	);
