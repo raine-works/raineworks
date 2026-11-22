@@ -22,8 +22,9 @@ The projects aren't kept here: they're the public repositories on github.com/rai
 with is its language, then its other topics: edit them on GitHub.
 
 A project gets a page of its own once it's in `src/content/projects.ts` (its repository, its page's slug, title and
-one-sentence summary) with its words in `src/content/project-pages.ts` (an overview, highlights and sections, written
-from its README; plain text, typographic quotes; loaded only with the page). Each page is prerendered with its own
+one-sentence summary, and for another company's product a `disclaimer` saying who it isn't affiliated with, shown on
+its page) with its words in `src/content/project-pages.ts` (an overview, highlights and sections, written from its
+README; plain text, typographic quotes; loaded only with the page). Each page is prerendered with its own
 head (`staticData.pages` on the route); any other slug is the 404. `src/content/projects.test.ts` holds the two files
 together.
 
