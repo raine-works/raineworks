@@ -14,6 +14,7 @@
 	"scripts": {
 		"brand-assets": "bun scripts/brand-assets.tsx",
 		"og-image": "bun scripts/og-image.tsx",
+		"wallpapers": "bun scripts/wallpapers.tsx",
 		"test": "bun test",
 		"typecheck": "bun check"
 	},

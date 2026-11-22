@@ -102,7 +102,8 @@ and Geist Mono. The brand is monochrome, like the logo, with one accent: a gradi
   black and white, on white, on black and on nothing) as SVG and PNG, the favicons, and the social images (avatars, X
   header, LinkedIn banner, GitHub's social preview, the share image). `bun run brand-assets` in `packages/ui` draws
   them all from `blocks/brand`, with Chrome, and the site's favicons and home-screen icon with them; run it again when
-  the logo or the accent changes.
+  the logo or the accent changes. `bun run wallpapers` draws `brand/wallpapers/` the same way: three dark designs
+  (halo, storm, eclipse) for phones and desktops, at each screen's exact size.
 - **Theme:** light, dark or the system's (`hooks/use-theme`, stored in `localStorage` through `lib/browser-storage`,
   applied as `.dark` on `<html>`), chosen from `blocks/theme-toggle`.
 - **ui-sdk** gives the behaviour of the theme menu and the phone menu (focus, keys, dismissal, swipe); they're styled
