@@ -27,6 +27,7 @@ import { projectsQuery, StarCount } from '@raineworks/web-marketing/components/p
 import { profile } from '@raineworks/web-marketing/content/profile';
 import { projectPages, type ProjectSection } from '@raineworks/web-marketing/content/project-pages';
 import {
+	googlePlayBetaUrl,
 	googlePlayUrl,
 	marketplaceUrl,
 	type ProjectEntry,
@@ -42,6 +43,7 @@ import {
 	BookOpenIcon,
 	ChevronLeftIcon,
 	ChevronRightIcon,
+	FlaskConicalIcon,
 	ShieldIcon,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -134,6 +136,14 @@ function AtAGlance({ project }: { project: ProjectEntry }) {
 						<a href={googlePlayUrl(project.googlePlay)} target="_blank" rel="noopener noreferrer">
 							<GooglePlayIcon />
 							Get it on Google Play
+						</a>
+					</Button>
+				)}
+				{project.googlePlay && project.googlePlayBeta && (
+					<Button asChild variant="outline" className="w-full">
+						<a href={googlePlayBetaUrl(project.googlePlay)} target="_blank" rel="noopener noreferrer">
+							<FlaskConicalIcon />
+							Join the beta
 						</a>
 					</Button>
 				)}
