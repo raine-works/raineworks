@@ -24,6 +24,15 @@ export interface ProjectEntry {
 	homeAssistant?: true;
 	/** For another company’s product: who it isn’t affiliated with, shown on its page. */
 	disclaimer?: string;
+	/** An app on Google Play: its package name, for Get it on Google Play. */
+	googlePlay?: string;
+	/** Its privacy policy: a page of its documentation (`content/projects` and `@raineworks/tools/docs`). */
+	privacyPolicy?: string;
+}
+
+/** The Google Play listing of a project's app. */
+export function googlePlayUrl(packageName: string): string {
+	return `https://play.google.com/store/apps/details?${new URLSearchParams({ id: packageName })}`;
 }
 
 /** Whose repositories. */
@@ -67,6 +76,8 @@ export const projects: ProjectEntry[] = [
 			'A Home Assistant integration with a TV app of its own for Google TV and Android TV: control, notifications, live cameras, media and dashboards.',
 		// The TV app’s icon, Raineworks TV’s own (the integration’s icon in Home Assistant is Google TV’s)
 		logo: 'android/play/icon-512.png',
+		googlePlay: 'com.raineworks.tvbridge',
+		privacyPolicy: 'privacy-policy',
 		disclaimer:
 			'Not affiliated with, authorized or endorsed by Google. Google TV and Android TV are trademarks of Google LLC.',
 		screenshots: [
