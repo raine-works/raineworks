@@ -12,15 +12,39 @@ import { Page } from '@raineworks/ui/blocks/page';
 import { Badge } from '@raineworks/ui/components/badge';
 import { Button } from '@raineworks/ui/components/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@raineworks/ui/components/card';
+import {
+	Dialog,
+	DialogBody,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from '@raineworks/ui/components/dialog';
 import { Skeleton } from '@raineworks/ui/components/skeleton';
-import { GitHubIcon, HomeAssistantIcon } from '@raineworks/web-marketing/components/brand-icons';
+import { GitHubIcon, GooglePlayIcon, HomeAssistantIcon } from '@raineworks/web-marketing/components/brand-icons';
 import { projectsQuery, StarCount } from '@raineworks/web-marketing/components/project-card';
 import { profile } from '@raineworks/web-marketing/content/profile';
 import { projectPages, type ProjectSection } from '@raineworks/web-marketing/content/project-pages';
-import { marketplaceUrl, type ProjectEntry, projects, repoFileUrl } from '@raineworks/web-marketing/content/projects';
+import {
+	googlePlayUrl,
+	marketplaceUrl,
+	type ProjectEntry,
+	projects,
+	repoFileUrl,
+} from '@raineworks/web-marketing/content/projects';
 import { useQuery } from '@tanstack/react-query';
 import { getRouteApi, Link } from '@tanstack/react-router';
-import { ArrowLeftIcon, ArrowRightIcon, ArrowUpRightIcon, BookOpenIcon } from 'lucide-react';
+import {
+	ArrowLeftIcon,
+	ArrowRightIcon,
+	ArrowUpRightIcon,
+	BookOpenIcon,
+	ChevronLeftIcon,
+	ChevronRightIcon,
+	ShieldIcon,
+} from 'lucide-react';
+import { useState } from 'react';
 
 const route = getRouteApi('/projects/$slug');
 
@@ -105,6 +129,14 @@ function AtAGlance({ project }: { project: ProjectEntry }) {
 						</div>
 					)}
 				</div>
+				{project.googlePlay && (
+					<Button asChild variant="outline" className="w-full">
+						<a href={googlePlayUrl(project.googlePlay)} target="_blank" rel="noopener noreferrer">
+							<GooglePlayIcon />
+							Get it on Google Play
+						</a>
+					</Button>
+				)}
 				{project.homeAssistant && (
 					<Button asChild variant="outline" className="w-full">
 						<a href={marketplaceUrl(project)} target="_blank" rel="noopener noreferrer">
@@ -127,6 +159,16 @@ function AtAGlance({ project }: { project: ProjectEntry }) {
 						View the source
 					</a>
 				</Button>
+				{project.privacyPolicy && isDocsProject(project.slug) && (
+					<Link
+						to="/projects/$slug/docs/$"
+						params={(previous) => ({ ...previous, slug: project.slug, _splat: project.privacyPolicy })}
+						className="inline-flex items-center gap-1.5 self-start item-link text-sm text-muted-foreground"
+					>
+						<ShieldIcon className="size-4" />
+						Privacy policy
+					</Link>
+				)}
 				{project.disclaimer && (
 					<p className="border-t pt-4 text-xs leading-relaxed text-pretty text-muted-foreground">
 						{project.disclaimer}
@@ -137,8 +179,72 @@ function AtAGlance({ project }: { project: ProjectEntry }) {
 	);
 }
 
-/** Screenshots from the repository: the first wide, the rest in a grid; each opens full size. */
+/**
+ * A screenshot full size in a large dialog (the whole screen, less a margin; all of it on a phone), with the ones
+ * either side a button or an arrow key away.
+ */
+function ScreenshotViewer({
+	project,
+	index,
+	onIndexChange,
+}: {
+	project: ProjectEntry;
+	index: number | null;
+	onIndexChange: (index: number | null) => void;
+}) {
+	const shots = project.screenshots ?? [];
+	const shot = index === null ? undefined : shots[index];
+	const step = (by: number) => {
+		if (index !== null) onIndexChange((index + by + shots.length) % shots.length);
+	};
+	return (
+		<Dialog open={shot !== undefined} onOpenChange={(open) => !open && onIndexChange(null)}>
+			<DialogContent
+				size="xl"
+				onKeyDown={(event) => {
+					if (event.key === 'ArrowLeft') step(-1);
+					if (event.key === 'ArrowRight') step(1);
+				}}
+			>
+				<DialogHeader>
+					<DialogTitle>{project.title}</DialogTitle>
+					<DialogDescription>{shot?.alt}</DialogDescription>
+				</DialogHeader>
+				<DialogBody className="bg-muted/30 p-2 sm:p-4" contentClassName="h-full grid-rows-[minmax(0,1fr)]">
+					{shot && (
+						<img
+							src={repoFileUrl(project, shot.path)}
+							alt={shot.alt}
+							decoding="async"
+							className="size-full object-contain"
+						/>
+					)}
+				</DialogBody>
+				{shots.length > 1 && (
+					<DialogFooter>
+						<div className="flex w-full items-center justify-between gap-3">
+							<Button variant="outline" onClick={() => step(-1)}>
+								<ChevronLeftIcon />
+								Previous
+							</Button>
+							<span className="text-sm text-muted-foreground tabular-nums">
+								{(index ?? 0) + 1} of {shots.length}
+							</span>
+							<Button variant="outline" onClick={() => step(1)}>
+								Next
+								<ChevronRightIcon />
+							</Button>
+						</div>
+					</DialogFooter>
+				)}
+			</DialogContent>
+		</Dialog>
+	);
+}
+
+/** Screenshots from the repository: the first wide, the rest in a grid; each opens large in a dialog. */
 function Screenshots({ project }: { project: ProjectEntry }) {
+	const [open, setOpen] = useState<number | null>(null);
 	if (!project.screenshots?.length) return null;
 	return (
 		<section aria-labelledby="screenshots" className="flex flex-col gap-4">
@@ -146,23 +252,24 @@ function Screenshots({ project }: { project: ProjectEntry }) {
 			<ul className="grid gap-3 sm:grid-cols-2">
 				{project.screenshots.map((shot, index) => (
 					<li key={shot.path} className={index === 0 ? 'sm:col-span-2' : undefined}>
-						<a
-							href={repoFileUrl(project, shot.path)}
-							target="_blank"
-							rel="noopener noreferrer"
-							className="block overflow-hidden rounded-xl border bg-card transition-[border-color,box-shadow] outline-none hover:border-foreground/20 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring"
+						<button
+							type="button"
+							onClick={() => setOpen(index)}
+							aria-label={`View larger: ${shot.alt}`}
+							className="block w-full cursor-zoom-in overflow-hidden rounded-xl border bg-card transition-[border-color,box-shadow] outline-none hover:border-foreground/20 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring"
 						>
 							<img
 								src={repoFileUrl(project, shot.path)}
-								alt={shot.alt}
+								alt=""
 								loading="lazy"
 								decoding="async"
 								className="h-auto w-full"
 							/>
-						</a>
+						</button>
 					</li>
 				))}
 			</ul>
+			<ScreenshotViewer project={project} index={open} onIndexChange={setOpen} />
 		</section>
 	);
 }
