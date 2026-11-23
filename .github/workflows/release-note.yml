@@ -1,5 +1,6 @@
 # Has Claude write a release's note, by hand (Actions → Release note → Run workflow), when a release has something
-# worth telling the people who use the project. Where the note goes depends on whether it keeps
+# worth telling the people who use the project. When nothing in it would be noticed, Claude writes none and the run
+# ends there: no pull request, nothing published. Where the note goes depends on whether it keeps
 # its notes in a folder (input `notes-dir`), as an app that shows them does.
 #
 # With a notes folder, the note is for the next release, a file the repository's own build and release use (an app
@@ -219,12 +220,12 @@ jobs:
               put each change in a block naming exactly the audiences it affects, as the docs define them. Text
               outside a block is shown to everyone, so keep it for changes everyone sees. One audience must never
               read about another's changes.
-            - If nothing in the range would be noticed by anyone, write a short note saying it's fixes and
-              improvements.
+            - If nothing in the range would be noticed by anyone, write nothing: don't create the file. A note
+              that says nothing is worse than none, and the workflow ends without one.
 
             ${{ inputs.guide }}
 
-            Write only that file.${{ inputs.check-command && format(' Then check it: `{0} {1}`.', inputs.check-command, steps.version.outputs.version) || '' }}
+            Write only that file.${{ inputs.check-command && format(' Then, if you wrote it, check it: `{0} {1}`.', inputs.check-command, steps.version.outputs.version) || '' }}
           # No `Bash(git …:*)` rules: a rule matches by prefix whatever options follow (`git log --output=<file>`
           # writes anywhere), and without one Claude Code's own read-only check runs git log, show and diff and
           # refuses those options. The only command allowed is the check, exactly as it's run below.
@@ -261,8 +262,8 @@ jobs:
               dependency only when its change is one they'd notice. Leave out anything nobody using it would
               notice.
             - Say first, under its own heading, anything they have to do or that no longer works as it did.
-            - If nothing in the range would be noticed by anyone, write a short note saying it's fixes and
-              improvements.
+            - If nothing in the range would be noticed by anyone, write nothing: don't create the file. A note
+              that says nothing is worse than none, and the workflow ends without one.
 
             ${{ inputs.guide }}
 
@@ -274,16 +275,24 @@ jobs:
             --allowedTools "Read,Write(${{ steps.tag.outputs.note }}),Edit(${{ steps.tag.outputs.note }}),Glob,Grep"
 
       # Claude may write only the note, but what it ran (and its tools' bugs) mustn't reach the pull request or the
-      # release: the note is the only change in the tree, or nothing more runs (the check command is master's).
+      # release: the note is the only change in the tree, or nothing more runs (the check command is master's). No
+      # note at all, with nothing else changed, is Claude finding nothing anyone would notice: the run ends there,
+      # with no pull request and the release's text left as it is (`written`).
       - name: Check the note
+        id: check
         env:
           NOTE: ${{ steps.version.outputs.note || steps.tag.outputs.note }}
           VERSION: ${{ steps.version.outputs.version }}
           CHECK_COMMAND: ${{ inputs.check-command }}
           WHERE: ${{ steps.where.outputs.where }}
         run: |
-          test -s "$NOTE" || { echo "::error::No note was written."; exit 1; }
           changed="$(git status --porcelain --untracked-files=all)"
+          if [ ! -e "$NOTE" ] && [ -z "$changed" ]; then
+            echo "No note: nothing in this release is something its readers would notice." | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "written=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          test -s "$NOTE" || { echo "::error::The note is empty."; exit 1; }
           if [ "$changed" != "?? $NOTE" ]; then
             echo "::error::Only $NOTE may change, but the tree has:"
             printf '%s\n' "$changed"
@@ -294,12 +303,13 @@ jobs:
           else
             cat "$NOTE" >> "$GITHUB_STEP_SUMMARY"
           fi
+          echo "written=true" >> "$GITHUB_OUTPUT"
 
       # With a notes folder: the note goes up as a pull request, reviewed and merged like any other change, opened as
       # the docs-sync app, its token made only now, so Claude's step never had it.
       - name: Use the docs-sync app
         id: app
-        if: steps.where.outputs.where == 'folder'
+        if: steps.where.outputs.where == 'folder' && steps.check.outputs.written == 'true'
         uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
           client-id: ${{ vars.DOCS_SYNC_APP_CLIENT_ID }}
@@ -307,7 +317,7 @@ jobs:
           permission-contents: write
           permission-pull-requests: write
       - name: Open the pull request
-        if: steps.where.outputs.where == 'folder'
+        if: steps.where.outputs.where == 'folder' && steps.check.outputs.written == 'true'
         uses: peter-evans/create-pull-request@3ffccacd46053766916f087ce41d627c0b8cf2d1 # v8.1.3
         with:
           token: ${{ steps.app.outputs.token }}
@@ -327,7 +337,7 @@ jobs:
       # Without one: the note becomes the release's text, with the workflow's own token (nothing is pushed, so no
       # app). A release the tag already has keeps its title and assets; only its text is replaced.
       - name: Publish it on the release
-        if: steps.where.outputs.where == 'release'
+        if: steps.where.outputs.where == 'release' && steps.check.outputs.written == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.tag.outputs.tag }}
