@@ -12,7 +12,7 @@ import { messageSender } from '@raineworks/ssh/server/messages';
 import { projectsLoader } from '@raineworks/ssh/server/projects';
 import { tryCatch } from '@raineworks/tools/prototypes';
 
-const { data: hostKey, error } = tryCatch(() => loadHostKey(process.env));
+const { data: hostKey, error } = tryCatch(() => loadHostKey(env));
 if (error || !hostKey) {
 	console.error(`ssh: ${error?.message}`);
 	process.exit(1);

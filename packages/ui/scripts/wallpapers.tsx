@@ -9,6 +9,8 @@
  * ```bash
  * bun run wallpapers [path/to/chrome] [only]   # Chrome defaults to macOS's; `only` draws the files whose names have it
  * ```
+ *
+ * @module scripts/wallpapers
  */
 
 import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';

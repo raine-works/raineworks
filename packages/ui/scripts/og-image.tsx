@@ -7,6 +7,8 @@
  * ```bash
  * bun run og-image [path/to/chrome]   # defaults to macOS's Google Chrome
  * ```
+ *
+ * @module scripts/og-image
  */
 
 import { mkdtempSync, rmSync } from 'node:fs';

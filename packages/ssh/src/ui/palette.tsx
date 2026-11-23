@@ -7,6 +7,7 @@
 
 import { useKeyboard } from '@opentui/react';
 import { theme } from '@raineworks/ssh/theme';
+import '@raineworks/tools/prototypes';
 import { useState } from 'react';
 
 export interface Command {
@@ -25,7 +26,7 @@ const rank = (command: Command, word: string) => {
 /** Commands whose label or hint holds every word typed: those matching in the label first, earliest first. */
 export function filterCommands(commands: readonly Command[], query: string): Command[] {
 	const words = query.toLowerCase().split(/\s+/).filter(Boolean);
-	if (words.length === 0) return [...commands];
+	if (words.isEmpty()) return [...commands];
 	return commands
 		.filter((command) => {
 			const haystack = `${command.label} ${command.hint}`.toLowerCase();
@@ -97,7 +98,7 @@ export function Palette({
 				/>
 			</box>
 			<box style={{ height: 1 }} />
-			{found.length === 0 ? (
+			{found.isEmpty() ? (
 				<text fg={theme.dim}>Nothing matches “{query}”.</text>
 			) : (
 				found.map((command, i) => (

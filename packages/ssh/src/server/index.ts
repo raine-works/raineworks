@@ -13,11 +13,12 @@ import { readFileSync } from 'node:fs';
 import { type CliRenderer, createCliRenderer } from '@opentui/core';
 import { createRoot } from '@opentui/react';
 import { App, type LoadProjects, type SendMessage } from '@raineworks/ssh/app';
+import type { SshEnv } from '@raineworks/ssh/lib/env';
 import { clampSize, ConnectionGuard, defaultLimits, type Limits } from '@raineworks/ssh/server/limits';
 import { TerminalInput, TerminalOutput } from '@raineworks/ssh/server/terminal';
+import { tryCatch } from '@raineworks/tools/prototypes';
 import { createElement } from 'react';
 import { Server, utils } from 'ssh2';
-import '@raineworks/tools/prototypes';
 
 export type ServerOptions = {
 	hostKey: string | Buffer;
@@ -181,7 +182,7 @@ export const DEFAULT_HOST_KEY_PATH = '/run/secrets/ssh_host_key';
  * accepted for platforms that store secrets on one line) or, failing that, the
  * file at `SSH_HOST_KEY_PATH`. Throws a descriptive error instead of dumping a stack.
  */
-export function loadHostKey(env: Record<string, string | undefined>): Buffer {
+export function loadHostKey(env: Pick<SshEnv, 'SSH_HOST_KEY' | 'SSH_HOST_KEY_PATH'>): Buffer {
 	// .env-style stores may keep the surrounding quotes literally.
 	const inline = env.SSH_HOST_KEY?.trim().replace(/^(['"])([\s\S]*)\1$/, '$2');
 	let key: Buffer;
@@ -189,14 +190,13 @@ export function loadHostKey(env: Record<string, string | undefined>): Buffer {
 		key = Buffer.from(inline.replace(/\\n/g, '\n'));
 	} else {
 		const path = env.SSH_HOST_KEY_PATH || DEFAULT_HOST_KEY_PATH;
-		try {
-			key = readFileSync(path);
-		} catch (error) {
-			const code = (error as NodeJS.ErrnoException).code;
+		const { data, error } = tryCatch<Buffer, NodeJS.ErrnoException>(() => readFileSync(path));
+		if (error || !data) {
 			throw new Error(
-				`no host key: set SSH_HOST_KEY (PEM text) or mount a key at SSH_HOST_KEY_PATH (${path}: ${code ?? error})`,
+				`no host key: set SSH_HOST_KEY (PEM text) or mount a key at SSH_HOST_KEY_PATH (${path}: ${error?.code ?? error})`,
 			);
 		}
+		key = data;
 	}
 	const parsed = utils.parseKey(key);
 	if (parsed instanceof Error) throw new Error(`host key is not a valid private key: ${parsed.message}`);

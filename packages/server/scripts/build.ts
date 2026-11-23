@@ -14,6 +14,8 @@
  *
  * `dist/web` stays behind, so `WEB_DIST=packages/server/dist/web bun run start`
  * serves the same files without the binary.
+ *
+ * @module scripts/build
  */
 
 import { cpSync, existsSync, mkdirSync, rmSync } from 'node:fs';

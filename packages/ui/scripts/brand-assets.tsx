@@ -11,6 +11,8 @@
  * ```bash
  * bun run brand-assets [path/to/chrome]   # defaults to macOS's Google Chrome
  * ```
+ *
+ * @module scripts/brand-assets
  */
 
 import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
