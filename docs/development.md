@@ -80,7 +80,7 @@ would notice: when nothing in the release is, Claude writes none and no pull req
 Release note → Run workflow**. Writing the note in the pull request that makes the change (`bun run release`) is still
 best: the release then ships with it. Claude signs in with workload identity federation: the job's GitHub OIDC token is exchanged
 for a short-lived Anthropic one (the federation rule's identifiers are in `raine-works/agents`' `release-note.yml`; no API key is stored).
-**Actions → anthropic-wif-test** checks that exchange on its own. The pull request is opened as the docs-sync GitHub
+`raine-works/agents`' **Actions → anthropic-wif-test** checks that exchange on its own. The pull request is opened as the docs-sync GitHub
 App (see [Claude in GitHub](#claude-in-github)).
 
 A release people would notice has a note. To write one:
@@ -131,7 +131,8 @@ They sign in to Anthropic with the job's OIDC token (workload identity federatio
 `claude[bot]` (the [Claude GitHub App](https://github.com/apps/claude), installed on the repository), and open pull
 requests as the docs-sync GitHub App (`DOCS_SYNC_APP_CLIENT_ID` variable, `DOCS_SYNC_APP_PRIVATE_KEY` secret): one
 opened with a workflow's own token would start no checks. A pull request that changes `code-review.yml` isn't reviewed
-(Claude runs only `master`'s copy), so a person reviews it. `anthropic-wif-test.yml` checks the sign-in on its own.
+(Claude runs only `master`'s copy), so a person reviews it. `raine-works/agents`' `anthropic-wif-test.yml` checks the
+sign-in on its own.
 
 ### Protecting `master`
 
