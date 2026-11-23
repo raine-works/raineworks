@@ -73,7 +73,8 @@ take turns (the `release` concurrency group), so versions are cut one at a time,
 **A release cut without a note gets one written.** Once CI has finished on `master` and released a commit that has no
 `<version>.md`, the Release note workflow (`release.yml`) runs on its own: Claude writes the next version's note from
 what changed since the last one and opens it as the pull request `Release note <version>`. Merging it is the release
-that puts it on the site (that release has its note, so it starts no other). It can also be run by hand: **Actions →
+that puts it on the site (that release has its note, so it starts no other). A note is only ever about what the site's readers
+would notice: when nothing in the release is, Claude writes none and no pull request is opened. It can also be run by hand: **Actions →
 Release note → Run workflow**. Writing the note in the pull request that makes the change (`bun run release`) is still
 best: the release then ships with it. Claude signs in with workload identity federation: the job's GitHub OIDC token is exchanged
 for a short-lived Anthropic one (the federation rule's identifiers are in `release-note.yml`; no API key is stored).
