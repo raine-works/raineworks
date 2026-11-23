@@ -1,13 +1,7 @@
-# Claude on issues and pull requests: mention @claude in an issue (its title or body), a comment, or a pull request
-# review, and Claude answers there: it reads the repository (AGENTS.md first), explains, reviews, or makes the change
-# on a branch and opens a pull request for it. Only people with write access to the repository can start it
-# (anthropics/claude-code-action checks the commenter's permission), so a stranger's @claude on a public issue does
-# nothing.
-#
-# It signs in to Anthropic with the job's OIDC token (workload identity federation, as release-note.yml does): no API
-# key is stored. The federation rule accepts this repository's tokens for every event. It answers, commits and pushes
-# as claude[bot] (the Claude GitHub App, installed on the repository, as Code review is), not the workflow's own token:
-# a branch that token pushed would start no checks, so a pull request from it could never pass them.
+# Mention @claude in an issue, a comment or a pull request review and Claude answers there, or makes the change on a
+# branch. The workflow is Raineworks', in raine-works/agents (.github/workflows/claude.yml): this file only calls it, and comes
+# from the raineworks-base skill's templates/workflows/claude.yml. Change the workflow there, for every repository at once;
+# here, only its inputs (with:). The Base rules check moves the pin when the shared workflows change.
 name: Claude
 
 on:
@@ -21,47 +15,17 @@ on:
     types: [opened, assigned]
 
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
+  issues: write
+  id-token: write
+  actions: read
 
 jobs:
   claude:
     name: Claude
-    if: >-
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude'))
-      || (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude'))
-      || (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude'))
-      || (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
-    runs-on: ubuntu-26.04
-    timeout-minutes: 60
-    # One run per issue or pull request at a time: a second mention waits for the first to finish.
-    concurrency:
-      group: claude-${{ github.event.issue.number || github.event.pull_request.number }}
-      cancel-in-progress: false
-    permissions:
-      contents: write
-      pull-requests: write
-      issues: write
-      id-token: write
-      # To read the checks' results on a pull request.
-      actions: read
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-      # Bun and the workspace's packages, so Claude can run the checks (`bun run lint`, `typecheck`, `test`).
-      - uses: ./.github/actions/setup
-      - uses: anthropics/claude-code-action@4fa93a88de49bbef68b10eb15aabedf28ca0e1ed # v1.0.271
-        with:
-          # Workload identity federation: the job's GitHub OIDC token (id-token: write) is exchanged for a
-          # short-lived Anthropic one. These are identifiers, not secrets.
-          anthropic_federation_rule_id: fdrl_015cLigViCEJyWAtahH5ytSC
-          anthropic_organization_id: 34318a61-fac0-4077-a795-808d80efef19
-          anthropic_service_account_id: svac_015F3BEwDj2EJr7bHDgKmFkL
-          anthropic_workspace_id: wrkspc_01G5WKL4tLYspnSa4BYdzUCS
-          # Lets Claude see why a pull request's checks failed.
-          additional_permissions: |
-            actions: read
-          claude_args: |
-            --model claude-opus-5-5
-            --max-turns 80
-            --allowedTools "Bash(bun run lint),Bash(bun run lint:fix),Bash(bun run format),Bash(bun run typecheck),Bash(bun run test),Bash(bun run build:web),Bash(bun install)"
+    uses: raine-works/agents/.github/workflows/claude.yml@bcc3f92307e34338be03ec7f6a243c3435604800 # raine-works/agents master
+    # The commands Claude may run, if they aren't a Bun project's (bun install, format, lint, typecheck, test):
+    with:
+      allowed-commands: >-
+        Bash(bun install),Bash(bun run format),Bash(bun run lint),Bash(bun run lint:fix),Bash(bun run typecheck),Bash(bun run test),Bash(bun run build:web)

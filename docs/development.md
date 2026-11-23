@@ -55,7 +55,8 @@ Versions are calendar versions, `YEAR.MONTH.N`: `2026.11.1` is November 2026's f
 version label, and About).
 
 **A push to `master` that changes the image is a release**, minted by GitHub Actions (`.github/workflows/ci.yml`,
-wiring `release-plan.yml`, `checks.yml`, `release-images.yml` and `release-publish.yml`):
+wiring `checks.yml` with Raineworks' shared `release-plan.yml`, `release-images.yml` and `release-publish.yml`, from
+`raine-works/agents`):
 
 1. **Plan:** the version it takes (`bun run release next`), and each image's inputs (`bun run images plan`). A service
    is a package with a `Dockerfile` (`server`, `ssh`); its inputs are the root's install and build files and every
@@ -78,7 +79,7 @@ that puts it on the site (that release has its note, so it starts no other). A n
 would notice: when nothing in the release is, Claude writes none and no pull request is opened. It can also be run by hand: **Actions →
 Release note → Run workflow**. Writing the note in the pull request that makes the change (`bun run release`) is still
 best: the release then ships with it. Claude signs in with workload identity federation: the job's GitHub OIDC token is exchanged
-for a short-lived Anthropic one (the federation rule's identifiers are in `release-note.yml`; no API key is stored).
+for a short-lived Anthropic one (the federation rule's identifiers are in `raine-works/agents`' `release-note.yml`; no API key is stored).
 **Actions → anthropic-wif-test** checks that exchange on its own. The pull request is opened as the docs-sync GitHub
 App (see [Claude in GitHub](#claude-in-github)).
 
@@ -113,58 +114,39 @@ there).
 
 ## Claude in GitHub
 
-Mention `@claude` in an issue, a comment or a pull request review and Claude answers there: it explains, reviews, or
-makes the change and opens a pull request for it (`.github/workflows/claude.yml`), as `claude[bot]` (the Claude GitHub
-App), so its branches run the checks. Only people with write access can
-start it. It signs in to Anthropic the same way as the release note (workload identity federation, no stored key), and
-can run the checks (`bun run lint`, `typecheck`, `test`) but nothing else.
+Claude's workflows are Raineworks' shared ones, in [`raine-works/agents`](https://github.com/raine-works/agents) (its
+README says what each does and what it needs): `.github/workflows` here holds only their callers, pinned to a commit,
+with raineworks' inputs. The Base rules check moves the pins, by pull request, when the shared workflows change.
 
-**Code review** (`.github/workflows/code-review.yml`, the check `Code review / review`): on every pull request (not
-drafts or forks), Claude reviews the change against `AGENTS.md` and the docs it lists, inline, with one summary comment
-ending `Reviewed up to <sha>`. On each push it follows up on its own findings (resolving what's fixed) and reviews
-what's new; a reply to one of its inline comments is answered in that thread (one mentioning `@claude` is
-`claude.yml`'s instead). It reviews the docs-sync app's pull requests too (the action runs for that app
-alone: `allowed_bots: raineworks-doc-sync`). It fails when it couldn't finish, so a review
-that didn't happen never passes quietly, and on a pull request that changes `code-review.yml` itself (Claude runs only
-`master`'s copy), so a person reviews that one. It posts as `claude[bot]`: the [Claude GitHub
-App](https://github.com/apps/claude) must be installed on the repository. How a pull request handles the review:
-[AGENTS.md](../AGENTS.md#pull-requests-and-code-review).
+| Caller | Does | raineworks' inputs |
+| --- | --- | --- |
+| `check-base.yml` | **Base rules** (`Base rules / check`): `.raineworks/base.md` is the current base rules and every caller is here; on `master`, opens the pull requests that update them | |
+| `code-review.yml` | **Code review** (`Code review / review`): Claude reviews every pull request against `AGENTS.md` and the base rules, inline, with one summary ending `Reviewed up to <sha>`; `Code review / approve` approves it once nothing it found is open | `focus`: the security, release, route, style and page rules to look for |
+| `docs-sync.yml` | **Docs sync**: after `master`'s CI, the `claude/docs-sync` pull request fixing any doc the new commits made wrong | `docs`: `AGENTS.md`, `STYLEGUIDE.md`, `README.md`, `docs/`, the packages' READMEs, never release notes |
+| `rules-audit.yml` | **Rules audit**: weekly and after CI, an issue labelled `rules-audit` while `master` breaks a rule | `rules`: the base rules, `AGENTS.md` and `STYLEGUIDE.md` |
+| `claude.yml` | **@claude**: mention `@claude` in an issue, a comment or a review and Claude answers, or makes the change on a branch, as `claude[bot]` | `allowed-commands`: install, format, lint, typecheck, test, `build:web` |
+| `release.yml` | **Release note** (above, [Releases](#releases)) | `name`, `guide` |
 
-**Docs sync** (`.github/workflows/docs-sync.yml`): once `master`'s CI passes, Claude checks whether what's new since its
-last run made any doc wrong (`AGENTS.md`, `STYLEGUIDE.md`, `README.md`, `docs/*.md`, the packages' READMEs) and, if so,
-opens (or updates) the `claude/docs-sync` pull request fixing them. It edits only those docs, never code or release
-notes, and skips its own merges and release notes'. Each run builds on the open docs-sync pull request's fixes rather
-than replacing them (if master has since changed the same lines, it drops them and looks again since that pull request
-began, which its commit records as a `Docs-Sync-Since:` trailer); a closed one's never come back. It can also be run by hand: **Actions → Docs sync → Run workflow**.
-
-**The docs-sync GitHub App** opens Docs sync's and the release note's pull requests: one opened with a workflow's own
-token would start no checks. Each run makes a token only after Claude's step, so Claude never has it. Set it up once:
-
-1. Create a GitHub App owned by `raine-works` (Settings → Developer settings → GitHub Apps → New), its webhook off, with
-   **Contents** and **Pull requests** read and write, installable only on this account.
-2. Install it on `raine-works/raineworks` alone.
-3. Give the repository its client ID as the `DOCS_SYNC_APP_CLIENT_ID` variable and a private key (generated on the
-   App's page) as the `DOCS_SYNC_APP_PRIVATE_KEY` secret:
-   `gh variable set DOCS_SYNC_APP_CLIENT_ID --body <client id>`, `gh secret set DOCS_SYNC_APP_PRIVATE_KEY < key.pem`.
-
-Without it, both workflows stop at their first step, saying what's missing.
+They sign in to Anthropic with the job's OIDC token (workload identity federation: no stored key), post and commit as
+`claude[bot]` (the [Claude GitHub App](https://github.com/apps/claude), installed on the repository), and open pull
+requests as the docs-sync GitHub App (`DOCS_SYNC_APP_CLIENT_ID` variable, `DOCS_SYNC_APP_PRIVATE_KEY` secret): one
+opened with a workflow's own token would start no checks. A pull request that changes `code-review.yml` isn't reviewed
+(Claude runs only `master`'s copy), so a person reviews it. `anthropic-wif-test.yml` checks the sign-in on its own.
 
 ### Protecting `master`
 
-Two repository rulesets protect `master` (Settings → Rules), defined in `.github/rulesets/` and applied with
-`gh api -X POST repos/raine-works/raineworks/rulesets --input .github/rulesets/<file>.json` (`PUT
-…/rulesets/<id>` to change one: edit the file first, so the repository holds what's applied):
+`master`'s rulesets are `raine-works/agents`' (its `rulesets/` and `repos.json`, applied with its
+`scripts/apply-rulesets.sh raineworks`), the same as every repository's:
 
-- **Protect master** (`protect-master.json`): no deleting it or force-pushing; every change through a pull request,
-  with one approval of its last push (stale approvals dismissed) and its review threads resolved.
-- **raineworks checks** (`checks.json`): `plan / plan` (CI's plan, with its `release check`), `checks / Lint`,
-  `checks / Typecheck`, `checks / Test` and `Code review / review` must pass, with the pull request up to date with
+- **Protect master**: no deleting it or force-pushing; every change through a pull request, with one approval of its
+  last push (stale approvals dismissed) and its review threads resolved.
+- **raineworks checks**: `Base rules / check`, `Code review / review`, `plan / plan` (CI's plan, with its `release
+  check`), `checks / Lint`, `checks / Typecheck` and `checks / Test` must pass, with the pull request up to date with
   `master`, so its checks ran on what lands: `plan / plan` fails a release note whose version another release took
   while it waited.
 
-The repository's admin may bypass both, only to merge a pull request: GitHub doesn't let anyone approve their own, so
-the owner's pull requests are merged that way, after reading them and the review; and a pull request that changes
-`code-review.yml` (whose review fails on purpose) needs it too.
+The approval is Code review's, once nothing it found is open. The owner may bypass both, only to merge a pull request:
+a pull request that changes `code-review.yml` (whose review fails on purpose) needs it.
 
 ## Deployment
 

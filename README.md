@@ -92,7 +92,9 @@ What's new.
 - **Docs sync.** After `master`'s CI passes, Claude fixes any doc the new commits made wrong, in a pull request.
 - **@claude.** Mention `@claude` in an issue or a pull request and Claude answers there, or makes the change.
 - **Protected `master`.** Every change goes through a pull request, with the checks, the review and an approval
-  ([.github/rulesets/](.github/rulesets)).
+  (the rulesets of [raine-works/agents](https://github.com/raine-works/agents)).
+- **Shared rules.** Agents follow Raineworks' base rules ([`.raineworks/base.md`](.raineworks/base.md), from
+  [raine-works/agents](https://github.com/raine-works/agents)) and this repository's own ([AGENTS.md](AGENTS.md)).
 
 ## Support
 

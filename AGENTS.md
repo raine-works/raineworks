@@ -15,6 +15,16 @@ change that area.
 | [docs/frontend.md](docs/frontend.md) | Touching `@raineworks/ui`, a web zone (`packages/web-*`), the design system or the About dialog |
 | `packages/*/README.md` | Working inside one package (every package has one) |
 
+## Raineworks base rules
+
+This repository follows Raineworks' base rules, in [`.raineworks/base.md`](.raineworks/base.md): read them before
+changing anything. They're a copy of `base.md` in `raine-works/agents`, kept current by its sync: change them there,
+not here. Where this file is more specific, it wins. They cover git, pull requests and the code review (which approves
+a pull request once nothing it found is open), the shared workflows, tests, docs, pinning and security; this file
+holds only what's particular to raineworks.
+
+@.raineworks/base.md
+
 ---
 
 ## Stack: don't reintroduce what was removed
@@ -105,8 +115,10 @@ Detail: [docs/development.md](docs/development.md#releases), [docs/frontend.md](
   image is built from that it doesn't know about is a bug in `@raineworks/tools/images`.
 - Every `@raineworks/*` package a package imports is in its `package.json` (`images.test.ts`): that's how the image
   knows what it's built from.
-- The workflows are the repository's own (`.github/workflows`); `.github/actions/setup` installs Bun and the packages
-  for every one of them.
+- Code review, docs sync, the rules audit, `@claude`, the release note and the release workflows (plan, images,
+  publish) are Raineworks' shared workflows in `raine-works/agents`: `.github/workflows` holds their callers (pinned to
+  a commit) and raineworks' own `ci.yml` and `checks.yml`. `.github/actions/setup` installs Bun and the packages for
+  every one of them.
 - A release people would notice has a note, `packages/ui/src/release-notes/<version>.md` (`bun run release` starts
   the next one): frontmatter `title` and `date`, then `##` sections by area. What changed for the people who read the
   site, not how. `bun run release check` fails a note that names a version already released.
@@ -174,22 +186,7 @@ Detail: [docs/frontend.md](docs/frontend.md).
 
 ## Pull requests and code review
 
-Every change reaches `master` through a pull request. A pull request isn't done when it's opened.
-
-1. Open it with a description of what changed, why, and how it was tested (the real results).
-2. **Wait for every check and the code review to finish** (`gh pr checks <number> --watch`): CI's checks and images
-   (`ci.yml`) and Claude's code review (`code-review.yml`, the check `Code review / review`). Don't report the pull
-   request ready, and don't stop, while any is running. If none start, find out why (a merge conflict stops them).
-3. **Handle everything they raise.** Fix each failing check. For each review finding, fix it in a new commit, or, when
-   it's wrong, reply in its thread saying why. Never leave a finding unanswered or resolve it without a reply: the
-   review resolves its own threads once it sees them fixed.
-4. Push the fixes and wait again. Repeat until every check passes and the review has nothing open.
-5. Only then say it's ready, with what the checks and the review found and what you did about each.
-
-- If `master` moves, bring it into the branch and resolve the conflicts; if it already contains the change, say so
-  instead of merging a duplicate.
-- Never merge your own pull request, and never skip, disable or weaken a check or a review to get one through.
-  `master`'s rulesets (`.github/rulesets/`, [docs/development.md](docs/development.md#protecting-master)) require
-  the checks, the review, an approval and every thread resolved; only the owner bypasses them, to merge.
-- A pull request that changes `code-review.yml` can't be reviewed by Claude (it runs only `master`'s copy): its review
-  fails on purpose, and a person reviews it. Change the review workflow in a pull request of its own.
+The base rules' "Pull requests and code review" is how every change lands. Here, the checks a pull request waits for
+are CI's (`ci.yml`: `plan / plan` and `checks / Lint`, `Typecheck`, `Test`), the Base rules check and Claude's
+review (`Code review / review`), which `master`'s rulesets (applied from `raine-works/agents`) require with an
+approval and every thread resolved.

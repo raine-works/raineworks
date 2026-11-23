@@ -11,7 +11,8 @@
 # It runs after CI rather than inside it: master's CI runs hold the `release` concurrency group the note workflow takes
 # its turn in, so a job of theirs would wait on itself.
 #
-# The workflow is release-note.yml beside this file: this file only decides when, and gives it its inputs.
+# The workflow is Raineworks' shared release note, release-note.yml in raine-works/agents (pinned to a commit; the
+# Base rules check moves the pin): this file only decides when, and gives it its inputs.
 # Claude signs in with the job's OIDC token (workload identity federation); the pull request is opened as the
 # docs-sync GitHub App (docs/development.md, Claude in GitHub).
 name: Release note
@@ -74,7 +75,7 @@ jobs:
     # `unnoted` is skipped when run by hand.
     if: >-
       always() && (github.event_name == 'workflow_dispatch' || needs.unnoted.outputs.write == 'true')
-    uses: ./.github/workflows/release-note.yml
+    uses: raine-works/agents/.github/workflows/release-note.yml@bcc3f92307e34338be03ec7f6a243c3435604800 # raine-works/agents master
     secrets: inherit
     with:
       name: raineworks
