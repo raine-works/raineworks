@@ -1,3 +1,5 @@
+import '@raineworks/tools/prototypes';
+
 import { afterEach, describe, expect, setSystemTime, test } from 'bun:test';
 
 import { articles, ARTICLES_TTL_MS, resetArticles, RETRY_MS, toArticles } from '@raineworks/server/lib/x';
