@@ -42,7 +42,8 @@ built on shadcn/ui and ui-sdk.
 | [`@raineworks/tools`](packages/tools) | The shared toolbox: zones, the frontend build, env, HTTP, versions, releases, licence notices |
 | [`@raineworks/tsconfig`](packages/tsconfig) | The TypeScript configs every package extends |
 
-The logo, the favicons and the social images, in every colourway, are in [`brand/`](brand).
+The logo, the favicons, the social images and the app stores' images, in every colourway, and the wallpapers are in
+[`brand/`](brand).
 
 ## Getting started
 
@@ -84,7 +85,8 @@ What's new.
   `latest`. Its GitHub release is written from its note in `packages/ui/src/release-notes/`, and production (Dokploy)
   is told to deploy.
 - **Release notes.** When a release goes out without a note, Claude writes the next one, covering everything since the
-  last note, and opens it as a pull request; merging it is that release.
+  last note, and opens it as a pull request; merging it is that release. When nothing in it would be noticed, it
+  writes none.
 - **Code review.** Claude reviews every pull request against [AGENTS.md](AGENTS.md), and follows up on its findings
   until they're fixed.
 - **Docs sync.** After `master`'s CI passes, Claude fixes any doc the new commits made wrong, in a pull request.
