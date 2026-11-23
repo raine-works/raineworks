@@ -24,7 +24,7 @@ permissions:
 jobs:
   claude:
     name: Claude
-    uses: raine-works/agents/.github/workflows/claude.yml@d926350369c3f4b2e1b8337f1d631fdcd609b79f # raine-works/agents master
+    uses: raine-works/agents/.github/workflows/claude.yml@8e071ee3392e4bf881edc8c90f72b9fb343d9e15 # raine-works/agents master
     # The commands Claude may run, if they aren't a Bun project's (bun install, format, lint, typecheck, test):
     with:
       allowed-commands: >-
