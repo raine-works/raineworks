@@ -1,7 +1,6 @@
 # Agent guidance for raineworks
 
 Rules for anyone (human or agent) changing this repo. They take precedence over generic best practices.
-`CLAUDE.md` is a symlink to this file. Edit `AGENTS.md`, not the link.
 
 This file holds **rules**. The reasoning, design and how-tos are in the docs below. Read the relevant one before you
 change that area.
@@ -18,10 +17,7 @@ change that area.
 ## Raineworks base rules
 
 This repository follows Raineworks' base rules, in [`.raineworks/base.md`](.raineworks/base.md): read them before
-changing anything. They're a copy of `base.md` in `raine-works/agents`, kept current by its sync: change them there,
-not here. Where this file is more specific, it wins. They cover git, pull requests and the code review (which approves
-a pull request once nothing it found is open), the shared workflows, tests, docs, pinning and security; this file
-holds only what's particular to raineworks.
+changing anything.
 
 @.raineworks/base.md
 
@@ -33,8 +29,7 @@ Bun 1.4.4 (runtime, package manager, test runner, bundler, formatter, type check
 Compiler · TanStack Router + Query · Tailwind v4 + shadcn/ui + ui-sdk · TypeScript strict, checked by `bun check` ·
 formatted by `bun fmt`.
 
-- **Do not** add Vite, a dev server framework, Babel, Biome, ESLint, Prettier or `tsc`: `bun fmt` formats (and sorts
-  imports and Tailwind classes), `bun check` type checks.
+- **Do not** add Vite, a dev server framework or Babel. `bun fmt` also sorts imports and Tailwind classes.
 - **Bun is pinned to 1.4.4**: `.bun-version`, `packageManager` and `engines` in `package.json`, `oven/bun:1.4.4` in
   `packages/server/Dockerfile`, and CI (`bun-version-file`). Move them together.
 - Workspace scripts fan out with `bun run --filter`.
@@ -115,8 +110,8 @@ Detail: [docs/development.md](docs/development.md#releases), [docs/frontend.md](
   image is built from that it doesn't know about is a bug in `@raineworks/tools/images`.
 - Every `@raineworks/*` package a package imports is in its `package.json` (`images.test.ts`): that's how the image
   knows what it's built from.
-- Code review, docs sync, the rules audit, `@claude`, the release note and the release workflows (plan, images,
-  publish) are Raineworks' shared workflows in `raine-works/agents`: `.github/workflows` holds their callers (pinned to
+- Code review, docs sync, the rules audit, `@claude`, Issue to PR, the release note and the release workflows (plan,
+  images, publish) are Raineworks' shared workflows in `raine-works/agents`: `.github/workflows` holds their callers (pinned to
   a commit) and raineworks' own `ci.yml` and `checks.yml`. `.github/actions/setup` installs Bun and the packages for
   every one of them.
 - A release people would notice has a note, `packages/ui/src/release-notes/<version>.md` (`bun run release` starts
