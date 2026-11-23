@@ -22,7 +22,9 @@ tagged `raineworks` on GitHub, one list shared by every session. Keep the TUI re
 (smaller says so), the title takes the biggest font that fits, and below 96 columns the sidebar becomes tabs.
 
 Tests (`bun test`) render the app with OpenTUI's `testRender` and drive it with keys: every screen at two sizes, the
-palette, the contact form (empty, sent, refused), quitting. No SSH needed.
+palette, the contact form (empty, sent, refused), quitting. No SSH needed. Host key tests use the fixed keys in
+`src/server/test-host-keys.ts`, never ssh2's `utils.generateKeyPairSync('ed25519')`: it drops a public key's leading zero
+bytes, so about one key in 256 it makes is malformed.
 
 ## The server
 

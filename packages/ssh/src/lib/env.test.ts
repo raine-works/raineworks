@@ -2,9 +2,9 @@ import { describe, expect, test } from 'bun:test';
 
 import { envSchema } from '@raineworks/ssh/lib/env';
 import { loadHostKey } from '@raineworks/ssh/server';
-import { utils } from 'ssh2';
+import { TEST_HOST_KEY } from '@raineworks/ssh/server/test-host-keys';
 
-const { private: pem } = utils.generateKeyPairSync('ed25519');
+const { pem } = TEST_HOST_KEY;
 
 describe('envSchema host key settings', () => {
 	test('keeps SSH_HOST_KEY and SSH_HOST_KEY_PATH', () => {
