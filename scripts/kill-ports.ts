@@ -12,10 +12,12 @@
 
 import { join } from 'node:path';
 
+import { baseEnvSchema, parseEnv, portSchema } from '@raineworks/tools/env';
 import { tryCatch } from '@raineworks/tools/prototypes';
 
 const REPO_ROOT = join(import.meta.dir, '..');
-const PORT = Number(Bun.env.PORT ?? 3032);
+/** The server's port (`PORT`, 3032 by default, as `@raineworks/server`'s): a malformed one fails here, not as NaN. */
+const { PORT } = parseEnv(baseEnvSchema.pick({}).extend({ PORT: portSchema.default(3032) }));
 const GRACE_MS = 3_000;
 const DRY_RUN = Bun.argv.includes('--dry-run');
 /** What `bun run dev` starts: the runner, the backend's `bun --watch`, and each frontend's `scripts/build.ts --watch`. */

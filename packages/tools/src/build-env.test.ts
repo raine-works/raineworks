@@ -25,4 +25,11 @@ describe('a build’s settings', () => {
 		expect(buildEnv().NODE_ENV).toBe('test');
 		expect(() => buildEnv({ NODE_ENV: 'staging' })).toThrow();
 	});
+
+	test('reads which libc’s OpenTUI library to ship, unset by default, and refuses any other', () => {
+		expect(buildEnv({}).OPENTUI_LIBC).toBeUndefined();
+		expect(buildEnv({ OPENTUI_LIBC: 'musl' }).OPENTUI_LIBC).toBe('musl');
+		expect(buildEnv({ OPENTUI_LIBC: 'glibc' }).OPENTUI_LIBC).toBe('glibc');
+		expect(() => buildEnv({ OPENTUI_LIBC: 'uclibc' })).toThrow();
+	});
 });

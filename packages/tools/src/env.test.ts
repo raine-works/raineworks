@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { baseEnvSchema, loadEnvFiles, parseEnv } from '@raineworks/tools/env';
+import { baseEnvSchema, loadEnvFiles, parseEnv, portSchema } from '@raineworks/tools/env';
 
 describe('loadEnvFiles', () => {
 	const dir = mkdtempSync(join(tmpdir(), 'raineworks-env-'));
@@ -43,5 +43,18 @@ describe('parseEnv', () => {
 		expect(parseEnv(baseEnvSchema).NODE_ENV).toBe('test');
 		expect(() => parseEnv(baseEnvSchema, { LOG_LEVEL: 'loud' })).toThrow();
 		expect(parseEnv(baseEnvSchema, { LOG_LEVEL: 'debug' }).LOG_LEVEL).toBe('debug');
+	});
+});
+
+describe('portSchema', () => {
+	const schema = baseEnvSchema.pick({}).extend({ PORT: portSchema.default(3032) });
+
+	test('reads a port from its string, with the default when unset', () => {
+		expect(parseEnv(schema, { PORT: '8080' }).PORT).toBe(8080);
+		expect(parseEnv(schema, {}).PORT).toBe(3032);
+	});
+
+	test('refuses what isn’t a port', () => {
+		for (const PORT of ['http', '3.5', '-1', '65536']) expect(() => parseEnv(schema, { PORT })).toThrow();
 	});
 });

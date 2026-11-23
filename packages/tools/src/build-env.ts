@@ -23,6 +23,8 @@ export const buildEnvSchema = baseEnvSchema.pick({ NODE_ENV: true }).extend({
 	RAINEWORKS_VERSION: optional,
 	/** The commit being built (CI, an image's `GIT_SHA`, where there's no `.git`); else git's. */
 	RAINEWORKS_COMMIT: optional,
+	/** Which libc's OpenTUI native library the SSH image ships on Linux (`@raineworks/ssh`'s build); glibc's if unset. */
+	OPENTUI_LIBC: z.enum(['glibc', 'musl']).optional(),
 });
 
 /** A build's settings. */
@@ -30,7 +32,7 @@ export type BuildEnv = z.infer<typeof buildEnvSchema>;
 
 /**
  * The build's settings, from `rawEnv` (the process's by default). Throws (a `ZodError`) on a `NODE_ENV` that isn't
- * `development`, `production` or `test`.
+ * `development`, `production` or `test`, or an `OPENTUI_LIBC` that isn't `glibc` or `musl`.
  */
 export function buildEnv(rawEnv: Record<string, string | undefined> = Bun.env): BuildEnv {
 	return parseEnv(buildEnvSchema, rawEnv);

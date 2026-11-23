@@ -42,6 +42,9 @@ export const baseEnvSchema = z.object({
 	LOG_LEVEL: logLevelSchema.optional(),
 });
 
+/** A TCP port, from its string in the environment: a whole number from 0 to 65535. */
+export const portSchema = z.coerce.number().int().min(0).max(65_535);
+
 /** The settings every package has. */
 export type BaseEnv = z.infer<typeof baseEnvSchema>;
 
