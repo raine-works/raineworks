@@ -44,4 +44,8 @@ brand
 
 # The repository's own scripts (dev tools), not part of any image
 scripts
+# …and each package's, but for its build (`scripts/build.ts`, what `bun run build` runs): what the rest write is in
+# `src`, and counted there (`@raineworks/tools/images`)
+packages/*/scripts/*
+!packages/*/scripts/build.ts
 .DS_Store

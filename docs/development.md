@@ -67,7 +67,8 @@ wiring `release-plan.yml`, `checks.yml`, `release-images.yml` and `release-publi
    a rebuild), then the repository tagged `v<version>` and its GitHub release published from its note, or from the
    pull requests merged since the last when there isn't one. A re-run after a newer release tags nothing.
 
-A push that changes nothing the image is built from (docs, workflows, tests) is checked, not released. Master's runs
+A push that changes nothing the image is built from (docs, workflows, tests, the brand assets, a package's scripts
+but its `scripts/build.ts`) is checked, not released. Master's runs
 take turns (the `release` concurrency group), so versions are cut one at a time, in order.
 
 **A release cut without a note gets one written.** Once CI has finished on `master` and released a commit that has no

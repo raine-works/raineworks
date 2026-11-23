@@ -7,7 +7,9 @@
  * settings, and every package it depends on (`@raineworks/*` in each `package.json`,
  * which declares every import: `images.test.ts`), the server's with every web
  * zone it embeds. Tests and Markdown don't count, but for the Markdown the
- * zones are built from (as `.dockerignore`). Their hash is of git's blob ids,
+ * zones are built from (as `.dockerignore`), and nor do a package's scripts
+ * but the build's own, `scripts/build.ts`: the rest are tools people run
+ * (`brand-assets`, `openapi`), and what they write is counted where it lands. Their hash is of git's blob ids,
  * so it's of their content, at any commit, and names the image built from them
  * (`inputs-<hash>`): an image whose inputs are already in the registry is only
  * tagged, never built again.
@@ -29,12 +31,16 @@ const ROOT_INPUTS = ['.dockerignore', 'LICENSE', 'bun.lock', 'bunfig.toml', 'pac
 /** The Markdown builds read: release notes (every zone). Add a zone's own here if its build reads Markdown. */
 const BUILT_MARKDOWN = [/^packages\/ui\/src\/release-notes\/[^/]+\.md$/];
 
+/** A package's script that isn't its build (`scripts/build.ts`, what `bun run build` runs in every image). */
+const DEV_SCRIPT = /^packages\/[^/]+\/scripts\/(?!build\.ts$)/;
+
 /** Characters of the hash kept in the image's tag. */
 const HASH_LENGTH = 20;
 
 /** Whether a file in a service's packages changes what its image builds. */
 export function countsAsInput(path: string): boolean {
 	if (/\.test\.tsx?$/.test(path)) return false;
+	if (DEV_SCRIPT.test(path)) return false;
 	if (path.endsWith('.md')) return BUILT_MARKDOWN.some((pattern) => pattern.test(path));
 	return true;
 }
