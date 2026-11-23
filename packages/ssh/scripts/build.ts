@@ -18,6 +18,7 @@
 import { cpSync, existsSync, mkdirSync, readdirSync, realpathSync, rmSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
+import { buildEnv } from '@raineworks/tools/build-env';
 import '@raineworks/tools/prototypes';
 
 const packageDir = join(import.meta.dir, '..');
@@ -52,7 +53,7 @@ if (!result.success) {
 }
 
 // This platform's native library, where `OTUI_ASSET_ROOT` points OpenTUI.
-const libc = process.platform === 'linux' && Bun.env.OPENTUI_LIBC === 'musl' ? '-musl' : '';
+const libc = process.platform === 'linux' && buildEnv().OPENTUI_LIBC === 'musl' ? '-musl' : '';
 const platformPackage = `@opentui/core-${process.platform}-${process.arch}${libc}`;
 // A dependency of `@opentui/core`'s, not this package's: resolved from there (installs are isolated).
 const coreDir = dirname(realpathSync(Bun.resolveSync('@opentui/core/package.json', packageDir)));
