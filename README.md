@@ -90,7 +90,9 @@ What's new.
 - **Code review.** Claude reviews every pull request against [AGENTS.md](AGENTS.md), and follows up on its findings
   until they're fixed.
 - **Docs sync.** After `master`'s CI passes, Claude fixes any doc the new commits made wrong, in a pull request.
-- **@claude.** Mention `@claude` in an issue or a pull request and Claude answers there, or makes the change.
+- **@claude.** Mention `@claude` in a pull request and Claude answers there, or makes the change.
+- **Issue to PR.** An issue Raine opens, one labelled `claude`, or one with an `@claude` comment is worked by Claude
+  into a pull request, which it then sees through its checks and review.
 - **Protected `master`.** Every change goes through a pull request, with the checks, the review and an approval
   (the rulesets of [raine-works/agents](https://github.com/raine-works/agents)).
 - **Shared rules.** Agents follow Raineworks' base rules ([`.raineworks/base.md`](.raineworks/base.md), from

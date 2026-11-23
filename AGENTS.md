@@ -115,8 +115,8 @@ Detail: [docs/development.md](docs/development.md#releases), [docs/frontend.md](
   image is built from that it doesn't know about is a bug in `@raineworks/tools/images`.
 - Every `@raineworks/*` package a package imports is in its `package.json` (`images.test.ts`): that's how the image
   knows what it's built from.
-- Code review, docs sync, the rules audit, `@claude`, the release note and the release workflows (plan, images,
-  publish) are Raineworks' shared workflows in `raine-works/agents`: `.github/workflows` holds their callers (pinned to
+- Code review, docs sync, the rules audit, `@claude`, Issue to PR, the release note and the release workflows (plan,
+  images, publish) are Raineworks' shared workflows in `raine-works/agents`: `.github/workflows` holds their callers (pinned to
   a commit) and raineworks' own `ci.yml` and `checks.yml`. `.github/actions/setup` installs Bun and the packages for
   every one of them.
 - A release people would notice has a note, `packages/ui/src/release-notes/<version>.md` (`bun run release` starts
