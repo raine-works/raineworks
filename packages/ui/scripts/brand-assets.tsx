@@ -3,8 +3,10 @@
  * (`src/assets/favicon.svg`, `src/assets/favicon-inactive.svg`, `src/assets/apple-touch-icon.png`): the mark and the
  * logo, drawn from `blocks/brand`, in the accent gradient and in black and white, on white, on black and on nothing, as
  * SVG and PNG; the favicons; and the social images (avatars, the X header, the LinkedIn banner, GitHub's social
- * preview). Rasterised by a headless Chrome, drawing each SVG onto a canvas, so PNGs keep their transparency. Run it
- * again when the logo or the accent's colours change; `bun run og-image` draws the share image.
+ * preview), and the app stores' (Google Play's developer page icon and header, an App Store icon). Rasterised by a
+ * headless Chrome, drawing each SVG onto a canvas, so PNGs keep their transparency; the stores' opaque images are
+ * encoded here as 24-bit PNGs with no alpha channel, which the stores require. Run it again when the logo or the
+ * accent's colours change; `bun run og-image` draws the share image.
  *
  * ```bash
  * bun run brand-assets [path/to/chrome]   # defaults to macOS's Google Chrome
@@ -14,6 +16,7 @@
 import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
+import { deflateSync } from 'node:zlib';
 
 import { AppLogo, AppMark, type MarkGradient } from '@raineworks/ui/blocks/brand';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -88,20 +91,20 @@ const ICON_BOX = '-56 -56 112 112';
 /** The mark and wordmark, with a margin of half the mark's height. */
 const LOGO_BOX = '-72 -72 514.8 144';
 
+/**
+ * How a raster is encoded: by the canvas (`image/png` keeps an alpha channel), or `opaque-png`, a 24-bit PNG with
+ * none, encoded here from the canvas's pixels.
+ */
+type RasterType = 'image/png' | 'image/webp' | 'image/jpeg' | 'opaque-png';
+
 /** A file to write: SVG text as it is, or an SVG to rasterise at `width` × `height` as `type`. */
 type Output =
-	| { path: string; svg: string }
-	| { path: string; from: string; width: number; height: number; type: 'image/png' | 'image/webp' };
+	{ path: string; svg: string } | { path: string; from: string; width: number; height: number; type: RasterType };
 
 const outputs: Output[] = [];
 const svgOut = (path: string, svg: string) => outputs.push({ path, svg });
-const raster = (
-	path: string,
-	from: string,
-	width: number,
-	height: number,
-	type: 'image/png' | 'image/webp' = 'image/png',
-) => outputs.push({ path, from, width, height, type });
+const raster = (path: string, from: string, width: number, height: number, type: RasterType = 'image/png') =>
+	outputs.push({ path, from, width, height, type });
 
 // The mark and the logo, every variant, as SVG and PNG.
 for (const variant of VARIANTS) {
@@ -173,6 +176,18 @@ raster('social/x-header-1500x500.png', xHeader, 1500, 500);
 raster('social/linkedin-banner-1584x396.png', linkedIn, 1584, 396);
 raster('social/github-social-preview-1280x640.png', github, 1280, 640);
 
+// The app stores. Google Play's developer page: a 512 px icon, drawn in the circle it's cropped to, and a 4096 × 2304
+// header (JPEG or a 24-bit PNG), the logo centred so every crop of it keeps the logo. The App Store's icon: 1024 px,
+// square and opaque (Apple rounds the corners), the mark heavier as the phone draws it small.
+const playHeader = banner(4096, 2304, centred(4096, 4), 1152, 4);
+const appStoreIcon = svgFile(ICON_BOX, markInner(VARIANTS[0]!, 2.4), BLACK);
+svgOut('stores/google-play-developer-header.svg', playHeader);
+svgOut('stores/app-store-icon.svg', appStoreIcon);
+raster('stores/google-play-developer-icon-512.png', avatarDark, 512, 512, 'opaque-png');
+raster('stores/google-play-developer-header-4096x2304.png', playHeader, 4096, 2304, 'opaque-png');
+raster('stores/google-play-developer-header-4096x2304.jpg', playHeader, 4096, 2304, 'image/jpeg');
+raster('stores/app-store-icon-1024.png', appStoreIcon, 1024, 1024, 'opaque-png');
+
 /** The page Chrome runs: each SVG drawn onto a canvas and encoded, the results written into the DOM it dumps. */
 const rasterPage = (jobs: { from: string; width: number; height: number; type: string }[]) => `<!doctype html>
 <pre id="out"></pre>
@@ -190,7 +205,22 @@ const jobs = ${JSON.stringify(jobs).replace(/</g, '\\u003c')};
 		const context = canvas.getContext('2d');
 		context.imageSmoothingQuality = 'high';
 		context.drawImage(image, 0, 0, job.width, job.height);
-		results.push(canvas.toDataURL(job.type, 0.95).split(',')[1]);
+		if (job.type !== 'opaque-png') {
+			results.push(canvas.toDataURL(job.type, 0.95).split(',')[1]);
+			continue;
+		}
+		// The pixels without their alpha, as base64 in chunks (one call per pixel would overflow the stack).
+		const rgba = context.getImageData(0, 0, job.width, job.height).data;
+		let binary = '';
+		for (let row = 0; row < job.height; row++) {
+			const line = new Array(job.width);
+			for (let x = 0; x < job.width; x++) {
+				const i = (row * job.width + x) * 4;
+				line[x] = String.fromCharCode(rgba[i], rgba[i + 1], rgba[i + 2]);
+			}
+			binary += line.join('');
+		}
+		results.push(btoa(binary));
 	}
 	document.getElementById('out').textContent = JSON.stringify(results);
 })();
@@ -223,8 +253,37 @@ const write = async (path: string, data: string | Uint8Array) => {
 	await Bun.write(path, data);
 };
 
+/** A 24-bit PNG (8-bit RGB, no alpha) of `rgb`, `width` × `height` pixels, rows top to bottom. */
+function rgbPng(rgb: Uint8Array, width: number, height: number): Uint8Array {
+	const chunk = (type: string, data: Uint8Array) => {
+		const head = Buffer.alloc(8);
+		head.writeUInt32BE(data.length, 0);
+		head.write(type, 4, 'ascii');
+		const crc = Buffer.alloc(4);
+		crc.writeUInt32BE(Bun.hash.crc32(Buffer.concat([head.subarray(4), data])) >>> 0, 0);
+		return Buffer.concat([head, data, crc]);
+	};
+	const header = Buffer.alloc(13);
+	header.writeUInt32BE(width, 0);
+	header.writeUInt32BE(height, 4);
+	header.set([8, 2, 0, 0, 0], 8);
+	// Each row starts with its filter: 0, none.
+	const rows = Buffer.alloc((width * 3 + 1) * height);
+	for (let row = 0; row < height; row++)
+		rows.set(rgb.subarray(row * width * 3, (row + 1) * width * 3), row * (width * 3 + 1) + 1);
+	return Buffer.concat([
+		Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+		chunk('IHDR', header),
+		chunk('IDAT', deflateSync(rows, { level: 9 })),
+		chunk('IEND', new Uint8Array()),
+	]);
+}
+
 const bytes = new Map<string, Uint8Array>();
-for (const [index, output] of rasters.entries()) bytes.set(output.path, Buffer.from(encoded[index]!, 'base64'));
+for (const [index, output] of rasters.entries()) {
+	const data = Buffer.from(encoded[index]!, 'base64');
+	bytes.set(output.path, output.type === 'opaque-png' ? rgbPng(data, output.width, output.height) : data);
+}
 for (const output of outputs)
 	await write(join(root, output.path), 'svg' in output ? output.svg : bytes.get(output.path)!);
 

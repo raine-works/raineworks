@@ -100,7 +100,8 @@ and Geist Mono. The brand is monochrome, like the logo, with one accent: a gradi
   black instead (`assets/favicon-inactive.svg`, swapped by `lib/favicon`).
 - **Brand assets:** `brand/` at the repository's root has the mark and the logo in every colourway (the gradient, and
   black and white, on white, on black and on nothing) as SVG and PNG, the favicons, and the social images (avatars, X
-  header, LinkedIn banner, GitHub's social preview, the share image). `bun run brand-assets` in `packages/ui` draws
+  header, LinkedIn banner, GitHub's social preview, the share image), and the app stores' (Google Play's developer
+  page icon and header, an App Store icon). `bun run brand-assets` in `packages/ui` draws
   them all from `blocks/brand`, with Chrome, and the site's favicons and home-screen icon with them; run it again when
   the logo or the accent changes. `bun run wallpapers` draws `brand/wallpapers/` the same way: three dark designs
   (halo, storm, eclipse) for phones and desktops, at each screen's exact size.
