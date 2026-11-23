@@ -125,6 +125,7 @@ with raineworks' inputs. The Base rules check moves the pins, by pull request, w
 | `docs-sync.yml` | **Docs sync**: after `master`'s CI, the `claude/docs-sync` pull request fixing any doc the new commits made wrong | `docs`: `AGENTS.md`, `STYLEGUIDE.md`, `README.md`, `docs/`, the packages' READMEs, never release notes |
 | `rules-audit.yml` | **Rules audit**: weekly and after CI, an issue labelled `rules-audit` while `master` breaks a rule | `rules`: the base rules, `AGENTS.md` and `STYLEGUIDE.md` |
 | `claude.yml` | **@claude**: mention `@claude` in an issue, a comment or a review and Claude answers, or makes the change on a branch, as `claude[bot]` | `allowed-commands`: install, format, lint, typecheck, test, `build:web` |
+| `issue-to-pr.yml` | **Issue to PR**: an issue you open (or any issue once it's labelled `claude`, such as a rules audit's) is worked by Claude on `claude/issue-<number>` into a pull request that closes it; after each CI and Code review run on it, Claude fixes what failed and the findings it agrees with, up to five rounds, and never merges | `allowed-commands`: the same as `claude.yml`'s |
 | `release.yml` | **Release note** (above, [Releases](#releases)) | `name`, `guide` |
 
 They sign in to Anthropic with the job's OIDC token (workload identity federation: no stored key), post and commit as
