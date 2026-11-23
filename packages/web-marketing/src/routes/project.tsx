@@ -22,18 +22,11 @@ import {
 	DialogTitle,
 } from '@raineworks/ui/components/dialog';
 import { Skeleton } from '@raineworks/ui/components/skeleton';
-import { GitHubIcon, GooglePlayIcon, HomeAssistantIcon } from '@raineworks/web-marketing/components/brand-icons';
+import { GitHubIcon, HomeAssistantIcon } from '@raineworks/web-marketing/components/brand-icons';
 import { projectsQuery, StarCount } from '@raineworks/web-marketing/components/project-card';
 import { profile } from '@raineworks/web-marketing/content/profile';
 import { projectPages, type ProjectSection } from '@raineworks/web-marketing/content/project-pages';
-import {
-	googlePlayBetaUrl,
-	googlePlayUrl,
-	marketplaceUrl,
-	type ProjectEntry,
-	projects,
-	repoFileUrl,
-} from '@raineworks/web-marketing/content/projects';
+import { marketplaceUrl, type ProjectEntry, projects, repoFileUrl } from '@raineworks/web-marketing/content/projects';
 import { useQuery } from '@tanstack/react-query';
 import { getRouteApi, Link } from '@tanstack/react-router';
 import {
@@ -43,7 +36,6 @@ import {
 	BookOpenIcon,
 	ChevronLeftIcon,
 	ChevronRightIcon,
-	FlaskConicalIcon,
 	ShieldIcon,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -131,22 +123,6 @@ function AtAGlance({ project }: { project: ProjectEntry }) {
 						</div>
 					)}
 				</div>
-				{project.googlePlay && (
-					<Button asChild variant="outline" className="w-full">
-						<a href={googlePlayUrl(project.googlePlay)} target="_blank" rel="noopener noreferrer">
-							<GooglePlayIcon />
-							Get it on Google Play
-						</a>
-					</Button>
-				)}
-				{project.googlePlay && project.googlePlayBeta && (
-					<Button asChild variant="outline" className="w-full">
-						<a href={googlePlayBetaUrl(project.googlePlay)} target="_blank" rel="noopener noreferrer">
-							<FlaskConicalIcon />
-							Join the beta
-						</a>
-					</Button>
-				)}
 				{project.homeAssistant && (
 					<Button asChild variant="outline" className="w-full">
 						<a href={marketplaceUrl(project)} target="_blank" rel="noopener noreferrer">

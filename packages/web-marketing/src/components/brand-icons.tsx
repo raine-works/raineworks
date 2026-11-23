@@ -1,5 +1,5 @@
 /**
- * GitHub's, LinkedIn's, X's, Home Assistant's and Google Play's marks (Simple Icons, CC0), which lucide no longer ships. Decorative: name the link.
+ * GitHub's, LinkedIn's, X's and Home Assistant's marks (Simple Icons, CC0), which lucide no longer ships. Decorative: name the link.
  *
  * @module components/brand-icons
  */
@@ -32,14 +32,6 @@ export function HomeAssistantIcon({ className }: { className?: string }) {
 	return (
 		<svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" className={className}>
 			<path d="M22.939 10.627 13.061.749a1.505 1.505 0 0 0-2.121 0l-9.879 9.878C.478 11.21 0 12.363 0 13.187v9c0 .826.675 1.5 1.5 1.5h9.227l-4.063-4.062a2.034 2.034 0 0 1-.664.113c-1.13 0-2.05-.92-2.05-2.05s.92-2.05 2.05-2.05 2.05.92 2.05 2.05c0 .233-.041.456-.113.665l3.163 3.163V9.928a2.05 2.05 0 0 1-1.15-1.84c0-1.13.92-2.05 2.05-2.05s2.05.92 2.05 2.05a2.05 2.05 0 0 1-1.15 1.84v8.127l3.146-3.146A2.051 2.051 0 0 1 18 12.239c1.13 0 2.05.92 2.05 2.05s-.92 2.05-2.05 2.05c-.25 0-.488-.047-.709-.13L12.9 20.602v3.088h9.6c.825 0 1.5-.675 1.5-1.5v-9c0-.825-.477-1.977-1.061-2.561z" />
-		</svg>
-	);
-}
-
-export function GooglePlayIcon({ className }: { className?: string }) {
-	return (
-		<svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" className={className}>
-			<path d="M22.018 13.298l-3.919 2.218-3.515-3.493 3.543-3.521 3.891 2.202a1.49 1.49 0 0 1 0 2.594zM1.337.924a1.486 1.486 0 0 0-.112.568v21.017c0 .217.045.419.124.6l11.155-11.087L1.337.924zm12.207 10.065l3.258-3.238L3.45.195a1.466 1.466 0 0 0-.946-.179l11.04 10.973zm0 2.067l-11 10.933c.298.036.612-.016.906-.183l13.324-7.54-3.23-3.21z" />
 		</svg>
 	);
 }
