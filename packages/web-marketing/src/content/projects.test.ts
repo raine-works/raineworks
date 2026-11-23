@@ -34,6 +34,10 @@ describe('the projects’ pages', () => {
 		}
 	});
 
+	test('every one has documentation', () => {
+		expect(projects.filter((project) => !isDocsProject(project.slug)).map((project) => project.slug)).toEqual([]);
+	});
+
 	test('are found by their address and by their repository', () => {
 		expect(projectBySlug('dotfiles')?.repo).toBe('.dotfiles');
 		expect(projectByRepo('.dotfiles')?.slug).toBe('dotfiles');

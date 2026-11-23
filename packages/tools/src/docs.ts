@@ -20,6 +20,10 @@ export const DOCS_SOURCES = {
 	'ha-everscent': { repo: 'ha-everscent', branch: 'master', dir: 'docs' },
 	'ha-warden': { repo: 'ha-warden', branch: 'master', dir: 'docs' },
 	'ha-gitops': { repo: 'ha-gitops', branch: 'master', dir: 'docs' },
+	'sendspin-a1s-source': { repo: 'sendspin-a1s-source', branch: 'master', dir: 'docs' },
+	raineworks: { repo: 'raineworks', branch: 'master', dir: 'docs' },
+	dotfiles: { repo: '.dotfiles', branch: 'master', dir: 'docs' },
+	'devcontainer-features': { repo: 'devcontainer-features', branch: 'master', dir: 'docs' },
 } as const;
 
 /** A key of {@link DOCS_SOURCES}. */
