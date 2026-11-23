@@ -13,7 +13,8 @@ import { highlight } from '@raineworks/tools/highlight';
 describe('the documented projects', () => {
 	test('are found by their slug, never by an inherited property', () => {
 		expect(isDocsProject('ha-dashboards')).toBe(true);
-		expect(isDocsProject('dotfiles')).toBe(false);
+		expect(isDocsProject('dotfiles')).toBe(true);
+		expect(isDocsProject('nope')).toBe(false);
 		expect(isDocsProject('constructor')).toBe(false);
 		expect(isDocsProject('toString')).toBe(false);
 	});
