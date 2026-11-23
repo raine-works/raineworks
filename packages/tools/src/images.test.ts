@@ -45,6 +45,16 @@ describe('what an image is built from', () => {
 		expect(packagesOf('server', packages, of)).toEqual(['api', 'server', 'tools', 'ui', 'web-marketing']);
 	});
 
+	test('a package’s build runs its scripts/build.ts and no other script, the only one an image is built from', async () => {
+		const others: string[] = [];
+		for (const manifestPath of new Bun.Glob('packages/*/package.json').scanSync({ cwd: ROOT })) {
+			const build: string = (await Bun.file(join(ROOT, manifestPath)).json()).scripts?.build ?? '';
+			for (const [script] of build.matchAll(/scripts\/[\w.-]+/g))
+				if (script !== 'scripts/build.ts') others.push(`${manifestPath}: ${script}`);
+		}
+		expect(others).toEqual([]);
+	});
+
 	test('tests and docs never change an image; the Markdown zones are built from does', () => {
 		expect(countsAsInput('packages/server/src/app.ts')).toBe(true);
 		expect(countsAsInput('packages/server/Dockerfile')).toBe(true);
@@ -53,6 +63,10 @@ describe('what an image is built from', () => {
 		expect(countsAsInput('packages/server/README.md')).toBe(false);
 		expect(countsAsInput('packages/ui/src/release-notes/2026.11.1.md')).toBe(true);
 		expect(countsAsInput('packages/web-marketing/src/docs/guide.md')).toBe(false);
+		expect(countsAsInput('packages/server/scripts/build.ts')).toBe(true);
+		expect(countsAsInput('packages/ui/scripts/brand-assets.tsx')).toBe(false);
+		expect(countsAsInput('packages/server/scripts/openapi.ts')).toBe(false);
+		expect(countsAsInput('packages/ui/src/assets/apple-touch-icon.png')).toBe(true);
 	});
 
 	test('the hash is of the inputs alone', () => {
