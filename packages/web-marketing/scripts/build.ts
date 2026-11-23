@@ -2,6 +2,8 @@
  * Builds the `marketing` zone with `Bun.build` (Tailwind, React Compiler), every page prerendered (`src/prerender.tsx`)
  * with the site's share image beside it. `--watch` rebuilds on change, `@raineworks/ui` included; `@raineworks/server`
  * serves `dist/` at the zone's basepath (`/`).
+ *
+ * @module scripts/build
  */
 
 import { join } from 'node:path';

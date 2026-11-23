@@ -4,6 +4,8 @@
  * @module server/limits
  */
 
+import '@raineworks/tools/prototypes';
+
 export type Limits = {
 	maxConnections: number;
 	maxPerIp: number;
@@ -71,7 +73,7 @@ export class ConnectionGuard {
 		const t = this.now();
 		for (const [ip, stamps] of this.recent) {
 			const live = stamps.filter((ts) => t - ts < this.limits.rateWindowMs);
-			if (live.length === 0) this.recent.delete(ip);
+			if (live.isEmpty()) this.recent.delete(ip);
 			else this.recent.set(ip, live);
 		}
 	}
