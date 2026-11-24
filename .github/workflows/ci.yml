@@ -41,7 +41,7 @@ permissions:
 
 jobs:
   plan:
-    uses: raine-works/agents/.github/workflows/release-plan.yml@68a4a12d233321b2d67337cff9eec9ab9f0f1bc6 # raine-works/agents master
+    uses: raine-works/agents/.github/workflows/release-plan.yml@9bac93eafd58b8d22e41d179650b6d1573cee55b # raine-works/agents master
     permissions:
       contents: read
       packages: read
@@ -54,7 +54,7 @@ jobs:
   images:
     needs: plan
     if: github.event_name == 'pull_request' && needs.plan.outputs.build != '[]'
-    uses: raine-works/agents/.github/workflows/release-images.yml@68a4a12d233321b2d67337cff9eec9ab9f0f1bc6 # raine-works/agents master
+    uses: raine-works/agents/.github/workflows/release-images.yml@9bac93eafd58b8d22e41d179650b6d1573cee55b # raine-works/agents master
     permissions:
       contents: read
       packages: read
@@ -67,7 +67,7 @@ jobs:
   publish:
     needs: plan
     if: github.event_name == 'push' && github.ref == 'refs/heads/master' && needs.plan.outputs.build != '[]'
-    uses: raine-works/agents/.github/workflows/release-images.yml@68a4a12d233321b2d67337cff9eec9ab9f0f1bc6 # raine-works/agents master
+    uses: raine-works/agents/.github/workflows/release-images.yml@9bac93eafd58b8d22e41d179650b6d1573cee55b # raine-works/agents master
     permissions:
       contents: read
       packages: write
@@ -82,7 +82,7 @@ jobs:
     if: >-
       always() && needs.plan.outputs.release == 'true' && needs.checks.result == 'success'
       && (needs.publish.result == 'success' || needs.publish.result == 'skipped')
-    uses: raine-works/agents/.github/workflows/release-publish.yml@68a4a12d233321b2d67337cff9eec9ab9f0f1bc6 # raine-works/agents master
+    uses: raine-works/agents/.github/workflows/release-publish.yml@9bac93eafd58b8d22e41d179650b6d1573cee55b # raine-works/agents master
     permissions:
       contents: write
       packages: write
