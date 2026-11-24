@@ -75,7 +75,7 @@ jobs:
     # `unnoted` is skipped when run by hand.
     if: >-
       always() && (github.event_name == 'workflow_dispatch' || needs.unnoted.outputs.write == 'true')
-    uses: raine-works/agents/.github/workflows/release-note.yml@9bac93eafd58b8d22e41d179650b6d1573cee55b # raine-works/agents master
+    uses: raine-works/agents/.github/workflows/release-note.yml@8d50b54592ee925341854a8a0aa2130336a1c416 # raine-works/agents master
     secrets: inherit
     with:
       name: raineworks
