@@ -67,6 +67,7 @@ export const projects: ProjectEntry[] = [
 		title: 'HA Slate',
 		summary:
 			'Firmware and a Home Assistant integration for a PoE wall touch panel: a kiosk dashboard, an on-device voice assistant with custom wake words, and an edge light bar.',
+		logo: brandIcon('ha_slate'),
 		homeAssistant: true,
 	},
 	{
