@@ -62,6 +62,15 @@ export const projects: ProjectEntry[] = [
 		homeAssistant: true,
 	},
 	{
+		repo: 'ha-slate',
+		slug: 'ha-slate',
+		title: 'HA Slate',
+		summary:
+			'Firmware and a Home Assistant integration for a PoE wall touch panel: a kiosk dashboard, an on-device voice assistant with custom wake words, and an edge light bar.',
+		logo: brandIcon('ha_slate'),
+		homeAssistant: true,
+	},
+	{
 		repo: 'ha-googletv',
 		slug: 'ha-googletv',
 		title: 'Raineworks TV',

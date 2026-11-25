@@ -14,6 +14,7 @@ export const DOCS_OWNER = 'raine-works';
 /** A project's documentation: its repository, branch and the folder in it. Keyed by the project's page slug. */
 export const DOCS_SOURCES = {
 	'ha-dashboards': { repo: 'ha-dashboards', branch: 'master', dir: 'docs' },
+	'ha-slate': { repo: 'ha-slate', branch: 'master', dir: 'docs' },
 	'ha-googletv': { repo: 'ha-googletv', branch: 'master', dir: 'docs' },
 	'ha-grok': { repo: 'ha-grok', branch: 'master', dir: 'docs' },
 	'ha-music-assistant': { repo: 'ha-music-assistant', branch: 'master', dir: 'docs' },

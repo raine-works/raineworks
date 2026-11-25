@@ -92,6 +92,67 @@ export const projectPages: Record<string, ProjectPage> = {
 			},
 		],
 	},
+	'ha-slate': {
+		overview: [
+			'HA Slate is a wall touch panel for Home Assistant, powered over Ethernet: a Linux image that boots straight into your dashboard, listens for a wake word on the device, and drives a light bar along its edge. This project is its firmware and the Home Assistant integration that goes with it.',
+			'Its ha_slate integration makes the panel a native Assist satellite, the same kind of voice device as Home Assistant’s own, so it appears in the voice assistant settings with its wake word picker, announcements, conversations and timers. Lights, volume, mute, the dashboard address and the rest are ordinary entities on one device.',
+			'It’s in development: the build resolves for every target and the software is tested on a host, but no full image has been compiled or run on a panel yet. That’s the next step.',
+		],
+		highlights: [
+			{
+				title: 'A dashboard that boots in seconds',
+				text: 'A Yocto image that goes straight to a full-screen Home Assistant dashboard in Weston’s kiosk shell and WPE WebKit, with a 15-second target from power to pixels.',
+			},
+			{
+				title: 'A native Assist satellite',
+				text: 'The integration builds on the same classes as Home Assistant’s own voice devices, so the panel gets the voice settings, pipelines, announcements, follow-up questions and timers they do.',
+			},
+			{
+				title: 'Your own wake words',
+				text: 'Put a microWakeWord or openWakeWord model in Home Assistant’s custom wake words folder and it’s pushed to every panel and offered in the wake word picker, up to two at once.',
+			},
+			{
+				title: 'An edge light bar',
+				text: 'A WS2812 strip or an LED driver that follows the voice assistant, takes colors and effects from automations, and stays within the power the PoE switch gives it.',
+			},
+			{
+				title: 'Updates that roll back',
+				text: 'Signed A/B updates with RAUC and U-Boot: a new image is kept only once the dashboard, the voice agent and the lights have been healthy for a minute.',
+			},
+			{
+				title: 'Locked down by default',
+				text: 'A read-only root, no SSH in production, unprivileged and sandboxed services, and one listening port: a pinned TLS link to Home Assistant, paired with a code or within 15 minutes of power-on.',
+			},
+		],
+		sections: [
+			{
+				heading: 'Getting started',
+				body: [
+					'You build the image with kas on a Linux host, then install the integration in Home Assistant 2026.10 or newer. A QEMU build is the quickest way to see the kiosk, the voice agent and a preview of the light bar without hardware.',
+				],
+				points: [
+					'Create development signing keys with scripts/gen-dev-keys.sh, then build an image with kas build and a machine file: QEMU, Compute Module 4, or Compute Module 5 with the 10.1-inch Touch Display 2.',
+					'Flash the image to the module’s eMMC and power the panel over PoE.',
+					'Add the repository to the Home Assistant Marketplace as a custom repository, download HA Slate and restart Home Assistant.',
+					'Configure the panel when Home Assistant discovers it, entering the pairing code from its label or pairing within 15 minutes of power-on.',
+				],
+			},
+			{
+				heading: 'How it works',
+				body: [
+					'On the panel, slate-agent is the only process on the network. It holds a TLS link to the integration, runs the wake word engines, and streams the microphone to Home Assistant’s Assist pipeline, which sends speech back as raw audio, so the panel needs no media decoders.',
+					'A separate daemon, slate-lightd, owns the light bar and the backlight. The voice agent and Home Assistant claim it with effects, and a power limiter keeps the bar within the PoE budget.',
+				],
+			},
+			{
+				heading: 'Under the hood',
+				body: [
+					'The image is Yocto Scarthgap, the long-term support release, with every layer pinned to a commit, hash-pinned Python wheels, and an SPDX bill of materials for each release. Everything board-specific lives in its own layer and machine file, so another module or carrier is a new file, not a fork.',
+					'The integration is tested against Home Assistant with the real agent running over TLS, and the specification in its documentation covers the design, the protocol and the build in full.',
+				],
+			},
+		],
+	},
 	'ha-googletv': {
 		overview: [
 			'Raineworks TV is an unofficial Home Assistant integration for Google TV and Android TV, with a TV app of its own. One local connection does what used to take the Android TV Remote, Google Cast and ADB integrations together, and a few things none of them can.',
